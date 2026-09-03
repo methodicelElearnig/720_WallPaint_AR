@@ -1,0 +1,8 @@
+.DS_Store
+.claude/settings.local.json
+*.swp
+*.swo
+*~
+
+# translation export tooling — reinstall with `npm install` in translation/tools before regenerating the DOCX
+translation/tools/node_modules/

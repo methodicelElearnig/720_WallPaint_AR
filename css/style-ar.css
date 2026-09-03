@@ -1,0 +1,99 @@
+/* ============================================================
+   style-ar.css — Arabic build overrides
+   Loaded AFTER css/style.css. Everything Arabic-specific lives
+   here, so css/style.css stays byte-identical to the Hebrew
+   version and future Hebrew fixes can be copied straight over.
+
+   Contents
+     1. Typeface
+     2. Translation-expansion fixes, screen by screen
+   ============================================================ */
+
+/* ── 1. Typeface ─────────────────────────────────────────────
+   'Assistant' carries no Arabic glyphs. Cairo is the Arabic
+   face; the rest of the stack is unchanged.                   */
+:root {
+  --font-main: 'Cairo', 'Segoe UI', Arial, sans-serif;
+}
+
+/* ── 2. Translation-expansion fixes ──────────────────────────
+   Arabic runs longer than Hebrew here, and these Figma boxes
+   are fixed-size. Every fix below keeps the screen's layout and
+   reading order; only the type scale or a blank's position
+   moves, and only where the Arabic would otherwise be clipped
+   or land on top of something else.                           */
+
+/* SLIDE2 — header paragraph ran a 5th line, spilling out from
+   under the white header shape (which ends at y=233). */
+.slide2-text {
+  font-size: 32px;
+  line-height: 39px;
+}
+
+/* Q2 — story column: 7 Arabic lines in a 205px box with
+   `overflow: hidden`; the tail was cut off and would have run
+   into the illustration at y=420. */
+.q2-story {
+  font-size: 1.6875rem;   /* 27px  (was 32px)  */
+  line-height: 29px;      /*       (was 40px)  */
+}
+
+/* Q3 — story column: the text fits, but Cairo's line box is a
+   little taller than the 40px line-height it is set in, so
+   `overflow: hidden` shaved the descenders off the last line.
+   Only artwork sits below, so it simply stops clipping. */
+.q3-story {
+  overflow: visible;
+}
+.q3-story p:last-child {
+  margin-bottom: 0;
+}
+
+/* Q7 — fill-in-the-blank paragraph.
+   Hebrew reads:  <text> [blank] <text>  /  <text>
+   Arabic is long enough that the sentence needs one more line,
+   so the second blank and the text after it move down to a line
+   of their own and everything below shifts with them. The type
+   drops from 33.3px to 30px to keep the block compact. */
+.q7-batch-desc,
+.q7-five-text,
+.q7-manot-text,
+.q7-litrim,
+.q7-thirty-text {
+  font-size: 30px;
+  line-height: 37px;
+}
+#q7-drop-2 {
+  top: 545px;
+  left: 800px;
+}
+.q7-manot-text {
+  top: 545px;
+  right: 1132px;          /* right edge x=788, clear of the blank */
+}
+.q7-thirty-text {
+  top: 594px;
+}
+.q7-chips {
+  top: 660px;             /* follows the extra line down */
+}
+
+/* Q7B — two fill-in-the-blank rows, each  <text> [blank] "لترًا".
+   The Arabic text is wide enough to run under its blank, so the
+   blanks and the unit label slide left and the type drops one
+   step. Both rows keep their original baselines. */
+.q7b-blue-text,
+.q7b-yellow-text,
+.q7b-blue-litrim,
+.q7b-yellow-litrim {
+  font-size: 29px;
+  line-height: 41px;
+}
+#q7b-drop-1,
+#q7b-drop-2 {
+  left: 318px;
+}
+.q7b-blue-litrim,
+.q7b-yellow-litrim {
+  right: 1614px;          /* right edge x=306, left of the blank */
+}

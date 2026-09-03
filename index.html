@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>رسم جداريّ — برنامج 720</title>
+<!-- Google Fonts: Assistant (Hebrew) + Open Sans (numbers)
+       מאומת מפיגמה: Assistant SemiBold + Bold -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&amp;family=Open+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<!-- CSS — single file per figma-lomda-builder skill -->
+<link href="css/style.css" rel="stylesheet"/>
+<!-- AR build: Arabic typeface + translation-expansion fixes -->
+<link href="css/style-ar.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app">
+<!--
+      NOTE ON STRUCTURE:
+      הסקיל מצפה ש-#app עצמו יהיה ה-1920×1080 canvas.
+      הפרויקט מוסיף #app-scaler כ-inner canvas כדי לאפשר
+      מרכוז ו-overflow:hidden על ה-#app החיצוני.
+      JS מיישם transform:scale() + left/top על #app-scaler.
+    -->
+<div id="app-scaler">
+<!-- ============================================================
+           מחוון התקדמות — 7 עיגולים
+           (placeholder — יתווסף בשלב מימוש)
+           ============================================================ -->
+<!-- ============================================================
+           כפתורי ניווט ◄ ►
+           (placeholder — יתווסף בשלב מימוש)
+           ============================================================ -->
+<!-- ============================================================
+           מסכים — 16 screens
+           סדר: slide2(0), slide3(1), q1(2), slide5(3), q2(4), q3(5),
+                 q4(6), q4b(7), q4c(8), slide8(9), q5(10),
+                 slide10(11), q6(12), q7(13), q7b(14), slide18(15)
+           ============================================================ -->
+<!-- ============================================================
+           SCREEN 0 — SLIDE1 — סרטון פתיחה
+           סוג: video — ► נעול עד סיום סרטון
+           ============================================================ -->
+<section class="screen active" data-screen="0" data-video-gate="slide1-video" id="screen-slide1">
+<!-- רקע — תמיד נראה -->
+<img alt="" class="slide1-bg" draggable="false" src="img/bg-slide1.png"/>
+<!-- סרטון -->
+<video class="slide1-video slide1-video--hidden" id="slide1-video" onended="onSlide1VideoEnded()" playsinline="" preload="auto" src="video/FirstVidfinal1.mp4">
+</video>
+<!-- header + טקסט — תמיד מעל -->
+<img alt="" class="slide1-header" draggable="false" src="img/bg-slide2-header.png"/>
+<div class="slide1-text" dir="rtl">
+<p>هذه سمر، معلّمة الفنون.</p>
+<p>دخلَتْ إلى درس الصفّ الثامن "ب"، ومعها بُشرى للطلّاب.</p>
+</div>
+<!-- כפתור Play -->
+<button aria-label="تشغيل الفيديو" class="slide1-play-btn" id="slide1-play-btn" onclick="startSlide1Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 0 — SLIDE1 -->
+<!-- ============================================================
+           SCREEN 1 — SLIDE2 (Figma 2:6)
+           סוג: content slide — תמיד פתוח
+           ============================================================ -->
+<section class="screen" data-screen="1" id="screen-slide2">
+<!-- רקע מלא 1920×1080 -->
+<img alt="" class="slide2-bg" draggable="false" src="img/bg-slide2.png"/>
+<!-- פאנל כותרת -->
+<img alt="" class="slide2-header" draggable="false" src="img/bg-slide2-header.png"/>
+<!-- טקסט קריינות -->
+<div class="slide2-text" dir="rtl">
+<p>بعد حيرةٍ كبيرة، اختارَ طلّاب وطالبات الصفّ، بأغلبيّة الأصوات، أنْ يرسُموا شاطئًا استوائيًّا مع أشجار نخيل وقوارب.</p>
+<p>والآن عليْهِم أنْ يخطِّطوا لدرجات الألوان وكمّيّات الألوان التي سيحتاجون إليها للرسمة.</p>
+<p>قسّمَتْ سمر الصفّ إلى عدّة مجموعات، وكانَتْ كلّ مجموعة مسؤولة عن تحضير بعض درجات الألوان المطلوبة للرسمة.</p>
+</div>
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" id="slide2-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" id="slide2-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 0 — SLIDE2 -->
+<!-- ============================================================
+           SCREEN 1 — SLIDE3 (Figma 2:17)
+           סוג: content + video — ► נעול עד סיום וידאו
+           data-video-gate מצביע על ה-<video> המגייט את ה-►
+           ============================================================ -->
+<section class="screen" data-screen="2" data-video-gate="slide3-video" id="screen-slide3">
+<!-- רקע מלא 1920×1080 — teacher + classroom background -->
+<img alt="" class="slide3-bg" draggable="false" src="img/bg-slide3.png"/>
+<!-- פאנל כותרת — node 2:21, 1512×233, left=1102
+             גלוי מ-x=1102 עד x=1920 (818px); .screen overflow:hidden מקצץ -->
+<img alt="" class="slide3-header" draggable="false" src="img/bg-slide3-header.png"/>
+<!-- לוח לבן — node 2:32, 947×977, left=0, top=2 -->
+<img alt="" class="slide3-board" draggable="false" src="img/board-slide3.png"/>
+<!-- מבחנות וסמלים — ימין: full-yellow + little-blue = light-green -->
+<img alt="" class="slide3-tube-full-yellow" draggable="false" src="img/tube-full-yellow.png"/>
+<img alt="+" class="slide3-icon-plus-r" draggable="false" src="img/icon-plus.png"/>
+<img alt="" class="slide3-tube-little-blue" draggable="false" src="img/tube-little-blue.png"/>
+<img alt="=" class="slide3-icon-equal-r" draggable="false" src="img/icon-equal.png"/>
+<img alt="" class="slide3-tube-light-green" draggable="false" src="img/tube-light-green.png"/>
+<!-- מבחנות וסמלים — שמאל: little-yellow + full-blue = dark-green
+             tube-little-yellow ו-tube-full-blue: clipped (div container) -->
+<div class="slide3-tube-little-yellow">
+<img alt="" draggable="false" src="img/tube-little-yellow.png"/>
+</div>
+<img alt="+" class="slide3-icon-plus-l" draggable="false" src="img/icon-plus.png"/>
+<div class="slide3-tube-full-blue">
+<img alt="" draggable="false" src="img/tube-full-blue.png"/>
+</div>
+<img alt="=" class="slide3-icon-equal-l" draggable="false" src="img/icon-equal.png"/>
+<img alt="" class="slide3-tube-dark-green" draggable="false" src="img/tube-dark-green.png"/>
+<!-- טקסט כותרת — Live HTML, node 2:23
+             Assistant SemiBold 600, 33.333px, right=62px, top=42px -->
+<div class="slide3-header-text" dir="rtl">
+<p>قبل أنْ يبدؤوا بالتخطيط،</p>
+<p>شرحَتْ سمر لأعضاء مجموعة درجات اللون الأخضر بعض الأمور:</p>
+</div>
+<!-- טקסט ראשי על לוח — Live HTML, node 2:33
+             Assistant Regular 400 + Bold 700 spans, right=1042px, top=159px
+             ⚠ "וריחוקץ" — כך בפיגמה (Source of Truth), ייתכן שגיאת הקלדה -->
+<div class="slide3-board-main-text" dir="rtl">
+<p><strong>الألوان الدافئة</strong> مِثل الأصفر، تَمنح شعورًا بالدِفء والقُرب.</p>
+<p><strong>الألوان الباردة</strong> مِثل الأزرق، تَمنح شعورًا بالبرودة والبُعد.</p>
+<p><strong>عند مزْج الألوان،</strong> تنتُج تركيبات مختلفة بحسب النسبة بينها.</p>
+<p>مثلًا، عند مزْج الأصفر والأزرق ينتُج اللون الأخضر.</p>
+</div>
+<!-- טקסט תערובת ימין — Live HTML, node 2:34
+             right=1042px, top=458px -->
+<div class="slide3-mix-right-text" dir="rtl">
+<p>إذا كان الخليط يحتوي على كمّيّة أكبر مِن اللون الأصفر،</p>
+<p>سنحصل على أخضر دافئ وفاتح.</p>
+</div>
+<!-- טקסט תערובת שמאל — Live HTML, node 2:35
+             right=1440px, top=450px -->
+<div class="slide3-mix-left-text" dir="rtl">
+<p>إذا كان الخليط يحتوي على كمّيّة أكبر مِن اللون الأزرق،</p>
+<p>سنحصل على أخضر بارد وغامق.</p>
+</div>
+<!-- קריינות שקף 3 — 3 חלקים -->
+<audio id="slide3-audio-stav" preload="auto" src="audio/slide3-stav.mp3"></audio>
+<audio id="slide3-audio-yellow" preload="auto" src="audio/slide3-yellow.mp3"></audio>
+<audio id="slide3-audio-blue" preload="auto" src="audio/slide3-blue.mp3"></audio>
+<!-- וידאו placeholder — native HTML5 video
+             src: video/slide3-teacher.mp4 (placeholder — קובץ עדיין לא קיים)
+             onended: משחרר נעילת ►
+             onerror: graceful fallback — משחרר נעילה בסביבת פיתוח (קובץ חסר) -->
+<video aria-label="الألوان الدافئة والباردة — فيديو" class="slide3-video" id="slide3-video" playsinline="" preload="auto" src="video/hot_cold_colors2.mp4">
+</video>
+<!-- כפתור "נגן שוב" — מוצג רק כשחוזרים למסך אחרי שהסרטון כבר נצפה -->
+<button aria-label="تشغيل الفيديو مرّة أخرى" class="slide3-replay-btn s3-hidden-btn" id="slide3-replay-btn" onclick="replaySlide3Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
+<!-- ניווט — NEXT (◄) שמאל — נעול עד סיום וידאו -->
+<button aria-label="التالي" class="nav-btn nav-next" id="slide3-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<!-- ניווט — PREV (►) ימין — אחורה -->
+<button aria-label="العودة" class="nav-btn nav-prev" id="slide3-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 1 — SLIDE3 -->
+<!-- ============================================================
+           SCREEN 2 — QUES1 (Figma 2:5 + states 6:67/6:202/6:113/6:242)
+           סוג: Drag & Drop — ► נעול עד השלמה
+           states: main / tryagain / correct / incorrect
+           help: data-q-help="open|closed"
+           ============================================================ -->
+<section class="screen" data-q-help="closed" data-q-state="main" data-screen="3" id="screen-q1">
+<!-- רקע — node 1:1250, 2038×1164, left=-25, top=-84 -->
+<img alt="" class="q1-bg" draggable="false" src="img/bg-slide2.png"/>
+<!-- אוברליי כהה — Rectangle 2 (SVG-only: rgba(0,0,0,0.451), 1946×1110)
+             מוחלף ב-CSS div ללא תמונה -->
+<div class="q1-overlay"></div>
+<!-- כרטיס שאלה — node 2:54 (BG_QUES 1), 1618×802, left=151, top=139 -->
+<img alt="" class="q1-card" draggable="false" src="img/q1-card.png"/>
+<!-- מסגרת צבע על הכרטיס — ירוק ב-CORRECT, מוסתר ביתר המצבים -->
+<div aria-hidden="true" class="q1-card-border"></div>
+<!-- מחוון התקדמות — node 5:30 (1_SELECTED 1), 371×48, left=1512, top=39 -->
+<img alt="" class="q1-progress" draggable="false" src="img/q1-progress.png"/>
+<!-- כפתור עזרה — node 2:59 (HELP 1), 140×140, left=8, top=17
+             ⚠ "עזרה" baked into image (UI chrome — not learner content) -->
+<button aria-label="مُساعَدة" class="q1-help-btn" onclick="toggleQ1Help()">
+<img alt="" draggable="false" src="img/q1-help-btn.png"/>
+</button>
+<!-- טקסט הקשר — Live HTML — node 2:60, right edge x=1656, top=229
+             Assistant SemiBold 600, 33.333px, lh=41px
+             right: 1920-1656=264px -->
+<div class="q1-context-text" dir="rtl">
+<p>بدأ الطلّاب بتخطيط الألوان التي يحتاجون إليها للرسمة.</p>
+<p>وبَعد عِدّة مُحاوَلات، توصّلوا إلى درجة "أخضر الغابة"،</p>
+<p>التي تنتُج من 3 أكواب مِن اللون الأزرق وكوبَيْن مِن اللون الأصفر.</p>
+<p>أيْ أنّ النسبة الملائمة هي 2 : 3.</p>
+</div>
+<!-- הנחיית שאלה — Live HTML — node 2:63, right edge x=914, top=229
+             Assistant Bold 700, 33.333px
+             right: 1920-914=1006px
+             ⚠ "צהובץ" — כך בפיגמה (Source of Truth) -->
+<div class="q1-instruction" dir="rtl">
+<p class="q1-instruction-num-line">1. أكمِلوا الجُمل التالية.</p>
+<p>جُرّوا الكلمات الملائمة من مخزن الكلمات.</p>
+</div>
+<!-- איור — node 2:62 (QUES1_ILLU 1), 501×408, left=1155, top=445 -->
+<img alt="" class="q1-illu" draggable="false" src="img/q1-illu.png"/>
+<!-- ─── משפט 1: בתערובת הצבע יש בסך הכל [__] כוסות ─── -->
+<!-- עיגול bullet — node 2:66, 19×19, left=895, top=370 -->
+<img alt="" class="q1-circle q1-circle-1" draggable="false" src="img/q1-circle.png"/>
+<!-- גזע משפט — node 2:68, right edge x=881, top=355 → right:1039 -->
+<p class="q1-stem q1-stem-1" dir="rtl">في خليط الألوان يوجد بالمُجمَل</p>
+<!-- drop zone 1 — node 2:134, left=348, top=355, 163×49 -->
+<div class="q1-drop" id="q1-drop-1" onclick="q1DropZoneClick(1)" ondragover="q1DragOver(event)" ondrop="q1DropOnZone(event,1)">
+<img alt="" class="q1-drop-empty-bg" draggable="false" src="img/q1-drop-empty.png"/>
+<div class="q1-drop-chip">
+<span class="q1-drop-label" dir="rtl"></span>
+</div>
+</div>
+<!-- סיומת משפט — node 2:70, right edge x=334, top=355 → right:1586 -->
+<p class="q1-stem q1-stem-suffix" dir="rtl">أكواب</p>
+<!-- ─── משפט 2: הצבע הדומיננטי (השולט) בתערובת הוא [__] ─── -->
+<!-- עיגול bullet — node 2:75, 19×19, left=895, top=433 -->
+<img alt="" class="q1-circle q1-circle-2" draggable="false" src="img/q1-circle.png"/>
+<!-- גזע משפט — node 2:72, right edge x=881, top=418 → right:1039 -->
+<p class="q1-stem q1-stem-2" dir="rtl">اللون الغالب في الخليط هو</p>
+<!-- drop zone 2 — node 2:130, left=205, top=414, 163×49 -->
+<div class="q1-drop" id="q1-drop-2" onclick="q1DropZoneClick(2)" ondragover="q1DragOver(event)" ondrop="q1DropOnZone(event,2)">
+<img alt="" class="q1-drop-empty-bg" draggable="false" src="img/q1-drop-empty.png"/>
+<div class="q1-drop-chip">
+<span class="q1-drop-label" dir="rtl"></span>
+</div>
+</div>
+<!-- ─── משפט 3: הגוון שיתקבל יהיה ירוק שנוטה להיות יותר [__] ─── -->
+<!-- עיגול bullet — node 2:81, 19×19, left=895, top=497 -->
+<img alt="" class="q1-circle q1-circle-3" draggable="false" src="img/q1-circle.png"/>
+<!-- גזע משפט — node 2:79, right edge x=881, top=482 → right:1039 -->
+<p class="q1-stem q1-stem-3" dir="rtl">درجة اللون الناتج ستكون أخضر مائلًا أكثر إلى اللون</p>
+<!-- drop zone 3 — node 2:80, left=191, top=474, 163×49 -->
+<div class="q1-drop" id="q1-drop-3" onclick="q1DropZoneClick(3)" ondragover="q1DragOver(event)" ondrop="q1DropOnZone(event,3)">
+<img alt="" class="q1-drop-empty-bg" draggable="false" src="img/q1-drop-empty.png"/>
+<div class="q1-drop-chip">
+<span class="q1-drop-label" dir="rtl"></span>
+</div>
+</div>
+<!-- ─── מחסן מילים — 6 chips ─── -->
+<!-- chip "5" — left=742, top=568, node 2:124 -->
+<div class="q1-chip" data-word="5" draggable="true" id="q1-chip-5" onclick="q1ChipClick(event,'5')" ondragend="q1DragEnd(event)" ondragstart="q1DragStart(event,'5')">
+<img alt="" class="q1-chip-bg-img" draggable="false" src="img/q1-chip-bg.png"/>
+<span class="q1-chip-label q1-chip-label-num">5</span>
+</div>
+<!-- chip "6" — left=742, top=630, node 2:127 -->
+<div class="q1-chip" data-word="6" draggable="true" id="q1-chip-6" onclick="q1ChipClick(event,'6')" ondragend="q1DragEnd(event)" ondragstart="q1DragStart(event,'6')">
+<img alt="" class="q1-chip-bg-img" draggable="false" src="img/q1-chip-bg.png"/>
+<span class="q1-chip-label q1-chip-label-num">6</span>
+</div>
+<!-- chip "כחול" — left=553, top=568, node 2:113 -->
+<div class="q1-chip" data-word="الأزرق" draggable="true" id="q1-chip-kahol" onclick="q1ChipClick(event,'الأزرق')" ondragend="q1DragEnd(event)" ondragstart="q1DragStart(event,'الأزرق')">
+<img alt="" class="q1-chip-bg-img" draggable="false" src="img/q1-chip-bg.png"/>
+<span class="q1-chip-label">الأزرق</span>
+</div>
+<!-- chip "צהוב" — left=553, top=631, node 2:116 -->
+<div class="q1-chip" data-word="الأصفر" draggable="true" id="q1-chip-tsahov" onclick="q1ChipClick(event,'الأصفر')" ondragend="q1DragEnd(event)" ondragstart="q1DragStart(event,'الأصفر')">
+<img alt="" class="q1-chip-bg-img" draggable="false" src="img/q1-chip-bg.png"/>
+<span class="q1-chip-label">الأصفر</span>
+</div>
+<!-- chip "חמים ובהיר" — left=359, top=567, node 2:119 -->
+<div class="q1-chip" data-word="الدافئ والفاتح" draggable="true" id="q1-chip-hamim" onclick="q1ChipClick(event,'الدافئ والفاتح')" ondragend="q1DragEnd(event)" ondragstart="q1DragStart(event,'الدافئ والفاتح')">
+<img alt="" class="q1-chip-bg-img" draggable="false" src="img/q1-chip-bg.png"/>
+<span class="q1-chip-label">الدافئ والفاتح</span>
+</div>
+<!-- chip "קריר וכהה" — left=359, top=630, node 2:120 -->
+<div class="q1-chip" data-word="البارد والغامق" draggable="true" id="q1-chip-karir" onclick="q1ChipClick(event,'البارد والغامق')" ondragend="q1DragEnd(event)" ondragstart="q1DragStart(event,'البارد والغامق')">
+<img alt="" class="q1-chip-bg-img" draggable="false" src="img/q1-chip-bg.png"/>
+<span class="q1-chip-label">البارد والغامق</span>
+</div>
+<!-- כפתור "צדקתי?" — node 2:67 (CHECK 1), 209×137, left=190, top=716
+             ⚠ "צדקתי?" baked into image (UI chrome) -->
+<button aria-label="هل إجابتي صحيحة؟" class="q1-submit-btn" onclick="submitQ1()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q1-submit.png"/>
+</button>
+<!-- ─── State: TRYAGAIN — Live HTML error text ─── -->
+<!-- node from 6:202, right edge x=905, top=758 → right:1015, color:#a93d2c -->
+<div class="q1-tryagain-text" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button aria-label="حاوِلوا مجدّدًا." class="q1-tryagain-action" onclick="resetQ1ForRetry()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- ─── State: CORRECT / INCORRECT — feedback panel ─── -->
+<!-- .q1-feedback is a transparent wrapper; children are absolutely positioned
+             Correct bg: node 6:156, 718×193, left=196, top=690
+             Incorrect bg: node 6:278, 718×193, left=187, top=695 -->
+<div class="q1-feedback">
+<img alt="" class="q1-feedback-bg-img" draggable="false" src="img/q1-feedback-bg.png"/>
+<!-- Correct feedback text — node 6:159, right edge x=887, top=705
+               right: 1920-887=1033px, font-size:30px, font-semibold, white -->
+<div class="q1-feedback-correct-text" dir="rtl">
+<p><strong>إجابتك صحيحة!</strong></p>
+<p>يوجد في خليط الألوان بالمُجمَل 5 أكواب. بما أن هناك 3 أكواب</p>
+<p>مِن اللون الأزرق وكوبَيْن مِن اللون الأصفر، فإنّ الأزرق هو اللون</p>
+<p>الغالب، ولذلك درجة اللون الناتج ستكون أخضر باردًا وغامقًا نسبيًّا.</p>
+</div>
+<!-- Incorrect feedback text — node 6:279, right edge x=878, top=710
+               right: 1920-878=1042px, font-size:30px, font-semibold, white -->
+<div class="q1-feedback-incorrect-text" dir="rtl">
+<p><strong>الإجابة غير دقيقة. الإجابات الصحيحة تَظهَر حاليًّا.</strong></p>
+<p>يوجد في خليط الألوان بالمُجمَل 5 أكواب. بما أن هناك 3 أكواب</p>
+<p>مِن اللون الأزرق وكوبَيْن مِن اللون الأصفر، فإنّ الأزرق هو اللون</p>
+<p>الغالب، ولذلك درجة اللون الناتج ستكون أخضر باردًا وغامقًا نسبيًّا.</p>
+</div>
+</div>
+<!-- ─── State: HELP — extra overlay + popup ─── -->
+<!-- Extra darkening overlay (appears in HELP state, left=-2, top=0)
+             Same rgba(0,0,0,0.451) as base overlay — doubles the darkening -->
+<div class="q1-help-overlay"></div>
+<!-- Help popup — node 6:108, 623×172, left=64, top=41
+             Image clipped: h=146.34%, left=-7.53%, top=-12.6%, w=107.53% -->
+<div class="q1-help-popup">
+<div class="q1-help-popup-inner">
+<img alt="" class="q1-help-popup-bg-img" draggable="false" src="img/q1-help-popup-bg.png"/>
+</div>
+<span aria-label="إغلاق" class="q1-help-close-btn help-popup-close-btn" onclick="toggleQ1Help()" role="button" tabindex="0">✕</span>
+<!-- Help text — Live HTML — node 6:111, right edge x=643, top=86
+               Within popup (at left=64,top=41): right=44px, top=45px
+               Assistant SemiBold, 33.333px -->
+<div class="q1-help-text" dir="rtl">
+<p>فكِّروا أيّ لون يؤثِّر أكثر على الخليط،</p>
+<p>وكيف ينعكس ذلك على درجة اللون.</p>
+</div>
+</div>
+<!-- ניווט — NEXT (◄) שמאל — נעול עד השלמת שאלה -->
+<button aria-label="التالي" class="nav-btn nav-next" id="q1-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<!-- ניווט — PREV (►) ימין — אחורה -->
+<button aria-label="العودة" class="nav-btn nav-prev" id="q1-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 2 — QUES1 -->
+<!-- ============================================================
+           SCREEN 3 — SLIDE5 (Figma 5:7 closed / 5:15 open)
+           סוג: content + applet — ► נעול עד פתיחת יישומון
+           data-applet-gate="true" → unlocks on first applet open
+           data-s5-state="closed|open" — ממוקד על .screen
+           ============================================================ -->
+<section class="screen" data-applet-gate="true" data-s5-state="closed" data-screen="4" id="screen-slide5">
+<!-- רקע מלא 1920×1080 — ילדים עם טלפון (Daniela + students)
+             node 5:14 — BG_SLIDE5 — ללא טקסט עברי, בטוח לייצוא -->
+<img alt="" class="s5-bg" draggable="false" src="img/slide5-bg.jpg"/>
+<!-- פאנל כותרת — node 5:9, left:960, top:0, 1512×233
+             גלוי גם ב-closed וגם ב-open -->
+<img alt="" class="s5-header-bg" draggable="false" src="img/slide5-header-bg.png"/>
+<!-- טקסט כותרת — Live HTML (לא מיוצא כתמונה)
+             node 5:10 — Assistant SemiBold 600, 33.333px, right:37px, top:42px -->
+<div class="s5-header-text" dir="rtl">
+<p>بَيْنَما كان بقيّة الطلّاب مُنشَغِلين بتخطيط الألوان،</p>
+<p>كانَتْ عبير تعمل مع أداة ذكاء اصطناعي (AI)، وطوّرَتْ بواسطتها تطبيقًا يساعد في إجراء الحِسابات.</p>
+<p><strong>اُنقُروا على هاتف عبير لفتح التطبيق.</strong></p>
+</div>
+<!-- Hotspot לחיץ — תמונת ידיים+טלפון PNG מונחת בדיוק על מיקום דניאלה
+             נראה רק ב-closed; hover = brightness עדין -->
+<button aria-label="فتْح تطبيق مُختبَر بحْث الألوان" class="s5-phone-hotspot" onclick="openS5Applet()">
+<img alt="" draggable="false" src="img/slide5-phone-hotspot.png"/>
+</button>
+<!-- פאנל פתוח — נראה רק ב-open -->
+<div class="s5-applet-panel">
+<!-- מסגרת iPhone — node 5:23, left:174, top:236, 1559×749 -->
+<img alt="" class="s5-iphone-frame" draggable="false" src="img/slide5-iphone.png"/>
+<!-- כפתור סגירה — top-right של מסגרת הטלפון -->
+<button aria-label="إغلاق التطبيق" class="s5-close-btn" onclick="closeS5Applet()">✕</button>
+<!-- iframe יישומון — node 5:22 APP area, left:919, top:322, 650×578 -->
+<iframe class="s5-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+<!-- כפתור הגדלה — מוסתר, מוחלף ב-CTA למטה -->
+<button aria-label="تكبير التطبيق" class="s5-zoom-btn" onclick="openS5Zoom()">⛶</button>
+<!-- שורת CTA — פותחת overlay מוגדל -->
+<button aria-label="فتْح التطبيق بعَرض كامل" class="s5-zoom-cta" onclick="openS5Zoom()"><span aria-hidden="true" class="s5-zoom-cta-icon">🔍</span> اُنقُروا هنا لفتح التطبيق بعَرض كامل </button>
+<!-- טקסט הוראות א — Live HTML
+               node 5:26 — right edge at 883px → CSS right:1037px, top:417px -->
+<div class="s5-instructions-a" dir="rtl">
+<p>أ. كوِّنوا اللون الأخضر، بحيث تكون النسبة بين عدد أكواب</p>
+<p>اللون الأزرق وعدد أكواب اللون الأصفر 3 : 4.</p>
+<p>اكتُبوا إمكانيّتَيْن مختلفتَيْن لعدد الأكواب</p>
+<p>من كل لون، بحيث تحقِّقان النسبة المطلوبة.</p>
+</div>
+<!-- טקסט הוראות ב — Live HTML
+               node 5:28 — right:1037px, top:658px -->
+<div class="s5-instructions-b" dir="rtl">
+<p>ب. افحَصوا في التطبيق –</p>
+<p>إذا أدخَلْنا 20 كوبًا مِن اللون الأزرق وَ 14 كوبًا</p>
+<p>مِن اللون الأصفر، هل سنحصل على:</p>
+<div class="s5-yn-row" data-s5-yn="b1" data-s5-yn-correct="yes">
+<span class="s5-yn-question">لون أخضر؟</span>
+<span class="s5-yn-options">
+<button class="s5-yn-btn s5-yn-yes" onclick="selectS5YN('b1','yes')">نعم <span aria-hidden="true" class="s5-yn-check"></span></button>
+<span class="s5-yn-sep">/</span>
+<button class="s5-yn-btn s5-yn-no" onclick="selectS5YN('b1','no')">لا <span aria-hidden="true" class="s5-yn-check"></span></button>
+</span>
+</div>
+<div class="s5-yn-row" data-s5-yn="b2" data-s5-yn-correct="no">
+<span class="s5-yn-question">نسبة 3 : 4؟</span>
+<span class="s5-yn-options">
+<button class="s5-yn-btn s5-yn-yes" onclick="selectS5YN('b2','yes')">نعم <span aria-hidden="true" class="s5-yn-check"></span></button>
+<span class="s5-yn-sep">/</span>
+<button class="s5-yn-btn s5-yn-no" onclick="selectS5YN('b2','no')">لا <span aria-hidden="true" class="s5-yn-check"></span></button>
+</span>
+</div>
+</div>
+</div><!-- /.s5-applet-panel -->
+<!-- ניווט — NEXT (◄) שמאל — קדימה -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<!-- ניווט — PREV (►) ימין — אחורה -->
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 3 — SLIDE5 -->
+<!-- ============================================================
+           SCREEN 4 — QUES2
+           Figma frames: 5:31 (main) | 7:195 (help) | 7:218 (tryagain)
+                         7:303 (correct) | 7:332 (incorrect)
+           Type: single-choice radio
+           Correct answer: option 3 (אלון טועה, 8 כוסות)
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q2-help="false" data-q2-state="main" data-screen="5" id="screen-q2">
+<!-- רקע — BG blur classroom (node 5:32) -->
+<img alt="" class="q2-bg" draggable="false" src="img/bg-slide2.png"/>
+<!-- שכבת overlay שקופה -->
+<div class="q2-overlay"></div>
+<!-- כרטיס שאלה לבן — BG_QUES (node 5:34) -->
+<img alt="" class="q2-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 2_SELECTED (node 5:66) -->
+<img alt="" class="q2-progress" draggable="false" src="img/q2-progress.png"/>
+<!-- כפתור עזרה — node 5:37 -->
+<button aria-label="مُساعَدة" class="q2-help-btn" onclick="toggleQ2Help()">
+<!-- Tooltip עזרה — גלוי רק כשdata-q2-help=true -->
+<div class="q2-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q2-help-popup-bg.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ2Help()" role="button" tabindex="0">✕</span>
+<p>فكّروا ماذا يحدُث عند إضافة نفْس الكمّيّة إلى المكوِّنَيْن – هل تُحفَظ النسبة بينهما؟</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- כפתור ישומון — node 6:313 -->
+<button aria-label="تطبيق" class="q2-app-btn" onclick="openQ2Applet()">
+<img alt="" draggable="false" src="img/q2-app-btn.png"/>
+</button>
+<!-- טקסט הקשר — עמודת ימין (node 5:38) -->
+<div class="q2-story" dir="rtl">
+<p>بدأ الطلّاب بتحضير كمّيّة كبيرة مِن الخليط، مع الحِفاظ على درجة اللون المطلوبة "أخضر الغابة". أضاف وسام 12 كوبًا مِن اللون الأزرق إلى خليط الألوان الذي كان يحتوي أصلًا على 3 أكواب مِن اللون الأزرق وكوبَيْن مِن اللون الأصفر:</p>
+</div>
+<!-- שאלה — עמודת שמאל (node 5:41) -->
+<div class="q2-question" dir="rtl">
+<p>2. الآن يَجِب إضافة اللون الأصفر. يدّعي وسام أنّهُ يَجِب إضافة 12 كوبًا مِن اللون الأصفر للحِفاظ على نسبة الخليط. استعينوا بالتطبيق أعلاه، وافحَصوا ما إذا تمّ الحِفاظ على درجة اللون وفقًا لاقتراح وسام.</p>
+<p><strong>هل هو على صواب؟</strong>   اختاروا الإجابة الصحيحة.</p>
+</div>
+<!-- איור — כוסות כחול + צהוב (animated, 2 phases) -->
+<div class="q2-illu" id="q2-illu">
+<img alt="" class="q2-illu-bg" draggable="false" src="img/q2-cup-bg.png"/>
+<!-- Phase 1: 3 כחולות + פלוס + 2 צהובות (LTR: blues-left yellows-right) -->
+<div class="q2-cups-top">
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="+" class="q2-cup-plus" draggable="false" src="img/icon-plus.png"/>
+<img alt="" class="q2-cup q2-cup-y" draggable="false" src="img/q2-cup-yellow.png"/>
+<img alt="" class="q2-cup q2-cup-y" draggable="false" src="img/q2-cup-yellow.png"/>
+</div>
+<!-- Phase 2: 12 כחולות -->
+<div class="q2-cups-bottom">
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+<img alt="" class="q2-cup q2-cup-b" draggable="false" src="img/q2-cup-blue.png"/>
+</div>
+</div>
+<!-- אפשרויות תשובה -->
+<div class="q2-options" dir="rtl">
+<div aria-checked="false" class="q2-option" data-value="1" onclick="selectQ2Option(1)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text">وسام على صواب. إضافة 12 كوبًا مِن اللون الأصفر ستُحافِظ على النسبة في الخليط.</span>
+</div>
+<div aria-checked="false" class="q2-option" data-value="2" onclick="selectQ2Option(2)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text" style="white-space: nowrap;">وسام مُخطئ، يَجِب إضافة 10 أكواب فقط مِن اللون الأصفر للحِفاظ على نسبة الخليط</span>
+</div>
+<div aria-checked="false" class="q2-option" data-value="3" onclick="selectQ2Option(3)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text">وسام مُخطئ، يَجِب إضافة 8 أكواب فقط مِن اللون الأصفر للحِفاظ على نسبة الخليط</span>
+</div>
+</div><!-- /.q2-options -->
+<!-- כפתור צדקתי? — node 5:51 -->
+<button aria-label="هل إجابتي صحيحة؟" class="q2-submit-btn" disabled="" onclick="submitQ2()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת TryAgain — גלוי רק ב-tryagain -->
+<div class="q2-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q2-retry-btn" onclick="retryQ2()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב — גלוי ב-correct ו-incorrect -->
+<div class="q2-feedback-panel">
+<img alt="" class="q2-feedback-bg-img" draggable="false" src="img/q2-feedback-bg.png"/>
+<!-- CORRECT feedback -->
+<div class="q2-fb-correct" dir="rtl">
+<p class="q2-fb-title">إجابتك صحيحة!</p>
+<p>أضاف وسام إلى الخليط عدد أكواب مِن اللون الأزرق، يُساوي 4 أضعاف عدد الأكواب الأصليّ الذي كان فيه. للحِفاظ على نسبة الخليط، يَجِب إضافة عدد أكواب مِن اللون الأصفر، يُساوي هو أيضًا 4 أضعاف الأكواب الأصليّ الذي كان في الخليط.</p>
+<p>لذلك، يَجِب إضافة 8 أكواب فقط مِن اللون الأصفر: 8 = 4 · 2</p>
+<p>النسبة الناتجة هي <span dir="ltr">15 : 10</span>، والنسبة المُختزَلة المُساوية لها هي <span dir="ltr">3 : 2</span>.</p>
+</div>
+<!-- INCORRECT feedback -->
+<div class="q2-fb-incorrect" dir="rtl">
+<p class="q2-fb-title">هذا خطأ. الإجابة الصحيحة مُشار إليها.</p>
+<p>أضاف وسام إلى الخليط عدد أكواب مِن اللون الأزرق، يُساوي 4 أضعاف عدد الأكواب الأصليّ الذي كان فيه. للحِفاظ على نسبة الخليط، يَجِب إضافة عدد أكواب مِن اللون الأصفر، يُساوي هو أيضًا 4 أضعاف الأكواب الأصليّ الذي كان في الخليط.</p>
+<p>لذلك، يَجِب إضافة 8 أكواب فقط مِن اللون الأصفر: 8 = 4 · 2</p>
+<p>النسبة الناتجة هي <span dir="ltr">15 : 10</span>، والنسبة المُختزَلة المُساوية لها هي <span dir="ltr">3 : 2</span>.</p>
+</div>
+</div><!-- /.q2-feedback-panel -->
+<!-- Applet modal (ישומון) -->
+<!-- ניווט — NEXT (◄) שמאל — קדימה -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<!-- ניווט — PREV (►) ימין — אחורה -->
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 4 — QUES2 -->
+<!-- ============================================================
+           SCREEN 5 — QUES3 (Radio, 4 options)
+           Figma: 7:358 (main) | 7:388 (help) | 7:422 (tryagain)
+                  7:451 (correct) | 7:491 (incorrect)
+           State: data-q3-state="main|tryagain|correct|incorrect"
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q3-help="false" data-q3-state="main" data-screen="6" id="screen-q3">
+<!-- רקע — same bg/overlay/card as QUES2 -->
+<img alt="" class="q3-bg" draggable="false" src="img/bg-slide2.png"/>
+<div class="q3-overlay"></div>
+<img alt="" class="q3-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 3_SELECTED -->
+<img alt="" class="q3-progress" draggable="false" src="img/q3-progress.png"/>
+<!-- כפתור עזרה -->
+<button aria-label="مُساعَدة" class="q3-help-btn" onclick="toggleQ3Help()">
+<!-- Tooltip עזרה -->
+<div class="q3-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q3-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ3Help()" role="button" tabindex="0">✕</span>
+<p>احسُبوا كم لترًا مِن كلّ لون موجود في الخليط.</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- כפתור ישומון -->
+<button aria-label="تطبيق" class="q3-app-btn" onclick="openQ3Applet()">
+<img alt="" draggable="false" src="img/q2-app-btn.png"/>
+</button>
+<!-- טקסט הקשר — עמודת ימין (node 7:365) -->
+<div class="q3-story" dir="rtl">
+<p>عُذرًا، حدثَ خطأ ما... سكبَتْ سناء وعبير عن طريق الخطأ لترَيْن مِن اللون الأصفر في دَلْو يحتوي على 10 لترات مِن خليط "أخضر الغابة". نُذكّرُكُم بأنّ النسبة الأصليّة للخليط هي <strong>2 : 3</strong></p>
+<p><strong>(3 لترات مِن اللون الأزرق إلى لترَيْن مِن اللون الأصفر).</strong></p>
+</div>
+<!-- שאלה — עמודת שמאל (node 7:366) -->
+<div class="q3-question" dir="rtl">
+<p><strong>3. ما هي النسبة الجديدة والمُختزَلة التي نتجَتْ بسبب هذا الخطأ؟</strong></p>
+<p>اختاروا الإجابة الصحيحة.</p>
+<p>استعينوا بالتطبيق أعلاه وافحَصوا إجابتَكُم قبل أنْ تجيبوا.</p>
+</div>
+<!-- איור — דלי שפיכה (⚠️ q3-pic.png contains Hebrew "2 ליטר" — clean Figma export needed) -->
+<img alt="" class="q3-pic" draggable="false" src="img/q3-pic.png"/>
+<!-- ילדות מבועתות -->
+<img alt="" class="q3-girls" draggable="false" src="img/q3-girls.png"/>
+<!-- אפשרויות תשובה — 4 options; rows reuse .q2-option classes -->
+<div class="q3-options" dir="rtl">
+<div aria-checked="false" class="q2-option" data-value="1" onclick="selectQ3Option(1)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text" dir="ltr">3 : 4</span>
+</div>
+<div aria-checked="false" class="q2-option" data-value="2" onclick="selectQ3Option(2)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text" dir="ltr">6 : 2</span>
+</div>
+<div aria-checked="false" class="q2-option" data-value="3" onclick="selectQ3Option(3)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text" dir="ltr">8 : 4</span>
+</div>
+<div aria-checked="false" class="q2-option" data-value="4" onclick="selectQ3Option(4)" role="radio" tabindex="0">
+<span class="q2-opt-marker"></span>
+<span class="q2-opt-text" dir="ltr">1 : 1</span>
+</div>
+</div><!-- /.q3-options -->
+<!-- כפתור צדקתי? -->
+<button aria-label="هل إجابتي صحيحة؟" class="q3-submit-btn" disabled="" onclick="submitQ3()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת TryAgain -->
+<div class="q3-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q3-retry-btn" onclick="retryQ3()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב -->
+<div class="q3-feedback-panel">
+<img alt="" class="q3-feedback-bg-img" draggable="false" src="img/q2-feedback-bg.png"/>
+<!-- CORRECT feedback -->
+<div class="q3-fb-correct" dir="rtl">
+<p class="q3-fb-title">إجابتك صحيحة!</p>
+<p>نسبة الخليط لدرجة "أخضر الغابة" هي 2 : 3، لذلك في 10 لترات مِن اللون الجاهز كانَتْ هناك 6 لترات مِن اللون الأزرق وَ 4 لترات مِن اللون الأصفر.</p>
+<p>عندما سُكِبَ لتران آخران مِن اللون الأصفر، أصبحَت الكمّيّة 6 لترات مِن اللون الأزرق وَ 6 لترات مِن اللون الأصفر.</p>
+<p>النسبة المُختزَلة لـ 6 : 6 هي 1 : 1.</p>
+</div>
+<!-- INCORRECT feedback -->
+<div class="q3-fb-incorrect" dir="rtl">
+<p class="q3-fb-title">هذا خطأ. الإجابة الصحيحة مُشار إليها.</p>
+<p>نسبة الخليط لدرجة "أخضر الغابة" هي 2 : 3، لذلك في 10 لترات مِن اللون الجاهز كانَتْ هناك 6 لترات مِن اللون الأزرق وَ 4 لترات مِن اللون الأصفر.</p>
+<p>عندما سُكِبَ لتران آخران مِن اللون الأصفر، أصبحَت الكمّيّة 6 لترات مِن اللون الأزرق وَ 6 لترات مِن اللون الأصفر.</p>
+<p>النسبة المُختزَلة لـ 6 : 6 هي 1 : 1.</p>
+</div>
+</div><!-- /.q3-feedback-panel -->
+<!-- Applet modal (ישומון) -->
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 5 — QUES3 -->
+<!-- ============================================================
+           SCREEN 6 — QUES4A
+           Figma: 7:526 main | 9:1183 help | 9:1222 tryagain | 9:1264 correct | 9:1309 incorrect
+           Multi-select radio — correct: {2,4} (2/3=16/X and 3/2=X/16)
+           ⚠️  q4-stav.png contains "16 ליטר" — needs clean Figma export
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q4-help="false" data-q4-state="main" data-screen="7" id="screen-q4">
+<!-- אודיו קריינות שאלה 4 -->
+<audio id="q4-audio" preload="auto" src="audio/Q4_audio.mp3"></audio>
+<!-- רקע — reuse QUES2/QUES3 bg/overlay/card -->
+<img alt="" class="q4-bg" draggable="false" src="img/bg-slide2.png"/>
+<div class="q4-overlay"></div>
+<img alt="" class="q4-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 4_SELECTED -->
+<img alt="سؤال 4" class="q4-progress" draggable="false" src="img/q4-progress.png"/>
+<!-- כפתור עזרה -->
+<button aria-label="مُساعَدة" class="q4-help-btn" onclick="toggleQ4Help()">
+<!-- Tooltip עזרה -->
+<div class="q4-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q4-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ4Help()" role="button" tabindex="0">✕</span>
+<p>انتبِهوا إلى البسط والمقام في المعادلات.</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- כפתור ישומון -->
+<button aria-label="تطبيق" class="q4-app-btn" onclick="openQ4Applet()">
+<img alt="" draggable="false" src="img/q2-app-btn.png"/>
+</button>
+<!-- בועת נרטיב — צורת הבועה (node 7:556) -->
+<img alt="" class="q4-bubble" draggable="false" src="img/bbl_new.png"/>
+<!-- טקסט מורה — overlaid on bubble (node 9:1236) — 6 lines per Figma -->
+<div class="q4-story" dir="rtl">
+<p>فجأةً، دخلَت المعلمة سمر إلى الصفّ وقالَتْ:</p>
+<p>"وجدْتُ في المخزن وعاءً كبيرًا يحتوي على 16 لترًا مِن اللون الأصفر.</p>
+<p>أريد استخدام كلّ الكمّيّة لتحضير خليط بدرجة "أخضر الغابة".</p>
+<p>أذكِّرُكُم أنّ النسبة هي 3 أكواب مِن اللون الأزرق إلى كوبَيْن مِن اللون الأصفر.</p>
+<p>أيْ أنّهُ لكلّ 3 لترات مِن اللون الأزرق نُضيف لترَيْن مِن اللون الأصفر".</p>
+</div>
+<!-- שאלה (node 7:534) -->
+<div class="q4-question" dir="rtl">
+<p><strong>4. أ. ما هي المعادلة التي ستساعد في معرفة عدد لترات اللون الأزرق التي يَجِب إضافتُها إلى 16 لترًا مِن اللون الأصفر، للوصول إلى درجة "أخضر الغابة"؟</strong></p>
+<p class="q4-q-sub">اختاروا <strong>كلّ الإجابات</strong> الصحيحة.</p>
+</div>
+<!-- איור — צינוריות ודלי (node 7:554 + 7:555) -->
+<img alt="" class="q4-illu" draggable="false" src="img/q4-illu.png"/>
+<!-- ⚠️ q4-stav.png contains "16 ליטר" baked in — needs clean Figma export -->
+<img alt="" class="q4-stav" draggable="false" src="img/q4-stav.png"/>
+<!-- אפשרויות תשובה — 4 options, horizontal, LTR order matching Figma pixel order -->
+<!-- Correct: option 2 (2/3=16/X) and option 4 (3/2=X/16) -->
+<div class="q4-options">
+<!-- option 1: 2/3 = X/16 — WRONG -->
+<div aria-checked="false" class="q4-option" data-value="1" onclick="selectQ4Option(1)" role="checkbox" tabindex="0">
+<div class="q4-eq-area">
+<span class="q4-eq-wrap">
+<span class="q4-frac">
+<span class="q4-frac-num">2</span>
+<span class="q4-frac-den">3</span>
+</span>
+<span class="q4-eq-sym">=</span>
+<span class="q4-frac">
+<span class="q4-frac-num">X</span>
+<span class="q4-frac-den">16</span>
+</span>
+</span>
+</div>
+<div class="q4-circle"></div>
+</div>
+<!-- option 2: 2/3 = 16/X — CORRECT -->
+<div aria-checked="false" class="q4-option" data-value="2" onclick="selectQ4Option(2)" role="checkbox" tabindex="0">
+<div class="q4-eq-area">
+<span class="q4-eq-wrap">
+<span class="q4-frac">
+<span class="q4-frac-num">2</span>
+<span class="q4-frac-den">3</span>
+</span>
+<span class="q4-eq-sym">=</span>
+<span class="q4-frac">
+<span class="q4-frac-num">16</span>
+<span class="q4-frac-den">X</span>
+</span>
+</span>
+</div>
+<div class="q4-circle"></div>
+</div>
+<!-- option 3: 3/2 = 16/X — WRONG -->
+<div aria-checked="false" class="q4-option" data-value="3" onclick="selectQ4Option(3)" role="checkbox" tabindex="0">
+<div class="q4-eq-area">
+<span class="q4-eq-wrap">
+<span class="q4-frac">
+<span class="q4-frac-num">3</span>
+<span class="q4-frac-den">2</span>
+</span>
+<span class="q4-eq-sym">=</span>
+<span class="q4-frac">
+<span class="q4-frac-num">16</span>
+<span class="q4-frac-den">X</span>
+</span>
+</span>
+</div>
+<div class="q4-circle"></div>
+</div>
+<!-- option 4: 3/2 = X/16 — CORRECT -->
+<div aria-checked="false" class="q4-option" data-value="4" onclick="selectQ4Option(4)" role="checkbox" tabindex="0">
+<div class="q4-eq-area">
+<span class="q4-eq-wrap">
+<span class="q4-frac">
+<span class="q4-frac-num">3</span>
+<span class="q4-frac-den">2</span>
+</span>
+<span class="q4-eq-sym">=</span>
+<span class="q4-frac">
+<span class="q4-frac-num">X</span>
+<span class="q4-frac-den">16</span>
+</span>
+</span>
+</div>
+<div class="q4-circle"></div>
+</div>
+</div><!-- /.q4-options -->
+<!-- כפתור צדקתי? -->
+<button aria-label="هل إجابتي صحيحة؟" class="q4-submit-btn" disabled="" onclick="submitQ4()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת TryAgain -->
+<div class="q4-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q4-retry-btn" onclick="retryQ4()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב -->
+<div class="q4-feedback-panel">
+<img alt="" class="q4-feedback-bg-img" draggable="false" src="img/q4-feedback-bg.png"/>
+<!-- CORRECT feedback (node 9:1300) -->
+<div class="q4-fb-correct" dir="rtl">
+<p class="q4-fb-title">إجابتك صحيحة!</p>
+<p>نَبْني المعادلة بحيث تكون النسبة الأصليّة في طرف، والنسبة الجديدة الملائمة لها في الطرف الآخر، أيْ — الكمّيّة الأصليّة مِن اللون الأصفر مقابل كمّيّتِهِ الجديدة، والكمّيّة الأصليّة مِن اللون الأزرق مقابل كمّيّتِهِ الجديدة.</p>
+</div>
+<!-- INCORRECT feedback (node 9:1329) -->
+<div class="q4-fb-incorrect" dir="rtl">
+<p class="q4-fb-title">هذا خطأ. الإجابات الصحيحة معلَّمة.</p>
+<p>نَبْني المعادلة بحيث تكون النسبة الأصليّة في طرف، والنسبة الجديدة الملائمة لها في الطرف الآخر، أيْ — الكمّيّة الأصليّة مِن اللون الأصفر مقابل كمّيّتِهِ الجديدة، والكمّيّة الأصليّة مِن اللون الأزرق مقابل كمّيّتِهِ الجديدة.</p>
+</div>
+</div><!-- /.q4-feedback-panel -->
+<!-- Applet modal (ישומון) -->
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 6 — QUES4A -->
+<!-- ============================================================
+           SCREEN 7 — QUES4B  (Part 2 of Question 4)
+           Figma: 9:1352 (main) | 9:1666 (help) | 9:1701 (tryagain)
+                  9:1743 (correct) | 9:1785 (incorrect)
+           Correct: options 2 (3/2 = 3·8/2·8) and 3 (3/2 = X/16)
+           Progress indicator stays on 4.
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q4b-help="false" data-q4b-state="main" data-screen="8" id="screen-q4b">
+<!-- רקע — same assets as QUES4A -->
+<img alt="" class="q4b-bg" draggable="false" src="img/bg-slide2.png"/>
+<div class="q4b-overlay"></div>
+<img alt="" class="q4b-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — stays on 4 (same asset as q4) -->
+<img alt="سؤال 4" class="q4b-progress" draggable="false" src="img/q4-progress.png"/>
+<!-- כפתור עזרה -->
+<button aria-label="مُساعَدة" class="q4b-help-btn" onclick="toggleQ4bHelp()">
+<!-- Tooltip עזרה -->
+<div class="q4b-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q4-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ4bHelp()" role="button" tabindex="0">✕</span>
+<p>انتبِهوا إلى اللون الأصفر: ازدادَ مِن لترَيْن إلى 16 لترًا.<br/>بِكَم ضِعف ازداد؟ تذكّروا: النسبة هي علاقة ضرب.<br/>هل أضَفْنا 14 لترًا (جمع) أمْ ضاعَفْنا الكمّيّة (ضرب)؟</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- כפתור ישומון -->
+<button aria-label="تطبيق" class="q4b-app-btn" onclick="openQ4bApplet()">
+<img alt="" draggable="false" src="img/q2-app-btn.png"/>
+</button>
+<!-- בועת נרטיב — same bubble shape as q4 -->
+<img alt="" class="q4b-bubble" draggable="false" src="img/bbl_new.png"/>
+<!-- טקסט מורה — same story text as QUES4A (same context) -->
+<div class="q4b-story" dir="rtl">
+<p>فجأةً، دخلَت المعلمة سمر إلى الصفّ وقالَتْ:</p>
+<p>"وجدْتُ في المخزن وعاءً كبيرًا يحتوي على 16 لترًا مِن اللون الأصفر.</p>
+<p>أريد استخدام كلّ الكمّيّة لتحضير خليط بدرجة "أخضر الغابة".</p>
+<p>أذكِّرُكُم أنّ النسبة هي 3 أكواب مِن اللون الأزرق إلى كوبَيْن مِن اللون الأصفر.</p>
+<p>أيْ أنّهُ لكلّ 3 لترات مِن اللون الأزرق نُضيف لترَيْن مِن اللون الأصفر".</p>
+</div>
+<!-- שאלה (Figma 9:1359) — bold 2 lines + regular 2 lines -->
+<div class="q4b-question" dir="rtl">
+<p><strong>4. ب. كم لترًا مِن اللون الأزرق يَجِب إضافتُه إلى اللون الأصفر، للوصول إلى درجة "أخضر الغابة"؟</strong></p>
+<p class="q4b-q-sub">اختاروا <strong>التمارين أو المعادلات</strong> التي يُمكن بواسطتها الوصول إلى الحلّ الصحيح.</p>
+</div>
+<!-- איור — same as QUES4A -->
+<img alt="" class="q4b-illu" draggable="false" src="img/q4-illu.png"/>
+<img alt="" class="q4b-stav" draggable="false" src="img/q4-stav.png"/>
+<!-- אפשרויות תשובה — 3 options (Figma positions: 387, 586, 786 left)
+             Option 1 (left:387): 3/2 = (3+14)/(2+14) — WRONG
+             Option 2 (left:586): 3/2 = (3·8)/(2·8)  — CORRECT
+             Option 3 (left:786): 3/2 = X/16          — CORRECT -->
+<div class="q4b-options">
+<!-- option 1: 3/2 = (3+14)/(2+14) — WRONG -->
+<div aria-checked="false" class="q4b-option" data-value="1" onclick="selectQ4bOption(1)" role="checkbox" tabindex="0">
+<div class="q4b-eq-area">
+<span class="q4b-eq-wrap">
+<span class="q4b-frac">
+<span class="q4b-frac-num">3</span>
+<span class="q4b-frac-den">2</span>
+</span>
+<span class="q4b-eq-sym">=</span>
+<span class="q4b-frac">
+<span class="q4b-frac-num">3 + 14</span>
+<span class="q4b-frac-den">2 + 14</span>
+</span>
+</span>
+</div>
+<div class="q4b-circle-row">
+<div class="q4b-circle"></div>
+<span class="q4b-opt-label">ت</span>
+</div>
+</div>
+<!-- option 2: 3/2 = (3·8)/(2·8) — CORRECT -->
+<div aria-checked="false" class="q4b-option" data-value="2" onclick="selectQ4bOption(2)" role="checkbox" tabindex="0">
+<div class="q4b-eq-area">
+<span class="q4b-eq-wrap">
+<span class="q4b-frac">
+<span class="q4b-frac-num">3</span>
+<span class="q4b-frac-den">2</span>
+</span>
+<span class="q4b-eq-sym">=</span>
+<span class="q4b-frac">
+<span class="q4b-frac-num">3 · 8</span>
+<span class="q4b-frac-den">2 · 8</span>
+</span>
+</span>
+</div>
+<div class="q4b-circle-row">
+<div class="q4b-circle"></div>
+<span class="q4b-opt-label">ب</span>
+</div>
+</div>
+<!-- option 3: 3/2 = X/16 — CORRECT -->
+<div aria-checked="false" class="q4b-option" data-value="3" onclick="selectQ4bOption(3)" role="checkbox" tabindex="0">
+<div class="q4b-eq-area">
+<span class="q4b-eq-wrap">
+<span class="q4b-frac">
+<span class="q4b-frac-num">3</span>
+<span class="q4b-frac-den">2</span>
+</span>
+<span class="q4b-eq-sym">=</span>
+<span class="q4b-frac">
+<span class="q4b-frac-num">X</span>
+<span class="q4b-frac-den">16</span>
+</span>
+</span>
+</div>
+<div class="q4b-circle-row">
+<div class="q4b-circle"></div>
+<span class="q4b-opt-label">أ</span>
+</div>
+</div>
+</div><!-- /.q4b-options -->
+<!-- כפתור צדקתי? -->
+<button aria-label="هل إجابتي صحيحة؟" class="q4b-submit-btn" disabled="" onclick="submitQ4b()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת TryAgain -->
+<div class="q4b-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q4b-retry-btn" onclick="retryQ4b()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב (Figma 9:1782: left:188 top:581 759×282) -->
+<div class="q4b-feedback-panel">
+<img alt="" class="q4b-feedback-bg-img" draggable="false" src="img/q4-feedback-bg.png"/>
+<!-- CORRECT feedback (Figma 9:1783) -->
+<div class="q4b-fb-correct" dir="rtl">
+<p class="q4b-fb-title">إجابتك صحيحة!</p>
+<p>الإجابتان "أ" وَ "ب" هُما التمرينان أو المعادلتان اللتان يُمكن بواسطتِهِما حلّ السؤال:<br/>"أ" هو التمثيل الجبريّ التقليديّ — التناسُب.<br/>"ب" هو تمثيل لتوسيع الكسور — إيجاد عامل التوسيع.<br/>مِن المهمّ أنْ نتذكّر: تُحفَظ النسبة فقط مِن خلال الضرب أو القسمة، وليس مِن خلال الجمع.</p>
+</div>
+<!-- INCORRECT feedback (Figma 9:1804) -->
+<div class="q4b-fb-incorrect" dir="rtl">
+<p class="q4b-fb-title">هذا خطأ. الإجابات الصحيحة معلَّمة.</p>
+<p>الإجابتان "أ" وَ "ب" هُما التمرينان أو المعادلتان اللتان يُمكن بواسطتِهِما حلّ السؤال:<br/>"أ" هو التمثيل الجبريّ التقليديّ — التناسُب.<br/>"ب" هو تمثيل لتوسيع الكسور — إيجاد عامل التوسيع.<br/>مِن المهمّ أنْ نتذكّر: تُحفَظ النسبة فقط مِن خلال الضرب أو القسمة، وليس مِن خلال الجمع.</p>
+</div>
+</div><!-- /.q4b-feedback-panel -->
+<!-- Applet modal (ישומון) — same applet as QUES4A -->
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 7 — QUES4B -->
+<!-- ============================================================
+           SCREEN 8 — QUES4C (Part 3 of Question 4 — Numeric Input)
+           Figma: 9:1824 (main), 9:1854 (help), 9:1920 (tryagain),
+                  9:1939 (correct), 9:1964 (incorrect)
+           Correct answer: 24 (blue paint liters = 3 × 8)
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q4c-help="false" data-q4c-state="main" data-screen="9" id="screen-q4c">
+<!-- רקע — same assets as QUES4A/4B -->
+<img alt="" class="q4c-bg" draggable="false" src="img/bg-slide2.png"/>
+<div class="q4c-overlay"></div>
+<img alt="" class="q4c-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — stays on 4 -->
+<img alt="سؤال 4" class="q4c-progress" draggable="false" src="img/q4-progress.png"/>
+<!-- כפתור עזרה -->
+<button aria-label="مُساعَدة" class="q4c-help-btn" onclick="toggleQ4cHelp()">
+<!-- Tooltip עזרה -->
+<div class="q4c-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q4-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ4cHelp()" role="button" tabindex="0">✕</span>
+<p>انتبِهوا إلى اللون الأصفر: ازدادَ مِن لترَيْن إلى 16 لترًا.<br/>بِكَم ضِعف ازداد؟ تذكّروا: النسبة هي علاقة ضرب.<br/>هل أضَفْنا 14 لترًا (جمع) أمْ ضاعَفْنا الكمّيّة (ضرب)؟</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- כפתור ישומון -->
+<button aria-label="تطبيق" class="q4c-app-btn" onclick="openQ4cApplet()">
+<img alt="" draggable="false" src="img/q2-app-btn.png"/>
+</button>
+<!-- בועת נרטיב — same bubble shape as q4/q4b -->
+<img alt="" class="q4c-bubble" draggable="false" src="img/bbl_new.png"/>
+<!-- טקסט מורה — same story as QUES4A/4B -->
+<div class="q4c-story" dir="rtl">
+<p>فجأةً، دخلَت المعلمة سمر إلى الصفّ وقالَتْ:</p>
+<p>"وجدْتُ في المخزن وعاءً كبيرًا يحتوي على 16 لترًا مِن اللون الأصفر.</p>
+<p>أريد استخدام كلّ الكمّيّة لتحضير خليط بدرجة "أخضر الغابة".</p>
+<p>أذكِّرُكُم أنّ النسبة هي 3 أكواب مِن اللون الأزرق إلى كوبَيْن مِن اللون الأصفر.</p>
+<p>أيْ أنّهُ لكلّ 3 لترات مِن اللون الأزرق نُضيف لترَيْن مِن اللون الأصفر".</p>
+</div>
+<!-- שאלה (Figma 9:1831) — bold + regular -->
+<div class="q4c-question" dir="rtl">
+<p><strong>4. ت. ما هو عدد لترات اللون الأزرق التي يَجِب إضافتُها إلى الخليط للحِفاظ على النسبة 2 : 3 الملائمة لدرجة "أخضر الغابة"؟</strong></p>
+<p class="q4c-q-sub">استعينوا بالتطبيق، واكتُبوا العدد الصحيح في الخانة.</p>
+</div>
+<!-- איור — same as QUES4A/4B -->
+<img alt="" class="q4c-illu" draggable="false" src="img/q4-illu.png"/>
+<img alt="" class="q4c-stav" draggable="false" src="img/q4-stav.png"/>
+<!-- שדה קלט מספרי (Figma DROP3: left:457 top:423 163×49) -->
+<input aria-label="اكتُبوا الإجابة" class="q4c-input" max="999" min="0" oninput="onQ4cInput()" onkeydown="if(event.key==='Enter'){ var b=document.querySelector('#screen-q4c .q4c-submit-btn'); if(b&amp;&amp;!b.disabled) submitQ4c(); }" placeholder="" type="number"/>
+<!-- כפתור צדקתי? (Figma CHECK 1: left:428 top:516 204×137) -->
+<button aria-label="هل إجابتي صحيحة؟" class="q4c-submit-btn" disabled="" onclick="submitQ4c()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת TryAgain -->
+<div class="q4c-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q4c-retry-btn" onclick="retryQ4c()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב (Figma: left:188 top:581 759×214) -->
+<div class="q4c-feedback-panel">
+<img alt="" class="q4c-feedback-bg-img" draggable="false" src="img/q4-feedback-bg.png"/>
+<!-- CORRECT feedback (Figma 9:1962) -->
+<div class="q4c-fb-correct" dir="rtl">
+<p class="q4c-fb-title">إجابتك صحيحة!</p>
+<p>النسبة هي 2 : 3. ازدادَتْ كمّيّة اللون الأصفر حتى أصبحت 8 أضعاف ما كانَ عليه، ولذلك نضرب أيضًا كمّيّة اللون الأزرق بـ 8، بحيث إنّ: <span dir="ltr">8 · 3 = 24</span>.<br/>عامل التوسيع هو 8، وبهذا الشكل حافَظْنا على علاقة الضرب بين اللونَيْن.</p>
+</div>
+<!-- INCORRECT feedback (Figma 9:1981) -->
+<div class="q4c-fb-incorrect" dir="rtl">
+<p class="q4c-fb-title">هذا خطأ.</p>
+<p>النسبة هي 2 : 3. ازدادَتْ كمّيّة اللون الأصفر حتى أصبحت 8 أضعاف ما كانَ عليه، ولذلك نضرب أيضًا كمّيّة اللون الأزرق بـ 8، بحيث إنّ: <span dir="ltr">8 · 3 = 24</span>.<br/>عامل التوسيع هو 8، وبهذا الشكل حافَظْنا على علاقة الضرب بين اللونَيْن.</p>
+</div>
+</div><!-- /.q4c-feedback-panel -->
+<!-- Applet modal (ישומון) — same applet as QUES4A/4B -->
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 8 — QUES4C -->
+<!-- ============================================================
+           SCREEN 9 — SLIDE8 (Figma 8:114)
+           סוג: content — ► תמיד פעיל
+           ============================================================ -->
+<section class="screen" data-screen="10" id="screen-slide8">
+<!-- רקע מלא 1920×1080 — girl holding painting, classroom background -->
+<img alt="" class="slide8-bg" draggable="false" src="img/bg-slide8.png"/>
+<!-- פאנל כותרת — BG_HEADER2 1 מ-Figma (RGBA, שקיפות אמיתית בפינות)
+             left:1273 w:1512 — יוצא מחוץ למסך ימינה -->
+<div class="slide8-header-wrap">
+<img alt="" draggable="false" src="img/bg-slide8-header-fresh.png"/>
+</div>
+<!-- טקסט קריינות — Live HTML, node 8:117
+             Assistant SemiBold 600, 33.333px, right=37px, top=42px -->
+<div class="slide8-text" dir="rtl">
+<p>ذكَّرِتْ نسرين أصدقاءَها بأنّ هناك درجات أخرى مِن اللون الأخضر</p>
+<p>في الرسم، بالإضافة إلى درجة أخضر الغابة،</p>
+<p>وأنّهُ يَجِب تحضير خلطات ملائمة لها أيضًا.</p>
+</div>
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 9 — SLIDE8 -->
+<!-- ============================================================
+           SCREEN 10 — QUES5 (שאלה 5, radio, progress:5)
+           Figma: 8:122 main | 8:225 help | 8:255 tryagain
+                  8:280 correct | 8:408 incorrect
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q5-help="false" data-q5-state="main" data-screen="11" id="screen-q5">
+<!-- רקע + overlay + כרטיס -->
+<img alt="" class="q5-bg" draggable="false" src="img/bg-slide2.png"/>
+<div class="q5-overlay"></div>
+<img alt="" class="q5-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 5 -->
+<img alt="سؤال 5" class="q5-progress" draggable="false" src="img/q5-progress.png"/>
+<!-- כפתור עזרה -->
+<button aria-label="مُساعَدة" class="q5-help-btn" onclick="toggleQ5Help()">
+<!-- Tooltip עזרה -->
+<div class="q5-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q5-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ5Help()" role="button" tabindex="0">✕</span>
+<p>انتبِهوا إلى الفَرْق بين كمّيّة اللون وبين نسبتِهِ.</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- כפתור ישומון -->
+<button aria-label="تطبيق" class="q5-app-btn" onclick="openQ5Applet()">
+<img alt="" draggable="false" src="img/q2-app-btn.png"/>
+</button>
+<!-- גרפיקת תערובות — Figma TAAROVET_B + TAAROVET_A -->
+<img alt='الخليط "ب" - النسبة 13:5' class="q5-taarovet-b" draggable="false" src="img/mixB.png"/>
+<img alt='الخليط "أ" - النسبة 3:2' class="q5-taarovet-a" draggable="false" src="img/mixa.png"/>
+<!-- טקסט שאלה — Figma 8:392, right:234 top:174 -->
+<div class="q5-question" dir="rtl">
+<p><strong>5. بدأ الطلّاب بخلط خلطات إضافيّة مِن درجات اللون الأخضر. في أيّ خليط سيكون اللون الأصفر أكثر بُروزًا؟</strong></p>
+<p>استعينوا بالتطبيق أعلاه، واختاروا الإجابة الصحيحة.</p>
+</div>
+<!-- אפשרויות תשובה — 3 options (RTL: circle on right, text on left)
+             Correct: option 2 -->
+<div class="q5-options">
+<!-- option 1: בתערובת ב' (WRONG) -->
+<div aria-checked="false" class="q5-option" data-value="1" onclick="selectQ5Option(1)" role="radio" tabindex="0">
+<div class="q5-circle">
+<img alt="" class="q5-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q5-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q5-label">في الخليط "ب"، لأنّهُ يحتوي على 5 أكواب مِن اللون الأصفر، مقابل كوبَيْن في الخليط "أ".</span>
+</div>
+<!-- option 2: בתערובת א' (CORRECT) -->
+<div aria-checked="false" class="q5-option" data-value="2" onclick="selectQ5Option(2)" role="radio" tabindex="0">
+<div class="q5-circle">
+<img alt="" class="q5-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q5-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q5-label">في الخليط "أ"، لأنّ اللون الأصفر يشكّل فيه نِصف الخليط تقريبًا، بَيْنَما في الخليط "ب" يشكّل أقلّ مِن النصف بكثير.</span>
+</div>
+<!-- option 3: אי אפשר לדעת (WRONG) -->
+<div aria-checked="false" class="q5-option" data-value="3" onclick="selectQ5Option(3)" role="radio" tabindex="0">
+<div class="q5-circle">
+<img alt="" class="q5-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q5-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q5-label">لا يُمكن المعرفة. لكَيْ نُحدِّد أيّ لون سيكون أكثر بُروزًا، يَجِب أنْ نعرِف عدد اللترات الإجماليّ مِن اللون في كلّ خليط.</span>
+</div>
+</div><!-- /.q5-options -->
+<!-- כפתור צדקתי? — Figma CHECK 1: left:206 top:767 w:209 h:137 -->
+<button aria-label="هل إجابتي صحيحة؟" class="q5-submit-btn" disabled="" onclick="submitQ5()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת TryAgain -->
+<div class="q5-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q5-retry-btn" onclick="retryQ5()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב — Figma: left:229 top:699 w:1462 h:190 bg:#434242 r:29 -->
+<div class="q5-feedback-panel">
+<!-- CORRECT feedback -->
+<div class="q5-fb-correct" dir="rtl">
+<p class="q5-fb-title">إجابتك صحيحة!</p>
+<p>على الرغم مِن أنّ الخليط "ب" يحتوي على كمّيّة أكبر مِن اللون الأصفر، إلّا أنّ هذه الكمّيّة "تغرَق" داخل كمّيّة أكبر بكثير مِن اللون الأزرق، مقارنةً بالخليط "أ".<br/>في الخليط "أ"، يشكّل اللون الأصفر نِصف كمّيّة اللون الإجماليّة تقريبًا، بَيْنَما في الخليط "ب" يشكّل اللون الأصفر أكثر مِن رُبع كمّيّة اللون الإجماليّة بقليل. لذلك، اللون الأصفر أكثر بُروزًا في الخليط "أ".</p>
+</div>
+<!-- INCORRECT feedback -->
+<div class="q5-fb-incorrect" dir="rtl">
+<p class="q5-fb-title">هذا خطأ. الإجابة الصحيحة معلَّمة.</p>
+<p>على الرغم مِن أنّ الخليط "ب" يحتوي على كمّيّة أكبر مِن اللون الأصفر، إلّا أنّ هذه الكمّيّة "تغرَق" داخل كمّيّة أكبر بكثير مِن اللون الأزرق، مقارنةً بالخليط "أ".<br/>في الخليط "أ"، يشكّل اللون الأصفر نِصف كمّيّة اللون الإجماليّة تقريبًا، بَيْنَما في الخليط "ب" يشكّل اللون الأصفر أكثر مِن رُبع كمّيّة اللون الإجماليّة بقليل. لذلك، اللون الأصفر أكثر بُروزًا في الخليط "أ".</p>
+</div>
+</div><!-- /.q5-feedback-panel -->
+<!-- Applet modal (ישומון) -->
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 10 — QUES5 -->
+<!-- ============================================================
+           SCREEN 11 — SLIDE10 (Figma 8:438)
+           סוג: content — ► תמיד פעיל, ◄ תמיד פעיל
+           ============================================================ -->
+<section class="screen" data-screen="12" data-video-gate="slide10-video" id="screen-slide10">
+<!-- רקע — תמיד נראה (גם לפני וגם אחרי הסרטון) -->
+<img alt="" class="slide10-bg" draggable="false" src="img/bg-slide10.png"/>
+<!-- סרטון — מוצג בזמן הנגינה בלבד -->
+<video class="slide10-video slide10-video--hidden" id="slide10-video" onended="onSlide10VideoEnded()" playsinline="" preload="auto" src="video/slide10.mp4">
+</video>
+<!-- header + טקסט — תמיד מעל (גם בזמן הסרטון) -->
+<div class="slide10-header-wrap">
+<img alt="" draggable="false" src="img/bg-slide10-header.png"/>
+</div>
+<p class="slide10-text" dir="rtl">بعد أنِ انتَهَوْا مِن تخطيط جميع خلطات الألوان، خرجَ الطلّاب إلى الخارج لمُعايَنة الجدار.</p>
+<!-- בועות דיבור — מופיעות אחרי הסרטון -->
+<div class="slide10-bubbles--hidden" id="slide10-bubbles">
+<img alt="" class="slide10-bubble-l" draggable="false" src="img/slide10-bubble.png"/>
+<div class="slide10-bubble-l-text" dir="rtl">
+<p>إنّهُ أكبر بكثير مِمّا</p>
+<p>ظنَنَتُ! كيف سنعرِف أنْ نُخطِّط</p>
+<p>كُبر الرسمة على</p>
+<p>الجدار الحقيقيّ؟</p>
+</div>
+<img alt="" class="slide10-bubble-r" draggable="false" src="img/slide10-bubble.png"/>
+<div class="slide10-bubble-r-text" dir="rtl">
+<p>لا تقلق يا وسام،</p>
+<p>سنستعين بمِقياس الرسم!</p>
+</div>
+</div>
+<!-- כפתור Play — נסתר לאחר לחיצה -->
+<button aria-label="تشغيل الفيديو" class="slide10-play-btn" id="slide10-play-btn" onclick="startSlide10Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
+<!-- ניווט — ► נעול עד סיום הסרטון (data-video-gate על ה-section) -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 11 — SLIDE10 -->
+<!-- ============================================================
+           SCREEN 12 — QUES6 (שאלה 6, radio, progress:6)
+           Figma: 8:446 main | 8:475 help | 8:514 tryagain
+                  8:544 correct | 8:579 incorrect
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q6-help="false" data-q6-state="main" data-screen="13" id="screen-q6">
+<!-- רקע + overlay + כרטיס (same assets as Q2/Q5) -->
+<img alt="" class="q6-bg" draggable="false" src="img/q6-bg.png"/>
+<div class="q6-overlay"></div>
+<img alt="" class="q6-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 6 -->
+<img alt="سؤال 6" class="q6-progress" draggable="false" src="img/q6-progress.png"/>
+<!-- כפתור עזרה -->
+<button aria-label="مُساعَدة" class="q6-help-btn" onclick="toggleQ6Help()">
+<!-- Tooltip עזרה -->
+<div class="q6-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q5-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ6Help()" role="button" tabindex="0">✕</span>
+<p>انتبِهوا إلى وحدات القياس - سنتيمترات وأمتار.</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- טקסט ימין — נרטיב (node 8:453) -->
+<div class="q6-narration" dir="rtl">
+<p>مِقياس الرسم في المخطَّط الذي حضّرَهُ الطلّاب هو 20 : 1.</p>
+<p>أيْ أنّ كلّ 1 سم على ورقة المخطَّط يُمثِّل 20 سم على الجدار.</p>
+</div>
+<!-- טקסט שמאל — שאלה (node 8:454) -->
+<div class="q6-question" dir="rtl">
+<p><span class="q6-q-num">6.</span> <span class="q6-q-semibold">ارتفاع الشجرة اليُمنى في المخطَّط هو 15 سم.</span></p>
+<p><span class="q6-q-bold">كم سيكون ارتفاع الشجرة نفسِها على الجدار الحقيقيّ للمبنى؟</span></p>
+<p class="q6-q-semibold">اختاروا الإجابة الصحيحة.</p>
+</div>
+<!-- תמונת דיאגרמה — Q6_IMG: left:979 top:353 w:715 h:506 -->
+<img alt="" class="q6-img" draggable="false" src="img/q6-img.png"/>
+<!-- אפשרויות — 4 radio options (Figma: left:804 top:399/457/515/573 w:143 h:41) -->
+<div class="q6-options">
+<div aria-checked="false" class="q6-option" data-value="1" onclick="selectQ6Option(1)" role="radio" tabindex="0">
+<div class="q6-circle">
+<img alt="" class="q6-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q6-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q6-label">35 سم</span>
+</div>
+<div aria-checked="false" class="q6-option" data-value="2" onclick="selectQ6Option(2)" role="radio" tabindex="0">
+<div class="q6-circle">
+<img alt="" class="q6-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q6-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q6-label">0.75 متر</span>
+</div>
+<div aria-checked="false" class="q6-option" data-value="3" onclick="selectQ6Option(3)" role="radio" tabindex="0">
+<div class="q6-circle">
+<img alt="" class="q6-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q6-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q6-label">3 أمتار</span>
+</div>
+<div aria-checked="false" class="q6-option" data-value="4" onclick="selectQ6Option(4)" role="radio" tabindex="0">
+<div class="q6-circle">
+<img alt="" class="q6-icon-v" draggable="false" src="img/q2-v.png"/>
+<img alt="" class="q6-icon-x" draggable="false" src="img/q2-x.png"/>
+</div>
+<span class="q6-label">300 متر</span>
+</div>
+</div>
+<!-- כפתור שליחה — Figma: left:207 top:743 w:209 h:137 -->
+<button aria-label="هل إجابتي صحيحة؟" class="q6-submit-btn" disabled="" onclick="submitQ6()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת נסו שוב — Figma: right edge:938 top:669 -->
+<div class="q6-tryagain-msg" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q6-retry-btn" onclick="retryQ6()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב — Figma: left:258 top:631 w:692 h:228 -->
+<div class="q6-feedback-panel">
+<div class="q6-fb-correct">
+<strong class="q6-fb-title">إجابتك صحيحة!</strong>
+<p>لإيجاد ارتفاع الشجرة على الجدار الحقيقيّ، نستخدِم</p>
+<p>مِقياس الرسم المعروف لنا – 20 : 1. وبالتالي، نضرب</p>
+<p>ارتفاع الشجرة في المخطَّط بـ 20:</p>
+<p>3 أمتار = 300 سم = 20 · 15 سم</p>
+</div>
+<div class="q6-fb-incorrect">
+<strong class="q6-fb-title">هذا خطأ. الإجابة الصحيحة مُشار إليها.</strong>
+<p>لإيجاد ارتفاع الشجرة على الجدار الحقيقيّ، نستخدِم</p>
+<p>مِقياس الرسم المعروف لنا – 20 : 1. وبالتالي، نضرب</p>
+<p>ارتفاع الشجرة في المخطَّط بـ 20:</p>
+<p>3 أمتار = 300 سم = 20 · 15 سم</p>
+</div>
+</div>
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 12 — QUES6 -->
+<!-- ============================================================
+           SCREEN 13 — QUES7 (שאלה 7א, drag-drop, progress:7)
+           Figma: 8:610 main | 8:651 help | 8:689 tryagain
+                  8:719 correct | 8:814 incorrect
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q7-help="closed" data-q7-state="main" data-screen="14" id="screen-q7">
+<!-- רקע + overlay + כרטיס (same assets as Q2/Q5/Q6) -->
+<img alt="" class="q7-bg" draggable="false" src="img/q6-bg.png"/>
+<div class="q7-overlay"></div>
+<img alt="" class="q7-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 7 -->
+<img alt="سؤال 7" class="q7-progress" draggable="false" src="img/q7-progress.png"/>
+<!-- כפתור עזרה — left:8 top:17 size:140 -->
+<button aria-label="مُساعَدة" class="q7-help-btn" onclick="toggleQ7Help()">
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+<div class="q7-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q5-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ7Help()" role="button" tabindex="0">✕</span>
+<p>وجبة الخليط تُعبِّر عن النسبة الأساسيّة المطلوبة لتحضير الخليط: وحدتان مِن اللون الأصفر وَ 3 وحدات مِن اللون الأزرق. الوحدات يُمكن أنْ تكون أكوابًا أو لترات.</p>
+</div>
+</button>
+<!-- נרטיב ימין (node 8:617): right=217px top=196px -->
+<div class="q7-narration" dir="rtl">
+<p>بدأ الطلّاب بالرسم على الجدار. عندما نفدَ خليط درجة</p>
+<p>"أخضر الغابة" الذي حضَّروهُ، حَسَبوا أنّ 28 لترًا</p>
+<p>إضافيًّا مِن نفس الدرجة، ستكون كافيةً لإكمال الرسمة.</p>
+<p>تُباع في المتجر أوعية مغلقة فقط</p>
+<p>مِن اللون بالأحجام التالية:</p>
+</div>
+<!-- שאלה (node 8:924): right=920px top=196px -->
+<div class="q7-question" dir="rtl">
+<p><span class="q7-bold">7. أ. </span><span class="q7-semibold">لِكَي يتمكّن الطلّاب مِن شراء الكمّيّة الصحيحة دون التعامل</span></p>
+<p class="q7-semibold">مع الكسور، يعمَلون خطوةً بخطوة بحسب "طريقة الوجبات الكاملة".</p>
+<p> <span class="q7-bold">جرّوا الأعداد إلى الأماكن الملائمة.</span></p>
+</div>
+<!-- תיאור מנה (node 8:921): right=920px top=339px -->
+<div class="q7-batch-desc" dir="rtl">
+<p class="q7-semibold">وجبة الخليط الواحدة (3 لترات أزرق + لتران أصفر)</p>
+<p class="q7-semibold">تحتوي معًا على</p>
+</div>
+<!-- DROP1 — blank for "5 ליטרים": left:712 top:375 w:163 h:49 -->
+<div aria-label="مكان لإدخال العدد" class="q7-drop" id="q7-drop-1" onclick="q7DropZoneClick(1)" ondragover="q7DragOver(event)" ondrop="q7DropOnZone(event,1)">
+<img alt="" class="q7-drop-bg" draggable="false" src="img/q7-drop.png"/>
+<span class="q7-drop-label"></span>
+</div>
+<!-- "ליטרים" text (node 8:922): right=1219px top=379px -->
+<p class="q7-litrim" dir="rtl">لترات.</p>
+<!-- "5 מנות לא יספיקו..." (node 8:925): right=920px top=435px -->
+<div class="q7-five-text" dir="rtl">
+<p class="q7-semibold">5 وجبات كاملة مِن اللون لن تكفي لأنّها تُساوي 25 لترًا فقط،</p>
+<p class="q7-semibold">ولذلك، يَجِب تحضير</p>
+</div>
+<!-- DROP2 — blank for "6 מנות": left:657 top:473 w:163 h:49 -->
+<div aria-label="مكان لإدخال العدد" class="q7-drop" id="q7-drop-2" onclick="q7DropZoneClick(2)" ondragover="q7DragOver(event)" ondrop="q7DropOnZone(event,2)">
+<img alt="" class="q7-drop-bg" draggable="false" src="img/q7-drop.png"/>
+<span class="q7-drop-label"></span>
+</div>
+<!-- "מנות צבע שלמות ששוות 30" (node 8:923): right=1278px top=476px -->
+<div class="q7-manot-text" dir="rtl">
+<p class="q7-semibold">وجبات كاملة مِن اللون، أيْ ما يُعادل</p>
+</div>
+<!-- "30 ליטרים ומתוכם..." (node 8:926): right=920px top=524px -->
+<p class="q7-thirty-text q7-semibold" dir="rtl">30 لترًا، واستخدام 28 لترًا المطلوبة منها.</p>
+<!-- איור גלונים — ILLU_QUES7 1: left:1209 top:523 w:489 h:244 -->
+<img alt="" class="q7-illu" draggable="false" src="img/q7-illu.png"/>
+<!-- word bank — 4 chips at top≈585 -->
+<div class="q7-chips">
+<div class="q7-chip" data-word="6" draggable="true" onclick="q7ChipClick(event,'6')" ondragend="q7DragEnd(event)" ondragstart="q7DragStart(event,'6')">
+<img alt="" class="q7-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7-chip-label">6</span>
+</div>
+<div class="q7-chip" data-word="30" draggable="true" onclick="q7ChipClick(event,'30')" ondragend="q7DragEnd(event)" ondragstart="q7DragStart(event,'30')">
+<img alt="" class="q7-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7-chip-label">30</span>
+</div>
+<div class="q7-chip" data-word="28" draggable="true" onclick="q7ChipClick(event,'28')" ondragend="q7DragEnd(event)" ondragstart="q7DragStart(event,'28')">
+<img alt="" class="q7-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7-chip-label">28</span>
+</div>
+<div class="q7-chip" data-word="5" draggable="true" onclick="q7ChipClick(event,'5')" ondragend="q7DragEnd(event)" ondragstart="q7DragStart(event,'5')">
+<img alt="" class="q7-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7-chip-label">5</span>
+</div>
+</div>
+<!-- כפתור שליחה — Figma: left:217 top:718 w:209 h:137 -->
+<button aria-label="هل إجابتي صحيحة؟" class="q7-submit-btn" onclick="submitQ7()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת tryagain -->
+<div class="q7-tryagain-text" dir="rtl">
+<p>هذه لَيْسَت الإجابة، <button class="q7-tryagain-action" onclick="resetQ7ForRetry()">حاوِلوا مجدّدًا.</button>
+</p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב — left:196 top:659 w:866 h:231 -->
+<div class="q7-feedback-panel">
+<div class="q7-fb-correct" dir="rtl">
+<strong class="q7-fb-title">إجابتك صحيحة!</strong>
+<p>وجبة الخليط الواحدة عِبارة عن 3 لترات أزرق + لتران أصفر = 5 لترات. يحتاج الطلّاب إلى تحضير 28 لترًا بواسطة وجبات كاملة مِن اللون، بدون كسور. 5 وجبات كاملة لن تكفي، لأنّها تُساوي 25 لترًا فقط (25 = 5 · 5). 6 وجبات كاملة تُساوي 30 لترًا فقط (30 = 5 · 6)، وسيستخدم الطلّاب منها 28 لترًا.</p>
+</div>
+<div class="q7-fb-incorrect" dir="rtl">
+<strong class="q7-fb-title">هذا خطأ. الإجابات الصحيحة معلَّمة.</strong>
+<p>وجبة الخليط الواحدة عِبارة عن 3 لترات أزرق + لتران أصفر = 5 لترات. يحتاج الطلّاب إلى تحضير 28 لترًا بواسطة وجبات كاملة مِن اللون، بدون كسور. 5 وجبات كاملة لن تكفي، لأنّها تُساوي 25 لترًا فقط (25 = 5 · 5). 6 وجبات كاملة تُساوي 30 لترًا فقط (30 = 5 · 6)، وسيستخدم الطلّاب منها 28 لترًا.</p>
+</div>
+</div>
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 13 — QUES7 -->
+<!-- ============================================================
+           SCREEN 14 — QUES7B (שאלה 7ב, drag-drop, progress:7)
+           Figma: 8:846 main | 8:967 help | 8:1034 tryagain
+                  8:1063 correct | 8:1099 incorrect
+           ============================================================ -->
+<section class="screen" data-q-state="" data-q7b-help="closed" data-q7b-state="main" data-screen="15" id="screen-q7b">
+<!-- רקע + overlay + כרטיס (same assets as Q7) -->
+<img alt="" class="q7b-bg" draggable="false" src="img/q6-bg.png"/>
+<div class="q7b-overlay"></div>
+<img alt="" class="q7b-card" draggable="false" src="img/q2-card.png"/>
+<!-- מחוון התקדמות — 7 (same as QUES7) -->
+<img alt="سؤال 7" class="q7b-progress" draggable="false" src="img/q7-progress.png"/>
+<!-- כפתור עזרה — left:8 top:17 size:140 -->
+<button aria-label="مُساعَدة" class="q7b-help-btn" onclick="toggleQ7bHelp()">
+<!-- Tooltip עזרה -->
+<div class="q7b-help-popup" dir="rtl" onclick="event.stopPropagation()">
+<img alt="" class="help-popup-bg-img" draggable="false" src="img/q5-help-popup.png"/>
+<span aria-label="إغلاق" class="help-popup-close-btn" onclick="event.stopPropagation(); toggleQ7bHelp()" role="button" tabindex="0">✕</span>
+<p>فكّروا في النسبة المطلوبة وكذلك في عدد الوجبات الكاملة.</p>
+</div>
+<img alt="" draggable="false" src="img/q2-help-btn.png"/>
+</button>
+<!-- נרטיב ימין (right=217px top=196px) -->
+<div class="q7b-narration" dir="rtl">
+<p>بدأ الطلّاب بالرسم على الجدار. عندما نفدَ خليط درجة</p>
+<p>"أخضر الغابة" الذي حضَّروهُ، حَسَبوا أنّ 28 لترًا</p>
+<p>إضافيًّا مِن نفس الدرجة، ستكون كافيةً لإكمال الرسمة.</p>
+<p>تُباع في المتجر أوعية مغلقة فقط</p>
+<p>مِن اللون بالأحجام التالية:</p>
+</div>
+<!-- שאלה (right=930px top=176px) -->
+<div class="q7b-question" dir="rtl">
+<p><span class="q7b-bold">7. ب. </span><span class="q7b-semibold">الآن، بَعد أنْ عرفَ الطلّاب أنّهُم بحاجة إلى الاعتماد على</span></p>
+<p class="q7b-semibold">حِساب 6 وجبات كاملة مِن اللون، ساعِدوهُم على حِساب عدد اللترات</p>
+<p class="q7b-semibold">التي يحتاجون إليها مِن كلّ لون.</p>
+<p><span class="q7b-semibold">نُذكّرُكُم بأنّ نسبة الخليط هي </span><span class="q7b-semibold">2 : 3 (3 أزرق لكلّ 2 أصفر).</span></p>
+<p> <span class="q7b-bold">جرّوا الأعداد إلى الأماكن الملائمة.</span></p>
+</div>
+<!-- שורת כחול: "עבור הצבע הכחול: 6 מנות = [DROP1] ליטרים" -->
+<!-- text right=937px top=393px -->
+<p class="q7b-blue-text q7b-semibold" dir="rtl">بالنسبة إلى اللون الأزرق: 6 وجبات كاملة =</p>
+<!-- "ליטרים" right=1649px top=393px -->
+<p class="q7b-blue-litrim q7b-semibold" dir="rtl">لترًا</p>
+<!-- DROP1 — blank for "18": left:279 top:389 w:163 h:41 -->
+<div aria-label="مكان لإدخال العدد" class="q7b-drop" id="q7b-drop-1" onclick="q7bDropZoneClick(1)" ondragover="q7bDragOver(event)" ondrop="q7bDropOnZone(event,1)">
+<img alt="" class="q7b-drop-bg" draggable="false" src="img/q7-drop.png"/>
+<span class="q7b-drop-label"></span>
+</div>
+<!-- שורת צהוב: "עבור הצבע הצהוב: 6 מנות = [DROP2] ליטרים" -->
+<!-- text right=937px top=450px -->
+<p class="q7b-yellow-text q7b-semibold" dir="rtl">بالنسبة إلى اللون الأصفر: 6 وجبات كاملة =</p>
+<!-- "ליטרים" right=1649px top=450px -->
+<p class="q7b-yellow-litrim q7b-semibold" dir="rtl">لترًا</p>
+<!-- DROP2 — blank for "12": left:279 top:446 w:163 h:41 -->
+<div aria-label="مكان لإدخال العدد" class="q7b-drop" id="q7b-drop-2" onclick="q7bDropZoneClick(2)" ondragover="q7bDragOver(event)" ondrop="q7bDropOnZone(event,2)">
+<img alt="" class="q7b-drop-bg" draggable="false" src="img/q7-drop.png"/>
+<span class="q7b-drop-label"></span>
+</div>
+<!-- איור גלונים — same as QUES7: left:1209 top:523 w:489 h:244 -->
+<img alt="" class="q7b-illu" draggable="false" src="img/q7-illu.png"/>
+<!-- word bank — 4 chips: "30","28","18","12" at left:260/449/638/827 top:529 -->
+<div class="q7b-chips">
+<div class="q7b-chip" data-word="30" draggable="true" onclick="q7bChipClick(event,'30')" ondragend="q7bDragEnd(event)" ondragstart="q7bDragStart(event,'30')">
+<img alt="" class="q7b-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7b-chip-label">30</span>
+</div>
+<div class="q7b-chip" data-word="28" draggable="true" onclick="q7bChipClick(event,'28')" ondragend="q7bDragEnd(event)" ondragstart="q7bDragStart(event,'28')">
+<img alt="" class="q7b-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7b-chip-label">28</span>
+</div>
+<div class="q7b-chip" data-word="18" draggable="true" onclick="q7bChipClick(event,'18')" ondragend="q7bDragEnd(event)" ondragstart="q7bDragStart(event,'18')">
+<img alt="" class="q7b-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7b-chip-label">18</span>
+</div>
+<div class="q7b-chip" data-word="12" draggable="true" onclick="q7bChipClick(event,'12')" ondragend="q7bDragEnd(event)" ondragstart="q7bDragStart(event,'12')">
+<img alt="" class="q7b-chip-bg" draggable="false" src="img/q7-chip.png"/>
+<span class="q7b-chip-label">12</span>
+</div>
+</div>
+<!-- כפתור שליחה — left:217 top:718 w:209 h:137 -->
+<button aria-label="هل إجابتي صحيحة؟" class="q7b-submit-btn" onclick="submitQ7b()">
+<img alt="هل إجابتي صحيحة؟" draggable="false" src="img/q2-submit.png"/>
+</button>
+<!-- הודעת tryagain -->
+<div class="q7b-tryagain-text" dir="rtl">
+<p>هذه لَيْسَت الإجابة،  <button class="q7b-tryagain-action" onclick="resetQ7bForRetry()">حاوِلوا مجدّدًا.</button> </p>
+<p>يُمكِنُكُم النقر على زرّ مُساعَدة للحصول على تلميح.</p>
+</div>
+<!-- פאנל משוב — left:260 top:595 w:734 h:228 -->
+<div class="q7b-feedback-panel">
+<div class="q7b-fb-correct" dir="rtl">
+<strong class="q7b-fb-title">إجابتك صحيحة!</strong>
+<p>لمَعرِفة عدد اللترات التي يحتاجها الطلّاب مِن كلّ لون، يَجِب ضرب عدد الوجبات الكاملة التي وجَدْنا أنّنا نحتاجها، بكمّيّة اللون الموجودة في كل وجبة كاملة، وفقًا لنسبة الخليط (2 : 3).</p>
+</div>
+<div class="q7b-fb-incorrect" dir="rtl">
+<strong class="q7b-fb-title">هذا خطأ. يتمّ عرض الإجابات الصحيحة الآن.</strong>
+<p>لمَعرِفة عدد اللترات التي يحتاجها الطلّاب مِن كلّ لون، يَجِب ضرب عدد الوجبات الكاملة التي وجَدْنا أنّنا نحتاجها، بكمّيّة اللون الموجودة في كل وجبة كاملة، وفقًا لنسبة الخليط (2 : 3).</p>
+</div>
+</div>
+<!-- ניווט -->
+<button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 14 — QUES7B -->
+<!-- ============================================================
+           SCREEN 15 — SLIDE18 (מסך סיום, end screen)
+           Figma: 2:2
+           ============================================================ -->
+<section class="screen" data-screen="16" id="screen-slide18">
+<!-- פאנל כותרת — תמיד גלוי -->
+<img alt="" class="slide18-pre-header" draggable="false" src="img/bg-slide2-header.png"/>
+<div class="slide18-header-text" dir="rtl">
+<p>بَعد عدّة أيّام مِن العمل المكثَّف، أنهى الطلّاب الرسمة.</p>
+</div>
+<!-- overlay סטטי לפני הסרטון -->
+<div class="slide18-pre-overlay" id="slide18-pre-overlay">
+<img alt="" class="slide18-pre-bg" draggable="false" src="img/bg-slide18.png"/>
+<!-- כפתור Play במרכז -->
+<button aria-label="تشغيل الفيديو" class="slide18-play-btn" id="slide18-play-btn" onclick="startSlide18Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
+</div>
+<!-- סרטון סיום — fullscreen -->
+<video class="slide18-video" id="slide18-video" onended="onSlide18VideoEnded()" playsinline="" preload="auto" src="video/lastslidevid.mp4">
+</video>
+<!-- כפתור סיימתי — מופיע לאחר סיום הסרטון -->
+<button aria-label="اِنْتَهَيْتُ" class="slide18-done-btn" id="slide18-done-btn" onclick="openScorePopup()">
+<img alt="اِنْتَهَيْتُ" draggable="false" src="img/btn-done.png"/>
+</button>
+<!-- ניווט — ◄ בלבד (מסך אחרון, אין ►) -->
+<button aria-label="العودة" class="nav-btn nav-prev" onclick="goTo(currentScreen - 1)">
+<img alt="" draggable="false" src="img/arrow-nav.png"/>
+</button>
+</section>
+<!-- /SCREEN 15 — SLIDE18 -->
+<!-- ============================================================
+           Help popup — מחוץ לכל .screen, ישירות ב-#app-scaler
+           (popup בתוך .screen עם display:none הופך ל-invisible)
+           (placeholder — יתווסף בשלב מימוש)
+           ============================================================ -->
+<!-- ============================================================
+           מודל applet (iframe) — מחוץ לכל .screen
+           src נקרא מ-config.js (CONFIG.appletUrl)
+           (placeholder — יתווסף בשלב מימוש)
+           ============================================================ -->
+<!-- ============================================================
+           פופאפ ציון — מחוץ לכל .screen, ישירות ב-#app-scaler
+           ============================================================ -->
+<div class="score-popup-overlay" dir="rtl" id="score-popup-overlay" style="display:none;">
+<div class="score-popup-card">
+<button aria-label="إغلاق" class="score-popup-close" onclick="closeScorePopup()">✕</button>
+<p class="score-popup-title">هذا كلّ شيء، اِنْتَهَت المُهمّة.</p>
+<p class="score-popup-score-label">علامتك هي</p>
+<p class="score-popup-score-value" id="score-popup-value">--</p>
+</div>
+</div>
+</div><!-- /#app-scaler -->
+</div><!-- /#app -->
+<!-- Zoom overlay — מחוץ ל-app-scaler, position:fixed על כל המסך -->
+<div aria-hidden="true" class="s5-zoom-overlay" id="s5-zoom-overlay">
+<div class="s5-zoom-modal">
+<button aria-label="إغلاق العرض المُكبَّر" class="s5-zoom-close-btn" onclick="closeS5Zoom()">✕</button>
+<iframe class="s5-zoom-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان — عرض مُكبَّر"></iframe>
+</div>
+</div>
+<!-- Applet overlays — מחוץ ל-app-scaler, position:fixed -->
+<div class="q2-applet-overlay" id="q2-applet-overlay">
+<div class="q2-applet-modal">
+<button aria-label="إغلاق التطبيق" class="q2-applet-close-btn" onclick="closeQ2Applet()">✕</button>
+<iframe class="q2-applet-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+</div>
+</div>
+<div class="q3-applet-overlay" id="q3-applet-overlay">
+<div class="q3-applet-modal">
+<button aria-label="إغلاق التطبيق" class="q3-applet-close-btn" onclick="closeQ3Applet()">✕</button>
+<iframe class="q3-applet-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+</div>
+</div>
+<div class="q4-applet-overlay" id="q4-applet-overlay">
+<div class="q4-applet-modal">
+<button aria-label="إغلاق التطبيق" class="q4-applet-close-btn" onclick="closeQ4Applet()">✕</button>
+<iframe class="q4-applet-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+</div>
+</div>
+<div class="q4b-applet-overlay" id="q4b-applet-overlay">
+<div class="q4b-applet-modal">
+<button aria-label="إغلاق التطبيق" class="q4b-applet-close-btn" onclick="closeQ4bApplet()">✕</button>
+<iframe class="q4b-applet-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+</div>
+</div>
+<div class="q4c-applet-overlay" id="q4c-applet-overlay">
+<div class="q4c-applet-modal">
+<button aria-label="إغلاق التطبيق" class="q4c-applet-close-btn" onclick="closeQ4cApplet()">✕</button>
+<iframe class="q4c-applet-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+</div>
+</div>
+<div class="q5-applet-overlay" id="q5-applet-overlay">
+<div class="q5-applet-modal">
+<button aria-label="إغلاق التطبيق" class="q5-applet-close-btn" onclick="closeQ5Applet()">✕</button>
+<iframe class="q5-applet-iframe" frameborder="0" scrolling="no" src="applet/color_lab.html" title="مُختبَر بحْث الألوان"></iframe>
+</div>
+</div>
+<!-- ============================================================
+       JS — loading order:
+       1. config.js      — applet URL, audio base path
+       2. content.js     — all learner-facing content (data layer)
+       3. dragdrop.js    — Drag & Drop question handler
+       4. radio.js       — Radio question handler
+       5. numeric.js     — Numeric input question handler
+       6. audio.js       — Audio manager
+       7. engine.js      — State machine: attempts, scoring
+       8. main.js        — ScreenManager, scaleApp, goTo, postMessage bridge
+       ============================================================ -->
+<script src="config.js"></script>
+<script src="js/data/content.js"></script>
+<script src="js/questions/dragdrop.js"></script>
+<script src="js/questions/radio.js"></script>
+<script src="js/questions/radio3.js"></script>
+<script src="js/questions/radio4.js"></script>
+<script src="js/questions/radio4b.js"></script>
+<script src="js/questions/numeric4c.js"></script>
+<script src="js/questions/radio5.js"></script>
+<script src="js/questions/radio6.js"></script>
+<script src="js/questions/dragdrop7.js"></script>
+<script src="js/questions/dragdrop7b.js"></script>
+<script src="js/questions/numeric.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/slide3.js"></script>
+<script src="js/slide5.js"></script>
+<script src="js/slide1.js"></script>
+<script src="js/slide10.js"></script>
+<script src="js/slide18.js"></script>
+<script src="js/main.js"></script>
+<!-- DEV: Help Popup Adjuster (hidden — remove display:none to re-enable) -->
+<div id="popup-adjuster" style="display:none;
+  position:fixed; bottom:70px; right:20px;
+  background:#1e1e2e; color:#cdd6f4;
+  border:2px solid #89b4fa; border-radius:12px;
+  padding:14px 16px; z-index:99999;
+  font-family:monospace; font-size:13px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.6);
+  min-width:270px; user-select:none;
+">
+<div id="pa-drag" style="font-weight:bold;margin-bottom:10px;color:#89b4fa;cursor:move">🔧 Help Popup Adjuster</div>
+<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+<span style="width:52px;color:#a6e3a1">left</span>
+<input id="pa-left" max="1200" min="0" style="flex:1;accent-color:#89b4fa" type="range" value="0"/>
+<span id="pa-left-val" style="width:50px;text-align:right;color:#f9e2af">0px</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+<span style="width:52px;color:#a6e3a1">top</span>
+<input id="pa-top" max="400" min="-200" style="flex:1;accent-color:#89b4fa" type="range" value="-23"/>
+<span id="pa-top-val" style="width:50px;text-align:right;color:#f9e2af">-23px</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+<span style="width:52px;color:#a6e3a1">width</span>
+<input id="pa-width" max="1600" min="200" style="flex:1;accent-color:#89b4fa" type="range" value="788"/>
+<span id="pa-width-val" style="width:50px;text-align:right;color:#f9e2af">788px</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+<span style="width:52px;color:#a6e3a1">height</span>
+<input id="pa-height" max="600" min="100" style="flex:1;accent-color:#89b4fa" type="range" value="260"/>
+<span id="pa-height-val" style="width:50px;text-align:right;color:#f9e2af">260px</span>
+</div>
+<div style="margin-top:10px;display:flex;gap:8px">
+<button onclick="paOpen()" style="flex:1;background:#a6e3a1;color:#1e1e2e;border:none;border-radius:6px;padding:6px;cursor:pointer;font-weight:bold">פתח רמז</button>
+<button onclick="paCopy()" style="flex:1;background:#89b4fa;color:#1e1e2e;border:none;border-radius:6px;padding:6px;cursor:pointer;font-weight:bold">Copy CSS</button>
+<button onclick="document.getElementById('popup-adjuster').remove()" style="background:#f38ba8;color:#1e1e2e;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">✕</button>
+</div>
+<div id="pa-out" style="margin-top:8px;font-size:11px;color:#cba6f7;word-break:break-all;display:none"></div>
+</div>
+<script>
+(function(){
+  function paApply() {
+    var popup = document.querySelector('.q7-help-popup');
+    if (!popup) return;
+    var l = +document.getElementById('pa-left').value;
+    var t = +document.getElementById('pa-top').value;
+    var w = +document.getElementById('pa-width').value;
+    var h = +document.getElementById('pa-height').value;
+    document.getElementById('pa-left-val').textContent = l + 'px';
+    document.getElementById('pa-top-val').textContent  = t + 'px';
+    document.getElementById('pa-width-val').textContent = w + 'px';
+    document.getElementById('pa-height-val').textContent = h + 'px';
+    popup.style.left = l + 'px';
+    popup.style.top  = t + 'px';
+    popup.style.width  = w + 'px';
+    popup.style.height = h + 'px';
+  }
+  window.paOpen = function() {
+    var s = document.getElementById('screen-q7');
+    if (s) s.setAttribute('data-q7-help','open');
+    paApply();
+  };
+  window.paCopy = function() {
+    var l = document.getElementById('pa-left').value;
+    var t = document.getElementById('pa-top').value;
+    var w = document.getElementById('pa-width').value;
+    var h = document.getElementById('pa-height').value;
+    var css = 'left: '+l+'px; top: '+t+'px; width: '+w+'px; height: '+h+'px;';
+    navigator.clipboard.writeText(css).catch(function(){});
+    var out = document.getElementById('pa-out');
+    out.style.display = 'block';
+    out.textContent = css;
+  };
+  ['pa-left','pa-top','pa-width','pa-height'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', paApply);
+  });
+  // Drag
+  var panel = document.getElementById('popup-adjuster');
+  var drag = document.getElementById('pa-drag');
+  var ox=0, oy=0, dragging=false;
+  drag.addEventListener('mousedown', function(e){
+    dragging=true; ox=e.clientX-panel.offsetLeft; oy=e.clientY-panel.offsetTop;
+    panel.style.right='auto'; panel.style.bottom='auto';
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!dragging) return;
+    panel.style.left=(e.clientX-ox)+'px';
+    panel.style.top=(e.clientY-oy)+'px';
+  });
+  document.addEventListener('mouseup', function(){ dragging=false; });
+})();
+</script>
+</body>
+</html>

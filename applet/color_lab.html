@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مُختبَر بحْث الألوان</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Spacing ── */
+      --gap:    clamp(8px,  2vw, 18px);
+      --gap-sm: clamp(5px,  1.2vw, 11px);
+      --pad:    clamp(14px, 2.8vw, 28px);
+      --pad-sm: clamp(10px, 2vw,   20px);
+
+      /* ── Radii ── */
+      --r-sm: 8px;  --r-md: 12px;
+      --r-lg: 16px; --r-xl: 20px;
+
+      /* ── Palette ── */
+      --yellow-dark:   #78350f; --yellow-mid: #d97706;
+      --yellow-bg:     #fefce8; --yellow-bd:  #fde68a;
+      --blue-dark:     #1e3a8a; --blue-mid:   #2563eb;
+      --blue-bg:       #eff6ff; --blue-bd:    #93c5fd;
+      --green-dark:    #14532d; --green-bg:   #f0fdf4; --green-bd: #86efac;
+      --indigo-dark:   #312e81; --indigo-mid: #4f46e5;
+      --indigo-bg:     #eef2ff; --indigo-bd:  #c7d2fe;
+      --text-1: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+      --surface: #ffffff; --bg: #f1f5f9; --border: #e2e8f0;
+
+      --font: 'Cairo', 'Segoe UI', Arial, sans-serif;
+    }
+
+    html, body {
+      font-family: var(--font);
+      background: var(--bg);
+      direction: rtl;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      padding: clamp(6px, 1vh, 12px);
+    }
+
+    #root {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+    /* ═══════════════════════════════════
+       Lab shell — fills all available space
+    ═══════════════════════════════════ */
+    .lab {
+      flex: 1;
+      min-height: 0;
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      box-shadow: 0 4px 24px rgba(0,0,0,.09);
+      border: 1px solid var(--border);
+      padding: clamp(20px, 2.6vw, 32px);
+      display: grid;
+      grid-template-rows: auto 1.1fr 0.55fr 2.7fr;
+      gap: clamp(10px, 1.6vh, 18px);
+    }
+
+    /* ── Title ── */
+    .lab-title {
+      text-align: center;
+      font-size: clamp(1rem, 2.8vw, 1.75rem);
+      font-weight: 800;
+      color: var(--text-1);
+      line-height: 1.2;
+    }
+
+    /* ── Color cards ── */
+    .color-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      min-height: 0;
+    }
+
+    .color-card {
+      border-radius: var(--r-lg);
+      border: 2px solid;
+      padding: clamp(10px, 1.6vh, 18px) var(--pad-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(6px, 1vh, 12px);
+      min-height: 0;
+    }
+    .color-card.yellow { background: var(--yellow-bg); border-color: var(--yellow-bd); }
+    .color-card.blue   { background: var(--blue-bg);   border-color: var(--blue-bd); }
+
+    .card-title {
+      font-size: clamp(0.85rem, 2vw, 1.2rem);
+      font-weight: 700;
+    }
+    .color-card.yellow .card-title { color: var(--yellow-dark); }
+    .color-card.blue   .card-title { color: var(--blue-dark); }
+
+    .counter-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 2.5vw, 24px);
+    }
+
+    .btn-counter {
+      width:  clamp(32px, 5.5vh, 56px);
+      height: clamp(32px, 5.5vh, 56px);
+      border-radius: 50%;
+      border: none;
+      font-size: clamp(.9rem, 2.4vh, 1.6rem);
+      font-family: var(--font);
+      font-weight: 800;
+      color: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .12s, transform .1s;
+      flex-shrink: 0;
+    }
+    .btn-counter:hover  { opacity: .82; transform: scale(1.08); }
+    .btn-counter:active { transform: scale(.93); }
+    .color-card.yellow .btn-counter { background: var(--yellow-mid); }
+    .color-card.blue   .btn-counter { background: var(--blue-mid); }
+
+    .counter-val {
+      font-size: clamp(1.6rem, 5.5vh, 3.6rem);
+      font-weight: 800;
+      min-width: 1.8rem;
+      text-align: center;
+      line-height: 1;
+    }
+    .color-card.yellow .counter-val { color: var(--yellow-dark); }
+    .color-card.blue   .counter-val { color: var(--blue-dark); }
+
+    /* ── Action row ──
+       RTL order: yellow-group (right) | reset (center) | blue-group (left)
+    ── */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 1.4vw, 16px);
+    }
+
+    .action-group { display: flex; gap: 8px; flex-shrink: 0; }
+
+    .btn-action {
+      height: clamp(42px, 5vh, 54px);
+      padding: 0 clamp(16px, 2vw, 28px);
+      border-radius: var(--r-sm);
+      border: 1.5px solid;
+      font-family: var(--font);
+      font-size: clamp(.95rem, 1.4vw, 1.15rem);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .12s, transform .1s;
+    }
+    .btn-action:active { transform: scale(.97); }
+    .btn-action.yellow {
+      background: var(--yellow-bg); color: var(--yellow-dark); border-color: var(--yellow-bd);
+    }
+    .btn-action.yellow:hover { background: #fef3c7; }
+    .btn-action.blue {
+      background: var(--blue-bg); color: var(--blue-dark); border-color: var(--blue-bd);
+    }
+    .btn-action.blue:hover { background: #dbeafe; }
+
+    .btn-reset {
+      flex: 1;
+      height: clamp(42px, 5vh, 54px);
+      border-radius: var(--r-sm);
+      border: 1.5px solid var(--green-bd);
+      background: var(--green-bg);
+      color: var(--green-dark);
+      font-family: var(--font);
+      font-size: clamp(.95rem, 1.4vw, 1.15rem);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .12s;
+    }
+    .btn-reset:hover { background: #dcfce7; }
+
+    /* ── Bottom panels ── */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(14px, 2.2vw, 24px);
+      min-height: 0;
+    }
+
+    /* Mix panel — dynamic bg via inline style */
+    .mix-panel {
+      min-height: 0;
+      border-radius: var(--r-lg);
+      border: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 1.8vh, 22px);
+      padding: clamp(10px, 1.8vh, 22px);
+      transition: background-color .45s;
+    }
+
+    .mix-name {
+      font-size: clamp(1.1rem, 4vh, 2.2rem);
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 8px rgba(0,0,0,.5);
+      text-align: center;
+    }
+
+    .mix-count {
+      font-size: clamp(.75rem, 1.9vw, 1.05rem);
+      font-weight: 700;
+      color: #fff;
+      background: rgba(0,0,0,.28);
+      padding: 4px 16px;
+      border-radius: 100px;
+      text-shadow: 0 1px 4px rgba(0,0,0,.35);
+    }
+
+    /* Quiz panel — uniform gap, centred block */
+    .quiz-panel {
+      min-height: 0;
+      border: 2px solid var(--indigo-bd);
+      border-radius: var(--r-lg);
+      background: var(--indigo-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(14px, 2.2vh, 24px);
+      padding: clamp(20px, 3vh, 36px) var(--pad);
+    }
+
+    .quiz-title {
+      font-size: clamp(1rem, 3.3vh, 2rem);
+      font-weight: 600;
+      color: var(--indigo-dark);
+      text-align: center;
+    }
+
+    .quiz-sub {
+      font-size: clamp(0.85rem, 2.4vw, 1.8rem);
+      font-weight: 600;
+      color: var(--text-2);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* Ratio row — RTL: yellow (right) : blue (left)
+       No dir="ltr". direction: rtl keeps first child on the right. */
+    .ratio-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: center;
+      gap: clamp(8px, 1.2vw, 14px);
+      direction: rtl;
+      width: auto;
+    }
+
+    .ratio-field {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .ratio-lbl {
+      font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+      font-weight: 600;
+    }
+    .ratio-lbl.yellow { color: var(--yellow-dark); }
+    .ratio-lbl.blue   { color: var(--blue-dark); }
+
+    .ratio-input {
+      width: clamp(105px, 9vw, 125px);
+      height: clamp(58px, 6.8vh, 68px);
+      text-align: center;
+      direction: ltr;        /* digits always LTR */
+      font-family: var(--font);
+      font-size: clamp(1.4rem, 2.8vh, 1.7rem);
+      font-weight: 600;
+      border-radius: var(--r-md);
+      border: 2px solid;
+      background: #fff;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .ratio-input.yellow { color: var(--yellow-dark); border-color: var(--yellow-bd); }
+    .ratio-input.yellow:focus { border-color: var(--yellow-mid); }
+    .ratio-input.blue   { color: var(--blue-dark);   border-color: var(--blue-bd); }
+    .ratio-input.blue:focus   { border-color: var(--blue-mid); }
+
+    .ratio-sep {
+      font-size: clamp(1.7rem, 3.5vh, 2.1rem);
+      font-weight: 800;
+      color: var(--text-3);
+      padding-bottom: clamp(5px, .9vw, 9px);
+    }
+
+    /* CTA */
+    .btn-check {
+      width: 100%;
+      height: clamp(52px, 7vh, 72px);
+      background: var(--indigo-mid);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: var(--font);
+      font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .12s, transform .1s;
+    }
+    .btn-check:hover  { background: #4338ca; }
+    .btn-check:active { transform: scale(.98); }
+
+    /* Feedback */
+    .feedback-area {
+      width: 100%;
+      text-align: center;
+      min-height: 0;
+    }
+    .fb { display: inline-block; padding: 3px 14px; border-radius: 100px; font-weight: 700; font-size: clamp(.68rem,1.35vw,.88rem); }
+    .fb-correct { background: #f0fdf4; color: #15803d; }
+    .fb-error   { background: #fef2f2; color: #dc2626; }
+    .fb-empty   { color: #c2410c; font-size: clamp(1rem, 1.8vw, 1.2rem); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState } = React;
+
+  function ColorLab() {
+    const [blue,        setBlue]        = useState(3);
+    const [yellow,      setYellow]      = useState(2);
+    const [guessBlue,   setGuessBlue]   = useState('');
+    const [guessYellow, setGuessYellow] = useState('');
+    const [feedback,    setFeedback]    = useState(null);
+
+    const updateCups = (newBlue, newYellow) => {
+      setBlue(newBlue);
+      setYellow(newYellow);
+      setGuessBlue('');
+      setGuessYellow('');
+      setFeedback(null);
+    };
+
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+
+    const total   = blue + yellow;
+    const divisor = total > 0 ? gcd(blue, yellow) : 1;
+    const expectedRatioBlue   = total > 0 ? blue   / divisor : 0;
+    const expectedRatioYellow = total > 0 ? yellow / divisor : 0;
+
+    const getMixedColor = () => {
+      if (total === 0) return '#cbd5e1';
+      const p  = blue / total;
+      const cY = [255, 204,   0];
+      const cG = [ 34, 139,  34];
+      const cB = [  0,  85, 255];
+      let r, g, b;
+      if (Math.abs(p - 0.6) < 0.01) {
+        [r, g, b] = cG;
+      } else if (p < 0.6) {
+        const t = p / 0.6;
+        r = Math.round(cY[0]*(1-t) + cG[0]*t);
+        g = Math.round(cY[1]*(1-t) + cG[1]*t);
+        b = Math.round(cY[2]*(1-t) + cG[2]*t);
+      } else {
+        const t = (p - 0.6) / 0.4;
+        r = Math.round(cG[0]*(1-t) + cB[0]*t);
+        g = Math.round(cG[1]*(1-t) + cB[1]*t);
+        b = Math.round(cG[2]*(1-t) + cB[2]*t);
+      }
+      return `rgb(${r},${g},${b})`;
+    };
+
+    const checkAnswer = () => {
+      const gB = parseInt(guessBlue);
+      const gY = parseInt(guessYellow);
+      if (isNaN(gB) || isNaN(gY)) { setFeedback('empty'); return; }
+      setFeedback(gB === expectedRatioBlue && gY === expectedRatioYellow ? 'correct' : 'error');
+    };
+
+    return (
+      <div className="lab">
+
+        {/* ── Title ── */}
+        <h2 className="lab-title">مُختبَر بحْث الألوان 🎨</h2>
+
+        {/* ── Color cards  (RTL: first=right=yellow, second=left=blue) ── */}
+        <div className="color-cards">
+          <div className="color-card yellow">
+            <div className="card-title">اللون الأصفر (أكواب)</div>
+            <div className="counter-row">
+              <button className="btn-counter" onClick={() => updateCups(blue, Math.max(0, yellow-1))}>−</button>
+              <span className="counter-val">{yellow}</span>
+              <button className="btn-counter" onClick={() => updateCups(blue, yellow+1)}>+</button>
+            </div>
+          </div>
+          <div className="color-card blue">
+            <div className="card-title">اللون الأزرق (أكواب)</div>
+            <div className="counter-row">
+              <button className="btn-counter" onClick={() => updateCups(Math.max(0, blue-1), yellow)}>−</button>
+              <span className="counter-val">{blue}</span>
+              <button className="btn-counter" onClick={() => updateCups(blue+1, yellow)}>+</button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Action row  (RTL: yellow-group right | reset center | blue-group left) ── */}
+        <div className="action-row">
+          <div className="action-group">
+            <button className="btn-action yellow" onClick={() => updateCups(blue, yellow+1)}>+1 للأصفر</button>
+            <button className="btn-action yellow" onClick={() => updateCups(blue, yellow+10)}>+10 للأصفر</button>
+          </div>
+          <button className="btn-reset" onClick={() => updateCups(3, 2)}>إعادة الضبط إلى وَصْفة الأخضر (3:2)</button>
+          <div className="action-group">
+            <button className="btn-action blue" onClick={() => updateCups(blue+1, yellow)}>+1 للأزرق</button>
+            <button className="btn-action blue" onClick={() => updateCups(blue+10, yellow)}>+10 للأزرق</button>
+          </div>
+        </div>
+
+        {/* ── Panels  (RTL: mix-panel right | quiz-panel left) ── */}
+        <div className="panels">
+
+          {/* Mix panel */}
+          <div className="mix-panel" style={{ backgroundColor: getMixedColor() }}>
+            <span className="mix-name">{total === 0 ? 'أضيفوا لونًا' : 'درجة اللون التي تكوَّنَتْ'}</span>
+            <span className="mix-count">إجماليّ عدد الأكواب: {total}</span>
+          </div>
+
+          {/* Quiz panel */}
+          <div className="quiz-panel">
+            <div className="quiz-title">اختبِروا أنفُسَكُم 🧠</div>
+            <div className="quiz-sub">ما هي النسبة المُختزَلة للخليط الآن؟</div>
+
+            {/* Ratio — RTL: yellow (right) : blue (left), NO dir="ltr" on wrapper */}
+            <div className="ratio-row">
+              <div className="ratio-field">
+                <span className="ratio-lbl yellow">الأصفر</span>
+                <input
+                  className="ratio-input yellow"
+                  type="number" min="0"
+                  value={guessYellow}
+                  onChange={e => setGuessYellow(e.target.value)}
+                  placeholder="?"
+                />
+              </div>
+              <span className="ratio-sep">:</span>
+              <div className="ratio-field">
+                <span className="ratio-lbl blue">الأزرق</span>
+                <input
+                  className="ratio-input blue"
+                  type="number" min="0"
+                  value={guessBlue}
+                  onChange={e => setGuessBlue(e.target.value)}
+                  placeholder="?"
+                />
+              </div>
+            </div>
+
+            <button className="btn-check" onClick={checkAnswer}>فحص الإجابة</button>
+
+            <div className="feedback-area">
+              {feedback === 'correct' && <span className="fb fb-correct">كلّ الاحترام! إجابة دقيقة ✓</span>}
+              {feedback === 'error'   && <span className="fb fb-error">حاوِلوا مجدّدًا — انتبِهوا للاختزال ✗</span>}
+              {feedback === 'empty'   && <span className="fb-empty">الرجاء ملء العددَيْن</span>}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<ColorLab />);
+</script>
+</body>
+</html>

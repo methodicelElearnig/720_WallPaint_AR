@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+"""
+asset_localization_report.py — writes translation/export/asset_localization_report.json
+
+Unlike extract_translations.py, this list is NOT auto-derived from the HTML
+(alt="" is used on several of these images even though they visually contain
+baked-in Hebrew, so an attribute-based scan can't find them reliably). It was
+compiled by opening every image referenced from index.html and applet/color_lab.html
+and visually inspecting it — cross-checked against the "⚠ baked into image" /
+"needs clean Figma export" warnings the developers already left as HTML
+comments (index.html lines ~253, ~387, ~777, ~867, ~921), which independently
+confirm several of these.
+
+If new image assets are added to img/ in the future, re-run this visual
+review by hand; there's no reliable way to automate "does this PNG contain
+baked-in text" from the HTML alone.
+"""
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "translation" / "export" / "asset_localization_report.json"
+
+ASSETS = [
+    {
+        "file": "img/q1-submit.png",
+        "bakedText": "צדקתי?",
+        "usedInScreens": ["q1"],
+        "note": "Submit-button graphic. Flagged by developer comment in index.html "
+                "(line ~387) as UI chrome baked into the PNG.",
+    },
+    {
+        "file": "img/q2-submit.png",
+        "bakedText": "צדקתי?",
+        "usedInScreens": ["q2", "q3", "q4", "q4b", "q4c", "q5", "q6", "q7", "q7b"],
+        "note": "Same submit-button graphic reused verbatim by every other question's "
+                "submit button (only q1 has its own copy, q1-submit.png).",
+    },
+    {
+        "file": "img/q1-help-btn.png",
+        "bakedText": "עזרה",
+        "usedInScreens": ["q1"],
+        "note": "Help-button graphic. Flagged by developer comment in index.html "
+                "(line ~253) as baked-in UI chrome.",
+    },
+    {
+        "file": "img/btn-done.png",
+        "bakedText": "סיימתי",
+        "usedInScreens": ["slide18"],
+        "note": "\"Done\" button graphic shown after the closing video finishes.",
+    },
+    {
+        "file": "img/mixa.png",
+        "bakedText": "תערובת א' - יחס 3:2",
+        "usedInScreens": ["q5"],
+        "note": "Illustration of mixture A with its full label (name + ratio) baked "
+                "into the image, including the mixed-in colon ratio notation.",
+    },
+    {
+        "file": "img/mixB.png",
+        "bakedText": "תערובת ב' - יחס 13:5",
+        "usedInScreens": ["q5"],
+        "note": "Illustration of mixture B, same pattern as mixa.png.",
+    },
+    {
+        "file": "img/q3-pic.png",
+        "bakedText": "2 ליטר",
+        "usedInScreens": ["q3"],
+        "note": "Paint bucket illustration. Flagged by developer comment in index.html "
+                "(line ~777): \"contains Hebrew '2 ליטר' — clean Figma export needed\".",
+    },
+    {
+        "file": "img/q4-stav.png",
+        "bakedText": "16 ליטר",
+        "usedInScreens": ["q4", "q4b", "q4c"],
+        "note": "Teacher holding a paint bucket, reused across the Q4 family. Flagged "
+                "by developer comments in index.html (lines ~867, ~921): "
+                "\"needs clean Figma export\".",
+    },
+    {
+        "file": "img/q6-img.png",
+        "bakedText": "2 ליטר / 5 ליטר",
+        "usedInScreens": ["q6"],
+        "note": "Two paint buckets (yellow + green) each with a baked-in liter label. "
+                "alt=\"\" in the HTML (decorative), so this was NOT caught by any "
+                "attribute-based scan — found only by opening the image directly. "
+                "This is the strongest argument for a human visual pass, not just "
+                "an alt-text sweep, when this report is refreshed.",
+    },
+]
+
+
+def main():
+    out = {
+        "meta": {
+            "unit": "ציורי קיר (Murals) — תכנית 720",
+            "method": (
+                "Manual visual review of every image referenced from index.html and "
+                "applet/color_lab.html, cross-checked against developer '⚠ baked into "
+                "image' comments already present in index.html. NOT auto-generated — "
+                "several of these images use alt=\"\" (decorative) despite containing "
+                "real baked-in text, so attribute scanning alone would have missed them."
+            ),
+            "totalFlagged": len(ASSETS),
+            "regenerate": (
+                "No script can safely regenerate this list. If img/ assets are added "
+                "or replaced, re-open each new/changed image and check by eye for "
+                "baked-in Hebrew text, then update this file's ASSETS list by hand."
+            ),
+        },
+        "assets": ASSETS,
+    }
+    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Wrote {OUT} — {len(ASSETS)} flagged assets")
+
+
+if __name__ == "__main__":
+    main()

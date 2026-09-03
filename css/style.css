@@ -1,0 +1,5392 @@
+/* ============================================================
+   style.css — כל עיצוב הלומדה
+   ציור קיר — תכנית 720
+
+   סדר סעיפים:
+     1. Google Fonts import
+     2. CSS Variables
+     3. Reset
+     4. Base (html, body)
+     5. App layout & viewport scaling
+     6. Screens — visibility
+     7. Navigation buttons (RTL)
+     8. Progress indicator
+     9. Slides (placeholder)
+    10. Questions (placeholder)
+    11. Animations & keyframes (placeholder)
+   ============================================================ */
+
+
+/* ============================================================
+   1. Google Fonts
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Open+Sans:wght@700&display=swap');
+
+
+/* ============================================================
+   2. CSS Variables
+   Source of truth: Figma file vUmRePxl3GTK1gPunwDqx1
+   ⚠ כל הערכים — placeholder עד ייצוא מפיגמה
+   ============================================================ */
+:root {
+  /* צבעים */
+  --color-bg:              #1a1a2e;   /* TODO: מפיגמה */
+  --color-card-bg:         #ffffff;
+  --color-card-bg-dimmed:  #f0f0f0;
+  --color-primary:         #2d2d2d;
+  --color-text:            #232020;   /* מאומת מפיגמה: #232020 */
+  --color-text-light:      #ffffff;
+  --color-correct:         #2e7d32;   /* TODO: מפיגמה */
+  --color-correct-bg:      #e8f5e9;
+  --color-incorrect:       #c62828;   /* TODO: מפיגמה */
+  --color-incorrect-bg:    #ffebee;
+  --color-tryagain:        #c62828;
+  --color-help-bg:         #fff9c4;   /* TODO: מפיגמה */
+  --color-help-border:     #f9a825;
+  --color-nav-btn:         #2d2d2d;
+  --color-progress-active: #ffffff;
+  --color-progress-done:   #4caf50;   /* TODO: מפיגמה */
+  --color-progress-idle:   #616161;
+  --color-feedback-bg:     #2d2d2d;
+  --color-feedback-text:   #ffffff;
+
+  /* טיפוגרפיה
+     מאומת בפיגמה: Assistant (SemiBold 600, Bold 700)
+     Open Sans 700 — למספרים בלבד */
+  --font-main:        'Assistant', 'Arial Hebrew', Arial, sans-serif;
+  --font-numbers:     'Open Sans', Arial, sans-serif;
+  --font-size-xs:     0.75rem;
+  --font-size-sm:     0.875rem;
+  --font-size-base:   1rem;           /* 16px */
+  --font-size-md:     1.125rem;       /* 18px */
+  --font-size-lg:     1.375rem;       /* 22px */
+  --font-size-xl:     1.75rem;        /* 28px */
+  --font-size-2xl:    2.0833rem;      /* 33.3px — גודל ראשי בפיגמה */
+  --font-weight-regular:  400;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* Layout */
+  --screen-width:        1920px;
+  --screen-height:       1080px;
+  --card-border-radius:  24px;
+  --nav-btn-size:        123px;       /* מאומת מפיגמה: 123×123px */
+  --nav-btn-margin:      25px;        /* מאומת מפיגמה: left/right 25px */
+
+  /* Z-index layers */
+  --z-screen:   1;
+  --z-nav:      10;
+  --z-progress: 10;
+  --z-tooltip:  50;
+  --z-modal:    100;
+  --z-devbar:   9999;
+}
+
+
+/* ============================================================
+   3. Reset
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ============================================================
+   4. Base
+   ============================================================ */
+html {
+  direction: rtl;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-main);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text);
+  background: var(--color-bg);
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+
+/* ============================================================
+   5. App layout & viewport scaling
+
+   NOTE ON SKILL DEVIATION:
+   הסקיל מצפה ש-#app עצמו יהיה ה-1920×1080 canvas המוגדל.
+   הפרויקט משתמש ב-#app כ-viewport wrapper + #app-scaler כ-canvas.
+   הסיבה: #app מאפשר overflow:hidden ומרכוז, בעוד #app-scaler
+   מקבל את ה-transform:scale() מ-JS. פונקציונלית שקול.
+   JS מחשב: scale = min(vw/1920, vh/1080) ומיישם על #app-scaler.
+   ============================================================ */
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 1920×1080 canvas — מוגדל על ידי JS */
+#app-scaler {
+  width: var(--screen-width);
+  height: var(--screen-height);
+  position: absolute;
+  transform-origin: top left;
+  /* transform: scale(N); left: Xpx; top: Ypx — מחושב ב-JS */
+}
+
+
+/* ============================================================
+   6. Screens — visibility
+   ============================================================ */
+.screen {
+  display: none;
+  position: absolute;
+  width: var(--screen-width);
+  height: var(--screen-height);
+  top: 0;
+  left: 0;
+  overflow: hidden;   /* clip anything that bleeds beyond 1920×1080 canvas */
+}
+
+.screen.active {
+  display: block;
+}
+
+
+/* ============================================================
+   7. Navigation buttons (RTL)
+
+   RTL convention (עברית):
+     חץ שמאלה (◄) = קדימה (NEXT) — left=25, top=923
+     חץ ימינה (►) = אחורה (PREV) — left=1760, top=923
+
+   בעברית קוראים מימין לשמאל:
+     ימין = מאיפה שבאנו (אחורה / PREV)
+     שמאל = לאן אנחנו הולכים (קדימה / NEXT)
+
+   Assets: img/arrow-nav.png — 123×123px (Figma node 2:14 / 2:15)
+   אותו asset לשני הכפתורים; NEXT מהופך עם scaleX(-1).
+   ============================================================ */
+
+.nav-btn {
+  position: absolute;
+  width: var(--nav-btn-size);    /* 123px — מאומת מפיגמה */
+  height: var(--nav-btn-size);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: var(--z-nav);
+  outline: none;
+}
+
+.nav-btn img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* נעול / disabled */
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* פולס — חץ קדימה זמין */
+@keyframes nav-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.18); }
+}
+.nav-next:not([disabled]) {
+  animation: nav-pulse 1.2s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* NEXT (קדימה) — שמאל, left=25 — חץ מצביע שמאלה (◄) */
+.nav-next {
+  left: 25px;
+  top: 923px;
+}
+
+.nav-next img {
+  transform: scaleX(-1);   /* הופך ► ל-◄ */
+}
+
+/* PREV (אחורה) — ימין, left=1760 — חץ מצביע ימינה (►) */
+.nav-prev {
+  left: 1760px;
+  top: 923px;
+}
+
+
+/* ============================================================
+   8. Progress indicator (7 עיגולים)
+
+   מיפוי: circles 1–7
+   circle 4 = QUES4 + QUES4B + QUES4C
+   circle 7 = QUES7  + QUES7B
+   ============================================================ */
+/* TODO: עיצוב לאחר ייצוא progress assets מפיגמה */
+
+
+/* ============================================================
+   9. Slides — content screens
+   (SLIDE2, SLIDE3, SLIDE5, SLIDE8, SLIDE10, SLIDE18)
+
+   Asset naming convention (img/):
+     img/bg-slide2.png   — רקע SLIDE2
+     img/bg-slide3.png   — רקע SLIDE3
+     ...etc
+   ============================================================ */
+/* ─── SLIDE2 ─────────────────────────────────────────────────
+   Figma frame 2:6
+   ──────────────────────────────────────────────────────────── */
+
+/* רקע מלא — node 2:10, 1920×1080 */
+.slide2-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  display: block;
+}
+
+/* פאנל כותרת — node 2:11, 1512×233, left=408, top=0
+   מיוצא בגודל node (לא full-canvas) — ממוקם ישירות */
+.slide2-header {
+  position: absolute;
+  top: 0;
+  left: 408px;
+  width: 1512px;
+  height: 233px;
+  display: block;
+}
+
+/* טקסט קריינות — node 2:12 — Live HTML
+   מיקום: right=37px (1920-1883), top=42px
+   טיפוגרפיה מפיגמה: Assistant SemiBold 600, 33.333px, lh=41px, ls=0.1302px */
+.slide2-text {
+  position: absolute;
+  top: 42px;
+  right: 37px;
+  width: 1440px;   /* מאפשר עטיפת 3 שורות ואינו חורג משמאל מפאנל הכותרת */
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);  /* 600 */
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);   /* #232020 */
+  text-align: right;
+  direction: rtl;
+}
+
+.slide2-text p {
+  margin: 0;
+}
+
+/* ─── SLIDE1 — סרטון פתיחה ───────────────────────────────── */
+.slide1-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1920px; height: 1080px;
+  display: block;
+}
+.slide1-header {
+  position: absolute;
+  top: 0; left: 1102px;
+  width: 1512px; height: 140px;
+  display: block; z-index: 4;
+}
+.slide1-text {
+  position: absolute;
+  top: 29px; right: 37px;
+  width: 1440px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px; line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right; direction: rtl;
+  z-index: 4;
+}
+.slide1-text p { margin: 0; }
+
+.slide1-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; z-index: 2;
+}
+.slide1-video--hidden { display: none; }
+
+.slide1-play-btn {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 168px; height: 168px;
+  background: none; border: none;
+  cursor: pointer; padding: 0; z-index: 5;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.slide1-play-btn svg { width: 100%; height: 100%; display: block; }
+.slide1-play-btn--hidden { display: none; }
+.slide1-play-btn:hover { transform: translate(-50%,-50%) scale(1.1); opacity: 0.9; }
+
+
+/* ─── SLIDE3 ─────────────────────────────────────────────────
+   Figma frame 2:17
+   סוג: content + video — ► נעול עד סיום וידאו
+   ──────────────────────────────────────────────────────────── */
+
+/* רקע מלא — node 2:25, 1920×1080 */
+.slide3-bg {
+  display: none; /* replaced by video */
+}
+
+/* פאנל כותרת — node 2:21, 1512×233, left=1102, top=0 */
+.slide3-header {
+  position: absolute;
+  top: 0;
+  left: 1102px;
+  width: 1512px;
+  height: 233px;
+  display: block;
+  z-index: 2;
+}
+
+/* לוח לבן — replaced by video */
+.slide3-board { display: none; }
+
+/* טקסט כותרת — node 2:23 */
+.slide3-header-text {
+  position: absolute;
+  top: 42px;
+  right: 62px;
+  width: 750px;
+  z-index: 3;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);   /* 600 */
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+
+/* טקסט ראשי על הלוח — replaced by video */
+.slide3-board-main-text { display: none; }
+
+/* טקסט תערובת ימין — replaced by video */
+.slide3-mix-right-text { display: none; z-index: 4;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-regular);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+
+/* טקסט תערובת שמאל — replaced by video */
+.slide3-mix-left-text { display: none; z-index: 4;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-regular);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+
+/* מכלי זכוכית — גדלים מהפיגמה (node size) */
+/* איקון שווה + איקון חיבור
+   הוחלף left/right — הטקסט הכתוב בגוף הסרטון החדש (hot_cold_colors2.mp4)
+   ממקם "יותר צהוב" בצד שמאל ו"יותר כחול" בצד ימין, הפוך מהסרטון הקודם */
+.slide3-icon-equal-r { position: absolute; left: 411px; top: 734px; width: 30px;  height: 22px; z-index: 4; }
+.slide3-icon-plus-r  { position: absolute; left: 306px; top: 731px; width: 29px;  height: 29px; z-index: 4; }
+.slide3-icon-equal-l { position: absolute; left: 795px; top: 734px; width: 30px;  height: 22px; z-index: 4; }
+.slide3-icon-plus-l  { position: absolute; left: 690px; top: 731px; width: 29px;  height: 29px; z-index: 4; }
+
+/* מבחנות — node size, positioned by left/top */
+.slide3-tube-light-green  { position: absolute; left: 457px; top: 609px; width: 49px;  height: 272px; z-index: 4; }
+.slide3-tube-little-blue  { position: absolute; left: 351px; top: 611px; width: 75px;  height: 267px; z-index: 4; }
+.slide3-tube-full-yellow  { position: absolute; left: 208px; top: 600px; width: 82px;  height: 278px; z-index: 4; }
+.slide3-tube-dark-green   { position: absolute; left: 837px; top: 601px; width: 47px;  height: 280px; z-index: 4; }
+
+/* tube-little-yellow — clipped */
+.slide3-tube-little-yellow {
+  position: absolute;
+  left: 633px;
+  top: 601px;
+  width: 44px;
+  height: 280px;
+  overflow: hidden;
+  z-index: 4;
+}
+.slide3-tube-little-yellow img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 82px;
+  height: 280px;
+}
+
+/* tube-full-blue — clipped */
+.slide3-tube-full-blue {
+  position: absolute;
+  left: 737px;
+  top: 611px;
+  width: 42px;
+  height: 270px;
+  overflow: hidden;
+  z-index: 4;
+}
+.slide3-tube-full-blue img {
+  position: absolute;
+  left: -39px;
+  top: 0;
+  width: 81px;
+  height: 270px;
+}
+
+/* וידאו רקע מלא — מחליף bg + לוח + דמות */
+.slide3-video {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  opacity: 1;
+  pointer-events: none;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* כפתור "נגן שוב" — מופיע בשובנו למסך אחרי שהסרטון כבר נצפה */
+.slide3-replay-btn {
+  position: absolute;
+  left: 50%;
+  top: 400px;
+  transform: translate(-50%, 0);
+  width: 180px;
+  height: 180px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 5;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.slide3-replay-btn svg { width: 100%; height: 100%; display: block; }
+.slide3-replay-btn:hover { transform: translate(-50%, 0) scale(1.1); opacity: 0.9; }
+.s3-hidden-btn { display: none; }
+
+/* shared text paragraph reset */
+.slide3-header-text p,
+.slide3-board-main-text p,
+.slide3-mix-right-text p,
+.slide3-mix-left-text p {
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SLIDE 3 — Entrance Animations (audio-synced via JS)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Helper: hide until JS reveals */
+.s3-hidden { opacity: 0 !important; }
+
+/* Keyframes */
+@keyframes s3SlideFromRight {
+  from { opacity: 0; transform: translateX(260px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes s3FadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes s3FadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes s3Pour {
+  0%   { transform: none; }
+  35%  { transform: rotate(20deg) translateX(35px); }
+  70%  { transform: rotate(20deg) translateX(35px); }
+  90%  { transform: none; }
+  100% { transform: none; }
+}
+@keyframes s3TubeFill {
+  from { opacity: 0; transform: scaleY(0); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
+/* Header popup entrance — all content slides
+   White panel + text slide in from right at 1s after screen entry */
+#screen-slide2.active  .slide2-header,
+#screen-slide2.active  .slide2-text,
+#screen-slide3.active  .slide3-header,
+#screen-slide3.active  .slide3-header-text,
+#screen-slide5.active  .s5-header-bg,
+#screen-slide5.active  .s5-header-text,
+#screen-slide8.active  .slide8-header-wrap,
+#screen-slide8.active  .slide8-text,
+#screen-slide10.active .slide10-header-wrap,
+#screen-slide18.active .slide18-pre-header,
+#screen-slide18.active .slide18-header-text,
+#screen-slide10.active .slide10-text {
+  animation: s3SlideFromRight 0.4s ease 1s both;
+}
+
+/* SLIDE3 — בחזרה למסך אחרי שהכותרת כבר הופיעה פעם (JS מוסיף class זה),
+   מבטלים את אנימציית הכניסה כדי שלא תרוץ שוב */
+#screen-slide3.active .slide3-header.s3-header-settled,
+#screen-slide3.active .slide3-header-text.s3-header-settled {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* JS-triggered reveal classes */
+.s3-rev-fadeup { animation: s3FadeUp  0.3s ease both; }
+.s3-rev-fadein { animation: s3FadeIn  0.3s ease both; }
+.s3-rev-fill   { transform-origin: bottom center; animation: s3TubeFill 1.0s ease both; }
+.s3-rev-pour   { transform-origin: bottom center;
+                 animation: s3FadeIn 0.3s ease both, s3Pour 2.8s ease 0.5s both; }
+
+/* Spotlight — one active hotspot at a time, removed by _s3ClearSpotlight() */
+.s3-spotlight {
+  outline: 3px solid rgba(255, 220, 60, 0.9);
+  box-shadow: 0 0 0 6px rgba(255, 220, 60, 0.2), 0 0 28px rgba(255, 200, 0, 0.4);
+  border-radius: 8px;
+  animation: s3Pulse 1.8s ease-in-out infinite;
+}
+@keyframes s3Pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(255,220,60,0.2), 0 0 28px rgba(255,200,0,0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(255,220,60,0.1), 0 0 40px rgba(255,200,0,0.6); }
+}
+
+
+/* ─── SLIDE5 ─────────────────────────────────────────────────
+   Figma frames 5:7 (closed) / 5:15 (open)
+   States: data-s5-state="closed" | "open" on #screen-slide5
+   ──────────────────────────────────────────────────────────── */
+
+/* רקע מלא — node 5:14, 1920×1080 */
+.s5-bg {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  display: block;
+  pointer-events: none;
+}
+
+/* פאנל כותרת — node 5:9, left:960, top:0, 1512×233
+   גלוי ב-closed וב-open */
+.s5-header-bg {
+  position: absolute;
+  left: 960px; top: 0;
+  width: 1512px; height: 233px;
+  display: block;
+  pointer-events: none;
+}
+
+/* טקסט כותרת — node 5:10 — Live HTML
+   -translate-x-full + left:1883 → right edge=1883 → CSS right:37px
+   Assistant SemiBold 600, 33.333px, lh=41px */
+.s5-header-text {
+  position: absolute;
+  top: 42px;
+  right: 37px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 0;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  z-index: 3;
+}
+.s5-header-text p { margin: 0; line-height: 41px; }
+
+/* Hotspot לחיץ — PNG של ידיים+טלפון מונח בדיוק על דניאלה בתמונת הרקע
+   מיקום מדויק מפיגמה (node 21:390): left:980, top:515, width:502, height:283 */
+.s5-phone-hotspot {
+  position: absolute;
+  left: 980px; top: 515px;
+  width: 502px; height: 283px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 5;
+  padding: 0;
+  outline: none;
+}
+/* תמונת PNG בגודלה המדויק — ללא stretch */
+.s5-phone-hotspot img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  transition: filter 0.15s, transform 0.15s;
+}
+/* hover — בהירות קלה + הגדלה עדינה */
+.s5-phone-hotspot:hover img {
+  filter: brightness(1.12);
+  transform: scale(1.03);
+}
+/* הסתרה ב-open */
+#screen-slide5[data-s5-state="open"] .s5-phone-hotspot {
+  display: none;
+}
+
+/* פאנל open — נסתר ב-closed, נראה ב-open */
+.s5-applet-panel {
+  display: none;
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  pointer-events: none; /* הפאנל עצמו עובר events לילדים */
+}
+#screen-slide5[data-s5-state="open"] .s5-applet-panel {
+  display: block;
+}
+
+/* מסגרת iPhone — node 5:23, left:174, top:236, 1559×749 */
+.s5-iphone-frame {
+  position: absolute;
+  left: 174px; top: 236px;
+  width: 1559px; height: 749px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* כפתור סגירה — פינה עליונה-ימנית של מסגרת iPhone */
+.s5-close-btn {
+  position: absolute;
+  left: 1695px; top: 252px;
+  width: 56px; height: 56px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  transition: background 0.15s;
+}
+.s5-close-btn:hover { background: rgba(0,0,0,0.85); }
+
+/* iframe יישומון — node 5:22 APP area, left:919, top:322, 650×578 */
+.s5-iframe {
+  position: absolute;
+  left: 919px; top: 322px;
+  width: 650px; height: 578px;
+  border: none;
+  border-radius: 8px;
+  z-index: 7;
+  pointer-events: auto;
+  background: #f3f4f6;
+}
+
+/* טקסט הוראות א — node 5:26
+   -translate-x-full + left:883 → right edge=883 → CSS right:1037px, top:417px
+   Assistant SemiBold 600, 33.333px */
+.s5-instructions-a {
+  position: absolute;
+  right: 1037px; top: 350px;
+  width: 820px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 0;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  z-index: 8;
+  pointer-events: none;
+}
+.s5-instructions-a p { margin: 0; line-height: 41px; }
+
+/* טקסט הוראות ב — node 5:28, right:1037px, top:658px */
+.s5-instructions-b {
+  position: absolute;
+  right: 1037px; top: 545px;
+  width: 820px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 0;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  z-index: 8;
+  pointer-events: none;
+}
+.s5-instructions-b p { margin: 0; line-height: 41px; }
+
+/* שורות כן/לא — סעיף ב, אחת לכל היגד */
+.s5-yn-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0;
+  pointer-events: auto;
+}
+.s5-yn-question {
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+}
+.s5-yn-options {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.s5-yn-sep {
+  font-size: 24px;
+  color: var(--color-text);
+  opacity: 0.5;
+}
+.s5-yn-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 24px;
+  color: #4A7CC7;
+  background: rgba(255,255,255,0.60);
+  border: 2px solid #4A7CC7;
+  border-radius: 10px;
+  padding: 6px 18px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.s5-yn-btn:hover { background: rgba(255,255,255,0.85); }
+
+/* חיווי לאחר מענה — אותה שפה עיצובית כמו שאר היחידה:
+   מסגרת ירוקה + ✔ (q2-v.png) על התשובה הנכונה,
+   מסגרת אדומה + ✖ (q2-x.png) על התשובה השגויה שנבחרה בפועל.
+   הטקסט עצמו לא משתנה — ר' .s5-yn-btn */
+
+/* נכון — מסגרת ירוקה, תמיד על התשובה הנכונה לאחר מענה */
+.s5-yn-row[data-s5-yn-answer][data-s5-yn-correct="yes"] .s5-yn-yes,
+.s5-yn-row[data-s5-yn-answer][data-s5-yn-correct="no"]  .s5-yn-no {
+  border-color: var(--color-correct);
+}
+
+/* שגוי — מסגרת אדומה, רק על התשובה השגויה שנבחרה בפועל */
+.s5-yn-row[data-s5-yn-correct="yes"][data-s5-yn-answer="no"] .s5-yn-no,
+.s5-yn-row[data-s5-yn-correct="no"][data-s5-yn-answer="yes"] .s5-yn-yes {
+  border-color: var(--color-incorrect);
+}
+
+/* סימון ✔/✖ — אותם אייקונים בדיוק כמו בשאר היחידה
+   (q2-v.png / q2-x.png, 30×26 — ר' .q2-opt-correct / .q2-opt-wrong) */
+.s5-yn-check {
+  display: none;
+  width: 30px; height: 26px;
+  flex-shrink: 0;
+}
+.s5-yn-row[data-s5-yn-answer][data-s5-yn-correct="yes"] .s5-yn-yes .s5-yn-check,
+.s5-yn-row[data-s5-yn-answer][data-s5-yn-correct="no"]  .s5-yn-no  .s5-yn-check {
+  display: inline-block;
+  background: url('../img/q2-v.png') center / contain no-repeat;
+}
+.s5-yn-row[data-s5-yn-correct="yes"][data-s5-yn-answer="no"] .s5-yn-no .s5-yn-check,
+.s5-yn-row[data-s5-yn-correct="no"][data-s5-yn-answer="yes"] .s5-yn-yes .s5-yn-check {
+  display: inline-block;
+  background: url('../img/q2-x.png') center / contain no-repeat;
+}
+
+/* כפתור הגדלה — bottom-right של ה-iframe הקטן */
+.s5-zoom-btn { display: none; }
+
+/* שורת CTA — מתחת ל-iframe, פותחת overlay מוגדל */
+.s5-zoom-cta {
+  position: absolute;
+  left: 919px; top: 916px;   /* iframe bottom: 322+578=900, gap 16px */
+  width: 650px;
+  background: none;
+  border: none;
+  font-family: var(--font-main);
+  font-size: 30px;
+  font-weight: var(--font-weight-bold);
+  color: #4338ca;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+  text-align: center;
+  direction: rtl;
+  padding: 0;
+  transition: color 0.15s;
+}
+.s5-zoom-cta:hover { color: #312e81; text-decoration: underline; }
+
+/* אייקון הזכוכית המגדלת בלבד מהבהב — הטקסט נשאר יציב */
+@keyframes s5-zoom-icon-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+.s5-zoom-cta-icon {
+  display: inline-block;
+  animation: s5-zoom-icon-pulse 1.8s ease-in-out infinite;
+}
+
+/* Zoom overlay — מכסה את כל הקנבס 1920×1080 */
+.s5-zoom-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.s5-zoom-overlay.open {
+  display: flex;
+}
+
+/* Modal box — ממלא את החלון הממשי ללא תלות בסקייל */
+.s5-zoom-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+/* כפתור סגירה של ה-zoom */
+.s5-zoom-close-btn {
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.s5-zoom-close-btn:hover { background: rgba(0,0,0,0.9); }
+
+/* iframe — ממלא את כל ה-modal */
+.s5-zoom-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+/* ============================================================
+   10. Questions — card, states, interactions
+   (QUES1–QUES7B)
+
+   States per question: main / help / tryagain / correct / incorrect
+   Types: dragdrop / radio / numeric
+
+   Full-canvas image clipping (applies to all Figma MCP assets):
+   All Figma exports are 1920×1080 with transparency outside the node.
+   Use overflow:hidden container + img with left:-X; top:-Y; width:1920px.
+   ============================================================ */
+/* ─── Question entrance animations ──────────────────────────
+   Sequential reveal: card → context+pic → question → options
+   Triggered by .screen.active (applied by goTo())
+   ============================================================ */
+@keyframes qFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes qFadeUpFlip {
+  from { opacity: 0; transform: translateY(14px) scaleX(-1); }
+  to   { opacity: 1; transform: scaleX(-1); }
+}
+
+/* Step 1 — white card + progress indicator (immediate) */
+#screen-q1.active  .q1-card,  #screen-q1.active  .q1-progress,
+#screen-q2.active  .q2-card,  #screen-q2.active  .q2-progress,
+#screen-q3.active  .q3-card,  #screen-q3.active  .q3-progress,
+#screen-q4.active  .q4-card,  #screen-q4.active  .q4-progress,
+#screen-q4b.active .q4b-card, #screen-q4b.active .q4b-progress,
+#screen-q4c.active .q4c-card, #screen-q4c.active .q4c-progress,
+#screen-q5.active  .q5-card,  #screen-q5.active  .q5-progress,
+#screen-q6.active  .q6-card,  #screen-q6.active  .q6-progress,
+#screen-q7.active  .q7-card,  #screen-q7.active  .q7-progress,
+#screen-q7b.active .q7b-card, #screen-q7b.active .q7b-progress {
+  animation: qFadeUp 0.4s ease 0.1s both;
+}
+
+/* Step 2a — context text (appears first, ~0.5s after card)
+   Q4 story is excluded — appears together with illustration at 3s */
+#screen-q1.active  .q1-context-text,
+#screen-q2.active  .q2-story,
+#screen-q3.active  .q3-story,
+#screen-q5.active  .q5-question,
+#screen-q6.active  .q6-narration,
+#screen-q7.active  .q7-narration {
+  animation: qFadeUp 0.4s ease 0.5s both;
+}
+/* Q7b: narration identical to Q7a — appear instantly, no re-animation */
+#screen-q7b.active .q7b-narration {
+  animation: none;
+  opacity: 1;
+}
+
+/* Step 2b — illustration — screens other than Q4
+   Q2 מקוצר: הכוסות עולות מהר יותר מאשר שאר המסכים (1s / 1.6s במקום 3s / 5s) */
+#screen-q2.active  .q2-cups-top  { animation: qFadeUp 0.4s ease 1s both; }
+#screen-q2.active  .q2-cups-bottom { animation: qFadeUp 0.4s ease 1.6s both; }
+
+#screen-q1.active  .q1-illu,
+#screen-q3.active  .q3-pic,
+#screen-q4b.active .q4b-illu,  #screen-q4b.active .q4b-stav,
+#screen-q4c.active .q4c-illu,  #screen-q4c.active .q4c-stav,
+#screen-q5.active  .q5-taarovet-a, #screen-q5.active .q5-taarovet-b,
+#screen-q6.active  .q6-img,
+#screen-q7.active  .q7-illu {
+  animation: qFadeUp 0.4s ease 3s both;
+}
+/* Q7b: illustration identical to Q7a — appear instantly */
+#screen-q7b.active .q7b-illu {
+  animation: none;
+  opacity: 1;
+}
+
+/* Q4b/Q4c bubbles */
+#screen-q4b.active .q4b-bubble,
+#screen-q4c.active .q4c-bubble {
+  animation: qFadeUp 0.4s ease 3s both;
+}
+
+/* Q4a — story + illustration appear right after card (0.3s) */
+#screen-q4.active  .q4-story,
+#screen-q4.active  .q4-illu,
+#screen-q4.active  .q4-stav,
+#screen-q4.active  .q4-bubble {
+  animation: qFadeUp 0.4s ease 0.3s both;
+}
+
+/* Step 3 — question text (6s — after illustration)
+   Q4a: JS-controlled (audio-gated), excluded here
+   Q5: question moved to 0.5s (step 2a), options moved here at 6s */
+#screen-q1.active  .q1-instruction,
+#screen-q3.active  .q3-question,
+#screen-q5.active  .q5-options, #screen-q5.active  .q5-help-btn,
+#screen-q6.active  .q6-question,
+#screen-q7.active  .q7-question {
+  animation: qFadeUp 0.4s ease 6s both;
+}
+/* Q2 מקוצר — השאלה מגיעה זמן קצר אחרי שהכוסות עולות (2.6s במקום 6s) */
+#screen-q2.active  .q2-question {
+  animation: qFadeUp 0.4s ease 2.6s both;
+}
+/* Q7b: question appears quickly since no illustration to wait for */
+#screen-q7b.active .q7b-question {
+  animation: qFadeUp 0.4s ease 0.5s both;
+}
+
+/* Step 4 — answer options + chips + sentence texts + buttons (9s)
+   Q4a: JS-controlled, excluded here */
+#screen-q1.active  .q1-drop,  #screen-q1.active  .q1-wordbank,  #screen-q1.active  .q1-chip,
+#screen-q1.active  .q1-stem,  #screen-q1.active  .q1-circle,
+#screen-q3.active  .q3-options,
+#screen-q6.active  .q6-options,
+#screen-q7.active  .q7-drop,  #screen-q7.active  .q7-chips,
+#screen-q7.active  .q7-batch-desc,  #screen-q7.active  .q7-litrim,
+#screen-q7.active  .q7-five-text,   #screen-q7.active  .q7-manot-text,
+#screen-q7.active  .q7-thirty-text,
+/* Help/app buttons animate at 9s — submit buttons are JS-gated (appear on selection) */
+#screen-q1.active  .q1-help-btn,
+#screen-q3.active  .q3-help-btn,  #screen-q3.active  .q3-app-btn,
+#screen-q6.active  .q6-help-btn,
+#screen-q7.active  .q7-help-btn {
+  animation: qFadeUp 0.4s ease 9s both;
+}
+/* Q2 מקוצר — המסיחים/כפתורי עזרה-יישומון עולים שנייה אחרי שהשאלה מסיימת לעלות (2.6s+0.4s+1s) */
+#screen-q2.active  .q2-options,
+#screen-q2.active  .q2-help-btn,  #screen-q2.active  .q2-app-btn {
+  animation: qFadeUp 0.4s ease 4s both;
+}
+/* Q7b left side — drops, chips, texts animate at 3s (after question at 0.5s) */
+#screen-q7b.active .q7b-drop,  #screen-q7b.active .q7b-chips,
+#screen-q7b.active .q7b-blue-text,  #screen-q7b.active .q7b-blue-litrim,
+#screen-q7b.active .q7b-yellow-text, #screen-q7b.active .q7b-yellow-litrim,
+#screen-q7b.active .q7b-help-btn {
+  animation: qFadeUp 0.4s ease 3s both;
+}
+
+/* ── Q4a — JS-gated: hidden until .q4-revealed added by JS after audio ends ── */
+#screen-q4 .q4-question,
+#screen-q4 .q4-options,
+#screen-q4 .q4-submit-btn, #screen-q4 .q4-help-btn, #screen-q4 .q4-app-btn {
+  opacity: 0;
+  pointer-events: none;
+}
+#screen-q4 .q4-question.q4-revealed  { animation: qFadeUp 0.4s ease both; pointer-events: auto; }
+#screen-q4 .q4-options.q4-revealed,
+#screen-q4 .q4-submit-btn.q4-revealed,
+#screen-q4 .q4-help-btn.q4-revealed,
+#screen-q4 .q4-app-btn.q4-revealed   { animation: qFadeUp 0.4s ease 2.5s both; pointer-events: auto; }
+
+/* ── Q4b / Q4c — illustration already "seen"; appears fast, only question+options animate ── */
+#screen-q4b.active .q4b-story,
+#screen-q4b.active .q4b-illu, #screen-q4b.active .q4b-stav, #screen-q4b.active .q4b-bubble,
+#screen-q4c.active .q4c-story,
+#screen-q4c.active .q4c-illu, #screen-q4c.active .q4c-stav, #screen-q4c.active .q4c-bubble {
+  animation: qFadeUp 0.3s ease 0.1s both;
+}
+#screen-q4b.active .q4b-question,
+#screen-q4c.active .q4c-question {
+  animation: qFadeUp 0.4s ease 0.5s both;
+}
+#screen-q4b.active .q4b-options,
+#screen-q4b.active .q4b-help-btn, #screen-q4b.active .q4b-app-btn,
+#screen-q4c.active .q4c-input,
+#screen-q4c.active .q4c-help-btn, #screen-q4c.active .q4c-app-btn {
+  animation: qFadeUp 0.4s ease 3.5s both;
+}
+
+/* ─── QUES1 ──────────────────────────────────────────────────
+   Figma frames: 2:5 (main) | 6:67 (help) | 6:202 (tryagain)
+                 6:113 (correct) | 6:242 (incorrect)
+   סוג: Drag & Drop Word Bank — 3 blanks, 6 chips
+   ──────────────────────────────────────────────────────────── */
+
+/* רקע — node 1:1250, 2038×1164, left=-25, top=-84 */
+.q1-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  display: block;
+}
+
+/* אוברליי כהה — Rectangle 2 (CSS-only: rgba(0,0,0,0.451), 1946×1110, left=-26, top=-15)
+   מוחלף ב-div CSS ללא תמונה — SVG היה rgba(0,0,0,0.451) פשוט */
+.q1-overlay {
+  position: absolute;
+  left: -26px;
+  top: -15px;
+  width: 1946px;
+  height: 1110px;
+  background: rgba(0, 0, 0, 0.451);
+  pointer-events: none;
+}
+
+/* כרטיס שאלה — node 2:54, 1618×802, left=151, top=139 */
+.q1-card {
+  position: absolute;
+  left: 151px;
+  top: 139px;
+  width: 1618px;
+  height: 802px;
+  display: block;
+}
+
+/* מסגרת כרטיס — overlay בגודל הכרטיס עם border-radius תואם
+   מוצג במצב CORRECT עם מסגרת ירוקה, כנדרש בפיגמה */
+.q1-card-border {
+  display: none;
+  position: absolute;
+  left: 151px;
+  top: 139px;
+  width: 1618px;
+  height: 802px;
+  border-radius: 40px;
+  border: 7px solid transparent;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* מחוון התקדמות — node 5:30, 371×48, left=1512, top=39 */
+.q1-progress {
+  position: absolute;
+  left: 1512px;
+  top: 39px;
+  width: 371px;
+  height: 48px;
+  display: block;
+}
+
+/* כפתור עזרה — node 2:59, 140×140, left=8, top=17 */
+.q1-help-btn {
+  position: absolute;
+  left: 8px;
+  top: 17px;
+  width: 140px;
+  height: 140px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 60;  /* above help popup (z:51) + overlay (z:50) */
+  outline: none;
+}
+.q1-help-btn img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* איור — node 2:62, 501×408, left=1155, top=445 */
+.q1-illu {
+  position: absolute;
+  left: 1155px;
+  top: 445px;
+  width: 501px;
+  height: 408px;
+  display: block;
+}
+
+/* טקסט הקשר — node 2:60
+   right edge at x=1656 → right: 1920-1656 = 264px; top=229
+   Assistant SemiBold 600, 33.333px, lh=41px */
+.q1-context-text {
+  position: absolute;
+  right: 264px;
+  top: 229px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right;
+  white-space: nowrap;
+  direction: rtl;
+}
+.q1-context-text p { margin: 0; }
+
+/* הנחיית שאלה — node 2:63
+   right edge at x=914 → right: 1920-914 = 1006px; top=229
+   Assistant Bold 700, 33.333px */
+.q1-instruction {
+  position: absolute;
+  right: 1006px;
+  top: 229px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right;
+  white-space: nowrap;
+  direction: rtl;
+}
+.q1-instruction p,
+.q1-instruction .q1-instruction-num-line { margin: 0; }
+
+/* עיגולי bullet — nodes 2:66/2:75/2:81 — 19×19 */
+.q1-circle {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+.q1-circle-1 { left: 895px; top: 370px; }
+.q1-circle-2 { left: 895px; top: 433px; }
+.q1-circle-3 { left: 895px; top: 497px; }
+
+/* גזעי משפטים — nodes 2:68/2:72/2:79
+   right edge at x=881 → right: 1920-881 = 1039px
+   Assistant SemiBold 600, 33.333px, lh=41px */
+.q1-stem {
+  position: absolute;
+  right: 1039px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right;
+  white-space: nowrap;
+  margin: 0;
+  direction: rtl;
+}
+.q1-stem-1 { top: 355px; }
+.q1-stem-2 { top: 418px; }
+.q1-stem-3 { top: 482px; }
+/* "כוסות" — node 2:70, right edge x=334 → right: 1920-334 = 1586px; top=355 */
+.q1-stem-suffix {
+  right: 1586px;
+  top: 355px;
+}
+
+/* ─── Drop zones ─────────────────────────────────────────── */
+.q1-drop {
+  position: absolute;
+  width: 163px;
+  height: 49px;
+  cursor: pointer;
+}
+#q1-drop-1 { left: 348px; top: 355px; }
+#q1-drop-2 { left: 205px; top: 414px; }
+#q1-drop-3 { left: 191px; top: 474px; }
+
+/* Empty drop zone — background image fills zone */
+.q1-drop .q1-drop-empty-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  pointer-events: none;
+}
+
+/* Filled chip inside drop zone — 163×41, centered vertically in 49px zone */
+.q1-drop .q1-drop-chip {
+  position: absolute;
+  left: 0;
+  top: 4px;         /* center: (49-41)/2 = 4px */
+  width: 163px;
+  height: 41px;
+  display: none;    /* shown when q1-drop-filled */
+  align-items: center;
+  justify-content: center;
+  background-image: url('../img/q1-chip-bg.png');
+  background-size: 100% 100%;
+  border-radius: 9px;
+}
+
+/* When drop zone is filled */
+.q1-drop.q1-drop-filled .q1-drop-empty-bg { display: none; }
+.q1-drop.q1-drop-filled .q1-drop-chip     { display: flex; }
+
+/* Correct state — green chip border + correct background */
+#screen-q1[data-q-state="correct"] .q1-drop.q1-drop-correct-style .q1-drop-chip {
+  background-image: url('../img/q1-chip-correct.png');
+  border: 4px solid #19963c;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+/* Per-drop feedback: green for correct position, red for wrong position */
+/* Applies in tryagain AND incorrect states */
+#screen-q1[data-q-state="tryagain"]  .q1-drop.q1-drop-correct-style .q1-drop-chip,
+#screen-q1[data-q-state="incorrect"] .q1-drop.q1-drop-correct-style .q1-drop-chip {
+  border: 4px solid #19963c;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+#screen-q1[data-q-state="tryagain"]  .q1-drop.q1-drop-wrong-style .q1-drop-chip,
+#screen-q1[data-q-state="incorrect"] .q1-drop.q1-drop-wrong-style .q1-drop-chip {
+  border: 4px solid #c62828;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+/* Drop zone label */
+.q1-drop-label {
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 28px;
+  line-height: 35px;
+  letter-spacing: 0.1094px;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  direction: rtl;
+}
+
+/* ─── Word bank chips ────────────────────────────────────── */
+.q1-chip {
+  position: absolute;
+  width: 163px;
+  height: 41px;
+  cursor: grab;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* Chip positions from Figma */
+#q1-chip-5     { left: 742px; top: 568px; }
+#q1-chip-6     { left: 742px; top: 630px; }
+#q1-chip-kahol { left: 553px; top: 568px; }
+#q1-chip-tsahov{ left: 553px; top: 631px; }
+#q1-chip-hamim { left: 359px; top: 567px; }
+#q1-chip-karir { left: 359px; top: 630px; }
+
+/* Chip background image */
+.q1-chip-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+/* Chip label text — Hebrew words */
+.q1-chip-label {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 28px;
+  line-height: 35px;
+  letter-spacing: 0.1094px;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  direction: rtl;
+}
+/* Number chips (5, 6) — 33.333px as per Figma */
+.q1-chip-label-num {
+  font-size: 33.333px;
+  letter-spacing: 0.1302px;
+}
+
+/* Chip placed — hide from word bank */
+.q1-chip.q1-chip-placed {
+  display: none;
+}
+
+/* Chip while dragging */
+.q1-chip.q1-chip-dragging {
+  opacity: 0.6;
+}
+
+/* ─── Submit button ──────────────────────────────────────── */
+/* node 2:67 (CHECK 1), 209×137, left=190, top=716
+   Default: hidden — only shown when all 3 drop zones are filled
+   (JS sets data-q-submit-ready="true" on #screen-q1) */
+.q1-submit-btn {
+  position: absolute;
+  left: 190px;
+  top: 716px;
+  width: 209px;
+  height: 137px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  z-index: 2;
+  display: none;
+}
+.q1-submit-btn img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* Show submit only when all drops are filled */
+#screen-q1[data-q-submit-ready="true"] .q1-submit-btn { display: block; }
+
+/* ─── State visibility ──────────────────────────────────── */
+
+/* TRYAGAIN: show error text, hide submit */
+.q1-tryagain-text { display: none; }
+#screen-q1[data-q-state="tryagain"] .q1-tryagain-text { display: block; }
+#screen-q1[data-q-state="tryagain"] .q1-submit-btn    { display: none; }
+
+/* CORRECT / INCORRECT: feedback wrapper
+   display:contents — wrapper has no box of its own;
+   children (.q1-feedback-bg-img, texts) position relative to #screen-q1 (1920px wide).
+   This fixes right:1033px resolving against the full 1920px canvas width. */
+.q1-feedback        { display: none; }
+.q1-feedback-bg-img { display: none; position: absolute; object-fit: fill; pointer-events: none; }
+.q1-feedback-correct-text   { display: none; }
+.q1-feedback-incorrect-text { display: none; }
+
+/* CORRECT */
+#screen-q1[data-q-state="correct"] .q1-feedback            { display: contents; }
+#screen-q1[data-q-state="correct"] .q1-feedback-bg-img     { display: block; left: 196px; top: 690px; width: 718px; height: 193px; }
+#screen-q1[data-q-state="correct"] .q1-feedback-correct-text   { display: block; }
+#screen-q1[data-q-state="correct"] .q1-submit-btn          { display: none; }
+#screen-q1[data-q-state="correct"] .q1-tryagain-text       { display: none; }
+/* Green card border in CORRECT state — מוסתר לפי עיצוב */
+/* #screen-q1[data-q-state="correct"] .q1-card-border { display: block; border-color: #19963c; } */
+
+/* INCORRECT */
+#screen-q1[data-q-state="incorrect"] .q1-feedback            { display: contents; }
+#screen-q1[data-q-state="incorrect"] .q1-feedback-bg-img     { display: block; left: 187px; top: 695px; width: 718px; height: 193px; }
+#screen-q1[data-q-state="incorrect"] .q1-feedback-incorrect-text { display: block; }
+#screen-q1[data-q-state="incorrect"] .q1-submit-btn          { display: none; }
+#screen-q1[data-q-state="incorrect"] .q1-tryagain-text       { display: none; }
+
+/* CORRECT/INCORRECT: lock chips and drops */
+#screen-q1[data-q-state="correct"]   .q1-chip,
+#screen-q1[data-q-state="incorrect"] .q1-chip {
+  pointer-events: none;
+  cursor: default;
+}
+#screen-q1[data-q-state="correct"]   .q1-drop,
+#screen-q1[data-q-state="incorrect"] .q1-drop {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* ─── Try again error text ───────────────────────────────── */
+/* node from 6:202, right edge x=905, top=758 → right:1015
+   color:#a93d2c, Assistant SemiBold 600, 33.333px */
+.q1-tryagain-text {
+  position: absolute;
+  right: 1015px;
+  top: 758px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right;
+  white-space: nowrap;
+  direction: rtl;
+}
+.q1-tryagain-text p { margin: 0; }
+
+/* "נסו שוב" — clickable action inside tryagain text */
+.q1-tryagain-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: var(--color-tryagain);
+  text-decoration: underline;
+  cursor: pointer;
+  display: inline;
+}
+
+/* ─── Feedback texts ────────────────────────────────────── */
+/* Figma approach: line-height:0 on container, 41px on each <p>
+   This prevents container leading from adding phantom whitespace rows.
+   white-space is NOT pre-wrap — HTML indentation must not render as blank lines. */
+
+/* Correct — node 6:159, right edge x=887, top=705 → right:1033 */
+.q1-feedback-correct-text {
+  position: absolute;
+  right: 1033px;
+  top: 705px;
+  width: 670px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 30px;
+  line-height: 0;
+  letter-spacing: 0.1172px;
+  color: #ffffff;
+  text-align: right;
+  direction: rtl;
+}
+.q1-feedback-correct-text p {
+  margin: 0;
+  line-height: 41px;
+}
+.q1-feedback-correct-text strong { font-weight: var(--font-weight-bold); }
+
+/* Incorrect — node 6:279, right edge x=878, top=710 → right:1042 */
+.q1-feedback-incorrect-text {
+  position: absolute;
+  right: 1042px;
+  top: 710px;
+  width: 670px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 30px;
+  line-height: 0;
+  letter-spacing: 0.1172px;
+  color: #ffffff;
+  text-align: right;
+  direction: rtl;
+}
+.q1-feedback-incorrect-text p {
+  margin: 0;
+  line-height: 41px;
+}
+.q1-feedback-incorrect-text strong { font-weight: var(--font-weight-bold); }
+
+/* ─── Help overlay + popup ───────────────────────────────── */
+
+/* Extra darkening overlay — hidden by default, shown when help open
+   node 6:104 in HELP state: left=-2, top=0, 1946×1110, rgba(0,0,0,0.451) */
+.q1-help-overlay {
+  display: none;
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 1946px;
+  height: 1110px;
+  background: rgba(0, 0, 0, 0.451);
+  z-index: 50;
+}
+
+/* Help popup container — node 6:108 (HELP_POPUP 1), 623×172, left=64, top=41 */
+.q1-help-popup {
+  display: none;
+  position: absolute;
+  left: 64px;
+  top: 17px;
+  width: 623px;
+  height: 172px;
+  z-index: 51;
+}
+
+.q1-help-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2.5px solid #2a2a2a;
+  background: #2a2a2a;
+  color: #f5f0d0;
+  font-size: 1.3rem;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 52;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.q1-help-close-btn:hover { background: #444; border-color: #444; }
+
+/* Inner container with overflow clip — mirrors Figma's inner overflow-hidden div */
+.q1-help-popup-inner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Help popup background image — clipped per Figma percentages:
+   h=146.34%, left=-7.53%, top=-12.6%, w=107.53% */
+.q1-help-popup-bg-img {
+  position: absolute;
+  height: 146.34%;
+  left: -7.53%;
+  top: -12.6%;
+  width: 107.53%;
+  max-width: none;
+  display: block;
+}
+
+/* Help text — Live HTML — node 6:111
+   Within popup: right edge at 623-(643-64)=44px; top=86-41=45px
+   Assistant SemiBold, 33.333px */
+.q1-help-text {
+  position: absolute;
+  right: 44px;
+  top: 45px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right;
+  white-space: nowrap;
+  direction: rtl;
+}
+.q1-help-text p { margin: 0; }
+
+/* Help open — show overlay + popup */
+#screen-q1[data-q-help="open"] .q1-help-overlay { display: block; }
+#screen-q1[data-q-help="open"] .q1-help-popup   { display: block; }
+
+/* Feedback wrapper — transparent positioning parent */
+.q1-feedback {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 0;
+}
+
+/* Input fields — preserve color when disabled */
+.timer-input:disabled {
+  cursor: default;
+  opacity: 1;
+  -webkit-text-fill-color: inherit; /* Safari */
+}
+
+/*
+   מבנה HTML צפוי לשאלה:
+
+   <section class="screen" data-screen="N" id="screen-q1">
+     <!-- רקע -->
+     <!-- כרטיס שאלה -->
+     <!-- help popup (מחוץ ל-.screen, ישירות ב-#app-scaler) -->
+     <!-- ניווט -->
+   </section>
+
+   NOTE: help popup חייב להיות מחוץ לכל .screen
+   (screen עם display:none הופך popup ל-invisible גם עם z-index)
+*/
+
+/*
+   ⚠ RTL flex alignment — כלל קריטי:
+   ב-flex עם direction:rtl (ירושה מ-html):
+     flex-start = physical RIGHT (היכן עברית מתחילה)
+     flex-end   = physical LEFT
+   השתמש ב-flex-start לאיזור ימין ב-RTL containers.
+*/
+
+/*
+   ⚠ Dynamic widget feedback — כרטיס חייב לגדול, לא לגלול:
+   card: min-height: <figma-height>; height: auto;
+   parent: overflow: visible;
+*/
+
+
+/* ============================================================
+   11. Animations & keyframes
+   ============================================================ */
+
+/* Sequential float-in (for chat/WhatsApp screens if needed) */
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Help popup — עיצוב אחיד: תמונת רקע מקורית ─── */
+.q2-help-popup, .q3-help-popup {
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* background delivered as <img> so it loads with the DOM (no async CSS bg flash) */
+.help-popup-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 0;
+}
+.q4-help-popup, .q4b-help-popup, .q4c-help-popup {
+  box-sizing: border-box;
+  overflow: visible;
+}
+.q5-help-popup, .q6-help-popup, .q7-help-popup, .q7b-help-popup {
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* X close button inside Q2–Q7b help popups */
+.help-popup-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2.5px solid #2a2a2a;
+  background: #2a2a2a;
+  color: #f5f0d0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.help-popup-close-btn:hover { background: #444; border-color: #444; }
+
+/* ── Help popup — fade-in אחיד לכל השאלות ─────────────────── */
+@keyframes helpPopupFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* כל popup עזרה שמוצג — אנימציה אחידה */
+#screen-q1[data-q-help="open"]   .q1-help-popup,
+#screen-q2[data-q2-help="true"]  .q2-help-popup,
+#screen-q3[data-q3-help="true"]  .q3-help-popup,
+#screen-q4[data-q4-help="true"]  .q4-help-popup,
+#screen-q4b[data-q4b-help="true"] .q4b-help-popup,
+#screen-q4c[data-q4c-help="true"] .q4c-help-popup,
+#screen-q5[data-q5-help="true"]  .q5-help-popup,
+#screen-q6[data-q6-help="true"]  .q6-help-popup,
+#screen-q7[data-q7-help="open"]  .q7-help-popup,
+#screen-q7b[data-q7b-help="open"] .q7b-help-popup {
+  animation: helpPopupFadeIn 0.18s ease-out both;
+}
+
+
+/* ============================================================
+   Utility
+   ============================================================ */
+.hidden {
+  display: none !important;
+}
+
+
+/* ============================================================
+   QUES2 — Single-choice radio question
+   Screen id: #screen-q2
+   State machine: data-q2-state="main|tryagain|correct|incorrect"
+   Help panel:   data-q2-help="true|false"
+   Applet modal: data-q2-applet-open on #q2-applet-overlay
+   Figma frames: 5:31 (main) | 7:195 (help) | 7:218 (tryagain)
+                 7:303 (correct) | 7:332 (incorrect)
+   Canvas: 1920×1080  RTL
+   ============================================================ */
+
+/* ── Background ── */
+.q2-bg {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.q2-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1;
+}
+
+/* ── Card ── */
+.q2-card {
+  position: absolute;
+  left: 151px; top: 139px;
+  width: 1618px; height: 802px;
+  z-index: 2;
+}
+
+/* ── Progress indicator ── */
+.q2-progress {
+  position: absolute;
+  left: 1512px; top: 39px;
+  width: 371px; height: 48px;
+  z-index: 10;
+  object-fit: fill;
+}
+
+/* all help buttons must allow tooltip to overflow outside their bounds */
+.q2-help-btn, .q3-help-btn, .q4-help-btn, .q4b-help-btn, .q4c-help-btn,
+.q5-help-btn, .q6-help-btn, .q7-help-btn, .q7b-help-btn { overflow: visible; }
+
+/* button image must render above the popup (popup is position:absolute z-index:9) */
+.q2-help-btn > img, .q3-help-btn > img, .q4-help-btn > img,
+.q4b-help-btn > img, .q4c-help-btn > img, .q5-help-btn > img,
+.q6-help-btn > img, .q7-help-btn > img, .q7b-help-btn > img {
+  position: relative; z-index: 10;
+}
+
+/* ── Help button ── */
+.q2-help-btn {
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+.q2-help-btn img {
+  width: 100%; height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+/* ── Help popup tooltip ── */
+.q2-help-popup {
+  position: absolute;
+  left: -34px; top: 28px; transform: none;
+  width: 659px; height: 235px;
+  z-index: 9; display: none;
+}
+.q2-help-popup p {
+  position: absolute;
+  top: calc(50% + -16px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  z-index: 1;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #3b2600; margin: 0;
+  text-align: right; direction: rtl;
+}
+#screen-q2[data-q2-help="true"] .q2-help-popup {
+  display: block;
+}
+
+/* ── App button (ישומון) ── */
+.q2-app-btn {
+  position: absolute;
+  left: 136px; top: 8px;
+  width: 141px; height: 141px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 8;
+}
+.q2-app-btn img {
+  width: 100%; height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+/* ── Story text (right column) — node 5:38 ── */
+.q2-story {
+  position: absolute;
+  left: 1122px; top: 192px;
+  width: 576px; height: 205px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2rem;        /* ~32px — 1px below Figma 33.333px as requested */
+  line-height: 40px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  overflow: hidden;
+}
+.q2-story p { margin: 0; }
+
+/* ── Question text (left column) — node 5:41 ── */
+.q2-question {
+  position: absolute;
+  left: 207px; top: 192px;
+  width: 863px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2rem;        /* ~32px — 1px below Figma 33.333px as requested */
+  line-height: 40px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q2-question p { margin: 0 0 4px 0; }
+.q2-question strong { font-weight: var(--font-weight-bold); }
+
+/* ── Illustration ── */
+.q2-pic { display: none; } /* replaced by .q2-illu */
+
+.q2-illu {
+  position: absolute;
+  left: 1109px; top: 420px;
+  width: 589px; height: 392px;
+  z-index: 5;
+}
+.q2-illu-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+/* Phase 1: top row — 2 yellow + plus + 3 blue */
+.q2-cups-top {
+  position: absolute;
+  top: 25px; left: 241px;
+  display: flex;
+  direction: ltr;
+  align-items: flex-end;
+  gap: 10px;
+}
+/* Phase 2: 12 blue cups — 2 rows of 6 */
+/* right edge aligns with B3 (rightmost blue above); shifted 60px left to center composition */
+.q2-cups-bottom {
+  position: absolute;
+  top: 170px; left: 107px;
+  width: 268px;
+  display: flex;
+  direction: ltr;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 5px 8px;
+}
+.q2-cup { width: 38px; height: auto; display: block; }
+.q2-cup-plus {
+  width: 22px; height: 22px;
+  object-fit: contain;
+  align-self: center;
+  margin-bottom: 12px;
+}
+
+/* ── Options ── */
+/* Figma: option text is 33.333px, wraps to 2 lines.
+   In flex layout we use 29px — close to Figma, readable, avoids lone-word orphan. */
+.q2-options {
+  position: absolute;
+  left: 219px; top: 395px;   /* הזזה 12px ימינה — קצה הטקסט מיושר עם השאלה */
+  width: 863px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.q2-option {
+  display: flex;
+  flex-direction: row;   /* direction:rtl → marker (first child) on RIGHT */
+  direction: rtl;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 7px 4px 7px 12px;  /* padding ימני מ-12 ל-4 — מיישר קצה טקסט עם השאלה */
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: rgba(255,255,255,0.60);
+  transition: background 0.12s;
+  user-select: none;
+}
+.q2-option:hover {
+  background: rgba(255,255,255,0.80);
+}
+
+/* Radio marker — 22px base circle (Figma circle is 19px PNG) */
+.q2-opt-marker {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid #4A7CC7;
+  background: transparent;
+  position: relative;           /* needed for ::after overlay */
+  overflow: visible;            /* allows V/X icon to extend beyond circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Option text — 29px: close to Figma 33px, avoids lone-word on short lines */
+.q2-opt-text {
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 1.9375rem;   /* 31px */
+  line-height: 1.42;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  flex: 1;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ── Option states ── */
+
+/* Selected — filled blue dot inside circle */
+.q2-option.q2-opt-selected {
+  background: rgba(255,255,255,0.75);
+}
+.q2-option.q2-opt-selected .q2-opt-marker {
+  border-color: #4A7CC7;
+}
+.q2-option.q2-opt-selected .q2-opt-marker::after {
+  content: '';
+  position: absolute;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: #4A7CC7;
+}
+
+/* Correct — keep circle, overlay Figma green-V PNG on top.
+   Figma: V is 21×18px, placed at left=126 top=12 within 143px group
+   (roughly centered on the 19px circle at left=124, top=15).            */
+.q2-option.q2-opt-correct {
+  cursor: default;
+}
+.q2-option.q2-opt-correct .q2-opt-marker {
+  border-color: #4A7CC7;  /* circle stays the same */
+  background: transparent;
+}
+.q2-option.q2-opt-correct .q2-opt-marker::after {
+  content: '';
+  position: absolute;
+  width: 30px; height: 26px;
+  top: 50%; left: 50%;
+  transform: translate(-46%, -54%);   /* ממוקם ממש מעל מרכז העיגול */
+  background: url('../img/q2-v.png') center / contain no-repeat;
+}
+
+/* Wrong — keep circle, overlay Figma red-X PNG on top.
+   Figma: X is 16×15px, placed at left=127 top=15 within 143px group. */
+.q2-option.q2-opt-wrong {
+  cursor: default;
+}
+.q2-option.q2-opt-wrong .q2-opt-marker {
+  border-color: #4A7CC7;  /* circle stays the same */
+  background: transparent;
+}
+.q2-option.q2-opt-wrong .q2-opt-marker::after {
+  content: '';
+  position: absolute;
+  width: 28px; height: 26px;
+  top: 50%; left: 50%;
+  transform: translate(-46%, -54%);   /* ממוקם ממש מעל מרכז העיגול */
+  background: url('../img/q2-x.png') center / contain no-repeat;
+}
+
+/* ── Submit button ── */
+.q2-submit-btn {
+  position: absolute;
+  left: 207px; top: 743px;
+  width: 209px; height: 137px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
+  display: none;
+  transition: opacity 0.15s, filter 0.15s;
+}
+.q2-submit-btn img {
+  width: 100%; height: 100%;
+  object-fit: fill;
+  display: block;
+}
+.q2-submit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* ── TryAgain message ── */
+.q2-tryagain-msg {
+  position: absolute;
+  left: 507px; top: 661px;  /* node 7:166 — מוצמד לפי פיגמה */
+  width: 563px;
+  z-index: 8;
+  display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right;
+  direction: rtl;
+}
+.q2-tryagain-msg p { margin: 0; }
+.q2-retry-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ── Feedback panel ──
+   Figma node 7:347 / 7:191: left=211, top=631, width=863, height=261
+   Text node: x=238.25→left-offset=27px from panel, y=640→top-offset=9px */
+.q2-feedback-panel {
+  position: absolute;
+  left: 211px; top: 612px;
+  width: 863px; height: 295px;
+  z-index: 9;          /* above options (z-index:6) and tryagain (z-index:8) */
+  display: none;
+  box-sizing: border-box;
+}
+.q2-feedback-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  border-radius: 14px;
+  pointer-events: none;
+}
+.q2-fb-correct,
+.q2-fb-incorrect {
+  position: relative;
+  z-index: 1;
+  padding: 9px 27px 14px 20px;
+  display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 36px;
+  letter-spacing: 0.1302px;
+  color: var(--color-feedback-text);
+  text-align: right;
+  direction: rtl;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+.q2-fb-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 6px 0;
+}
+.q2-fb-correct p,
+.q2-fb-incorrect p {
+  margin: 0 0 4px 0;
+}
+
+/* ── State rules ── */
+/* MAIN — default, everything shown except tryagain/feedback */
+#screen-q2[data-q2-state="main"] .q2-tryagain-msg { display: none; }
+#screen-q2[data-q2-state="main"] .q2-feedback-panel { display: none; }
+
+/* TRYAGAIN */
+#screen-q2[data-q2-state="tryagain"] .q2-tryagain-msg { display: block; }
+#screen-q2[data-q2-state="tryagain"] .q2-feedback-panel { display: none; }
+#screen-q2[data-q2-state="tryagain"] .q2-submit-btn { display: none; }
+
+/* CORRECT */
+#screen-q2[data-q2-state="correct"] .q2-feedback-panel { display: block; }
+#screen-q2[data-q2-state="correct"] .q2-fb-correct { display: block; }
+#screen-q2[data-q2-state="correct"] .q2-submit-btn { display: none; }
+#screen-q2[data-q2-state="correct"] .q2-tryagain-msg { display: none; }
+
+/* INCORRECT */
+#screen-q2[data-q2-state="incorrect"] .q2-feedback-panel { display: block; }
+#screen-q2[data-q2-state="incorrect"] .q2-fb-incorrect { display: block; }
+#screen-q2[data-q2-state="incorrect"] .q2-submit-btn { display: none; }
+#screen-q2[data-q2-state="incorrect"] .q2-tryagain-msg { display: none; }
+/* Show submit only after answer selected */
+#screen-q2[data-q-submit-ready="true"][data-q2-state="main"] .q2-submit-btn { display: block; }
+
+/* Lock options when done */
+#screen-q2[data-q2-state="correct"] .q2-option,
+#screen-q2[data-q2-state="incorrect"] .q2-option {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── Applet modal ── */
+.q2-applet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.q2-applet-overlay.open { display: flex; }
+.q2-applet-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.q2-applet-close-btn {
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.q2-applet-close-btn:hover { background: rgba(0,0,0,0.9); }
+.q2-applet-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: none; display: block;
+}
+/* /QUES2 ============================================================ */
+
+
+/* ============================================================
+   QUES3 — Single-choice radio question (4 options)
+   Screen id: #screen-q3
+   State: data-q3-state="main|tryagain|correct|incorrect"
+   Help:  data-q3-help="true|false"
+   Figma: 7:358 (main) | 7:388 (help) | 7:422 (tryagain)
+          7:451 (correct) | 7:491 (incorrect)
+   Reuses from QUES2:
+     Images — q2-bg, q2-card, q2-help-btn, q2-help-popup-bg,
+               q2-app-btn, q2-submit, q2-feedback-bg, q2-v, q2-x, q2-circle
+     CSS    — .q2-option, .q2-opt-marker, .q2-opt-text,
+               .q2-opt-selected/.correct/.wrong (unscoped → work in any screen)
+   ============================================================ */
+
+/* ── Background / overlay / card — identical to QUES2 ── */
+.q3-bg {
+  position: absolute; inset: 0;
+  width: 1920px; height: 1080px;
+  object-fit: cover; object-position: center; z-index: 0;
+}
+.q3-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.35); z-index: 1;
+}
+.q3-card {
+  position: absolute;
+  left: 151px; top: 139px;
+  width: 1618px; height: 802px; z-index: 2;
+}
+
+/* ── Progress — 3_SELECTED (same position as q2) ── */
+.q3-progress {
+  position: absolute;
+  left: 1512px; top: 39px;
+  width: 371px; height: 48px;
+  z-index: 10; object-fit: fill;
+}
+
+/* ── Help button — same position as QUES2 ── */
+.q3-help-btn {
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: transparent; border: none;
+  padding: 0; cursor: pointer; z-index: 10;
+}
+.q3-help-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* ── Help popup — QUES3: Figma left:60, top:40, w:535, h:172 ── */
+.q3-help-popup {
+  position: absolute;
+  left: 49px; top: 25px; transform: none;
+  width: 427px; height: 223px;
+  z-index: 9; display: none;
+}
+.q3-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -18px); transform: translateY(-50%);
+  right: 44px; left: 63px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #3b2600; margin: 0;
+  text-align: right; direction: rtl;
+}
+#screen-q3[data-q3-help="true"] .q3-help-popup { display: block; }
+
+/* ── App button — same position as QUES2 ── */
+.q3-app-btn {
+  position: absolute;
+  left: 136px; top: 8px;
+  width: 141px; height: 141px;
+  background: transparent; border: none;
+  padding: 0; cursor: pointer; z-index: 8;
+}
+.q3-app-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* ── Story text (right column) — Figma: right-edge=1699, w=720 → left=979 ── */
+.q3-story {
+  position: absolute;
+  left: 979px; top: 192px;
+  width: 720px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2rem; line-height: 40px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right; direction: rtl; overflow: hidden;
+}
+.q3-story p { margin: 0 0 4px 0; }
+
+/* ── Question text (left column) — Figma: right-edge=947, w=740 → left=207 ── */
+.q3-question {
+  position: absolute;
+  left: 207px; top: 192px;
+  width: 740px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2rem; line-height: 40px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right; direction: rtl;
+}
+.q3-question p { margin: 0 0 4px 0; }
+.q3-question strong { font-weight: var(--font-weight-bold); }
+
+/* ── Illustration — bucket pouring (⚠️ q3-pic.png contains "2 ליטר" — needs clean export) ── */
+.q3-pic {
+  position: absolute;
+  left: 1100px; top: 360px;
+  width: 330px; height: 297px;
+  z-index: 5; object-fit: contain;
+}
+
+/* ── Characters — shocked girls ── */
+.q3-girls {
+  position: absolute;
+  left: 1200px; top: 680px;
+  width: 500px; height: 440px;
+  z-index: 5; object-fit: contain;
+}
+
+/* ── Options container — 4 options; rows reuse .q2-option CSS ── */
+.q3-options {
+  position: absolute;
+  left: 219px; top: 345px;
+  width: 730px;
+  z-index: 6;
+  display: flex; flex-direction: column; gap: 7px;
+}
+
+/* ── Submit button — same position as QUES2 ── */
+.q3-submit-btn {
+  position: absolute;
+  left: 207px; top: 743px;
+  width: 209px; height: 137px;
+  background: transparent; border: none;
+  padding: 0; cursor: pointer; z-index: 10;
+  display: none;
+  transition: opacity 0.15s, filter 0.15s;
+}
+.q3-submit-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+.q3-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* ── TryAgain message — Figma top:655 ── */
+.q3-tryagain-msg {
+  position: absolute;
+  left: 207px; top: 655px;
+  width: 740px;
+  z-index: 8; display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right; direction: rtl;
+}
+.q3-tryagain-msg p { margin: 0; }
+.q3-retry-btn {
+  background: none; border: none;
+  color: inherit;
+  font-family: inherit; font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: pointer; padding: 0;
+}
+
+/* ── Feedback panel — Figma left:191, top:631, w:759, h:269 ── */
+.q3-feedback-panel {
+  position: absolute;
+  left: 191px; top: 618px;
+  width: 759px; height: 285px;
+  z-index: 9; display: none; box-sizing: border-box;
+}
+.q3-feedback-bg-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: fill; z-index: 0;
+  border-radius: 14px; pointer-events: none;
+}
+.q3-fb-correct,
+.q3-fb-incorrect {
+  position: relative; z-index: 1;
+  padding: 9px 27px 14px 20px;
+  display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 33px;
+  letter-spacing: 0.1302px;
+  color: var(--color-feedback-text);
+  text-align: right; direction: rtl;
+  height: 100%; box-sizing: border-box; overflow: hidden;
+}
+.q3-fb-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 6px 0;
+}
+.q3-fb-correct p, .q3-fb-incorrect p { margin: 0 0 4px 0; }
+
+/* ── State visibility rules ── */
+#screen-q3[data-q3-state="main"] .q3-tryagain-msg   { display: none; }
+#screen-q3[data-q3-state="main"] .q3-feedback-panel { display: none; }
+
+#screen-q3[data-q3-state="tryagain"] .q3-tryagain-msg   { display: block; }
+#screen-q3[data-q3-state="tryagain"] .q3-feedback-panel { display: none; }
+#screen-q3[data-q3-state="tryagain"] .q3-submit-btn     { display: none; }
+
+#screen-q3[data-q3-state="correct"] .q3-feedback-panel { display: block; }
+#screen-q3[data-q3-state="correct"] .q3-fb-correct     { display: block; }
+#screen-q3[data-q3-state="correct"] .q3-submit-btn     { display: none; }
+#screen-q3[data-q3-state="correct"] .q3-tryagain-msg   { display: none; }
+
+#screen-q3[data-q3-state="incorrect"] .q3-feedback-panel { display: block; }
+#screen-q3[data-q3-state="incorrect"] .q3-fb-incorrect   { display: block; }
+#screen-q3[data-q3-state="incorrect"] .q3-submit-btn     { display: none; }
+#screen-q3[data-q-submit-ready="true"][data-q3-state="main"] .q3-submit-btn { display: block; }
+#screen-q3[data-q3-state="incorrect"] .q3-tryagain-msg   { display: none; }
+
+/* Lock options in final states (targets .q2-option rows inside #screen-q3) */
+#screen-q3[data-q3-state="correct"] .q2-option,
+#screen-q3[data-q3-state="incorrect"] .q2-option {
+  cursor: default; pointer-events: none;
+}
+
+/* ── Applet modal — same structure as QUES2 ── */
+.q3-applet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 9999; display: none;
+  align-items: center; justify-content: center;
+}
+.q3-applet-overlay.open { display: flex; }
+.q3-applet-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.q3-applet-close-btn {
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.65); color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%; font-size: 22px;
+  cursor: pointer; z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+}
+.q3-applet-close-btn:hover { background: rgba(0,0,0,0.9); }
+.q3-applet-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: none; display: block;
+}
+/* /QUES3 ============================================================ */
+
+/* ============================================================
+   QUES4A — Multi-select radio, screen-q4
+   Figma: 7:526 (main), 9:1183 (help), 9:1222 (tryagain),
+          9:1264 (correct), 9:1309 (incorrect)
+   Correct answers: options 2 (2/3 = 16/X) and 4 (3/2 = X/16)
+   ⚠️  q4-stav.png contains "16 ליטר" — needs clean Figma export
+   ============================================================ */
+
+/* — Background / Overlay / Card — */
+.q4-bg {
+  position: absolute;
+  left: -25px; top: -84px;
+  width: 2038px; height: 1164px;
+  object-fit: cover; pointer-events: none;
+}
+.q4-overlay {
+  position: absolute;
+  left: -26px; top: -15px;
+  width: 1946px; height: 1110px;
+  background: rgba(0,0,0,0.40);
+  pointer-events: none;
+}
+.q4-card {
+  position: absolute;
+  left: 51px; top: 163px;
+  width: 1618px; height: 802px;
+  pointer-events: none;
+}
+
+/* — Progress — */
+.q4-progress {
+  position: absolute;
+  left: 1513px; top: 39px;
+  width: 371px; height: 48px;
+  pointer-events: none; z-index: 5;
+}
+
+/* — Help button — */
+.q4-help-btn {
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 10;
+}
+.q4-help-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* — Help popup tooltip — */
+/* Figma 9:1183: popup bg at left:37px top:25px w:596px h:131px; text at top:65px right-aligned */
+.q4-help-popup {
+  position: absolute;
+  left: -4px; top: 45px; transform: none;
+  width: 609px; height: 201px;
+  z-index: 9; display: none;
+  box-sizing: border-box;
+}
+.q4-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -17px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem;
+  line-height: 41px;
+  color: #3b2600; margin: 0;
+  text-align: right; direction: rtl;
+}
+#screen-q4[data-q4-help="true"] .q4-help-popup { display: block; }
+
+/* — Applet button (ישומון) — */
+.q4-app-btn {
+  position: absolute;
+  left: 136px; top: 8px;
+  width: 141px; height: 141px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 8;
+}
+.q4-app-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* — Narration bubble shape — */
+.q4-bubble {
+  display: none;
+}
+
+/* — Story text — right side inside card */
+.q4-story {
+  position: absolute;
+  top: 192px; right: 330px;
+  width: 750px;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  white-space: normal;
+  z-index: 6;
+}
+.q4-story p { margin: 0; white-space: normal; }
+
+/* — Question text — */
+.q4-question {
+  position: absolute;
+  left: 80px; top: 192px;
+  width: 820px;
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.42;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right; direction: rtl;
+  z-index: 6;
+}
+.q4-question p { margin: 0 0 2px; }
+.q4-question .q4-q-sub {
+  font-weight: var(--font-weight-regular);
+  font-size: 2rem;
+}
+
+/* — Illustration & teacher character — */
+.q4-illu {
+  position: absolute;
+  left: 994px; top: 570px;
+  width: 413px; height: 338px;
+  pointer-events: none; z-index: 5;
+}
+.q4-stav {
+  position: absolute;
+  left: 1340px; top: 600px;
+  width: 545px; height: 452px;
+  pointer-events: none; z-index: 5;
+}
+
+/* ── Answer options — horizontal row ────────────────────── */
+.q4-options {
+  position: absolute;
+  left: 210px; top: 430px;
+  display: flex;
+  flex-direction: row;
+  gap: 45px;
+  direction: ltr;
+  z-index: 6;
+}
+
+/* option card — no card border (Figma shows none). Circle-only indicators. */
+.q4-option {
+  width: 145px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: 2.5px solid transparent;
+  border-radius: 10px;
+  padding: 8px 6px 10px;
+  box-sizing: border-box;
+  transition: none;
+}
+.q4-option.q4-opt-selected { /* no card change — circle only */ }
+.q4-option.q4-opt-correct   { /* no card change — circle only */ }
+.q4-option.q4-opt-wrong     { /* no card change — circle only */ }
+
+/* equation card */
+.q4-eq-area {
+  width: 100%; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* fraction equation — live HTML */
+.q4-eq-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem;       /* 33.333px — matches question text size */
+  font-weight: var(--font-weight-bold);
+  color: #232020;
+  line-height: 1;
+  direction: ltr;
+}
+.q4-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.q4-frac-num {
+  border-bottom: 2px solid #232020;
+  padding: 0 4px 2px;
+  text-align: center;
+  min-width: 18px;
+}
+.q4-frac-den {
+  padding: 2px 4px 0;
+  text-align: center;
+  min-width: 18px;
+}
+.q4-eq-sym {
+  line-height: 1;
+}
+
+/* circle indicator */
+.q4-circle {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid #4A7CC7;
+  background: transparent;
+  position: relative;
+  overflow: visible;
+  flex-shrink: 0;
+  transition: none;
+}
+
+/* SELECTED — outer blue ring + inner blue dot (radio-button style) */
+.q4-option.q4-opt-selected .q4-circle {
+  background: transparent;
+  border-color: #4A7CC7;
+}
+.q4-option.q4-opt-selected .q4-circle::before {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #4A7CC7;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* CORRECT — plain circle (no fill) + V icon overlaid; hide radio dot */
+.q4-option.q4-opt-correct .q4-circle {
+  background: transparent;
+  border-color: #4A7CC7;   /* keep default blue ring */
+}
+.q4-option.q4-opt-correct .q4-circle::before { display: none; }
+.q4-option.q4-opt-correct .q4-circle::after {
+  content: '';
+  position: absolute;
+  width: 26px; height: 22px;   /* V icon, slightly larger than circle so it covers ring */
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: url('../img/q4-v.png') center / contain no-repeat;
+}
+
+/* WRONG — plain circle (no fill) + X icon overlaid; hide radio dot */
+.q4-option.q4-opt-wrong .q4-circle {
+  background: transparent;
+  border-color: #c0392b;   /* red ring to signal error */
+}
+.q4-option.q4-opt-wrong .q4-circle::before { display: none; }
+.q4-option.q4-opt-wrong .q4-circle::after {
+  content: '';
+  position: absolute;
+  width: 22px; height: 20px;   /* X icon fits within ring */
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: url('../img/q4-x.png') center / contain no-repeat;
+}
+
+/* lock options in final states */
+#screen-q4[data-q4-state="correct"] .q4-option,
+#screen-q4[data-q4-state="incorrect"] .q4-option {
+  cursor: default; pointer-events: none;
+}
+
+/* — Submit button — */
+.q4-submit-btn {
+  position: absolute;
+  left: 207px; top: 743px;
+  width: 209px; height: 137px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 8;
+}
+.q4-submit-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+.q4-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* — Try again message — */
+.q4-tryagain-msg {
+  position: absolute;
+  left: 207px; top: 626px;
+  width: 740px;
+  z-index: 7; display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right; direction: rtl;
+}
+.q4-tryagain-msg p { margin: 0; }
+/* FIX #4: inherit red color from parent .q4-tryagain-msg */
+.q4-retry-btn {
+  background: none; border: none;
+  color: inherit;
+  font-family: var(--font-main);
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+
+/* — Feedback panel — */
+.q4-feedback-panel {
+  position: absolute;
+  left: 191px; top: 631px;
+  width: 759px; height: 239px;
+  z-index: 9; display: none;
+}
+.q4-feedback-bg-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: fill; pointer-events: none;
+}
+.q4-fb-correct,
+.q4-fb-incorrect {
+  position: absolute; inset: 0;
+  display: none;
+  padding: 12px 30px 10px 48px;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;               /* matches Figma line-height */
+  text-align: right; direction: rtl;
+  box-sizing: border-box;
+}
+.q4-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  margin: 0;
+}
+.q4-fb-correct p,
+.q4-fb-incorrect p { margin: 0; }
+
+/* — State visibility rules — */
+#screen-q4[data-q4-state="main"] .q4-tryagain-msg   { display: none; }
+#screen-q4[data-q4-state="main"] .q4-feedback-panel { display: none; }
+
+#screen-q4[data-q4-state="tryagain"] .q4-tryagain-msg   { display: block; }
+#screen-q4[data-q4-state="tryagain"] .q4-feedback-panel { display: none; }
+#screen-q4[data-q4-state="tryagain"] .q4-submit-btn     { display: none; }
+
+#screen-q4[data-q4-state="correct"] .q4-feedback-panel { display: block; }
+#screen-q4[data-q4-state="correct"] .q4-fb-correct     { display: block; }
+#screen-q4[data-q4-state="correct"] .q4-submit-btn     { display: none; }
+#screen-q4[data-q4-state="correct"] .q4-tryagain-msg   { display: none; }
+
+#screen-q4[data-q4-state="incorrect"] .q4-feedback-panel { display: block; }
+#screen-q4[data-q4-state="incorrect"] .q4-fb-incorrect   { display: block; }
+#screen-q4[data-q4-state="incorrect"] .q4-submit-btn     { display: none; }
+#screen-q4[data-q4-state="incorrect"] .q4-tryagain-msg   { display: none; }
+
+/* — Applet overlay — */
+.q4-applet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 9999; display: none;
+  align-items: center; justify-content: center;
+}
+.q4-applet-overlay.open { display: flex; }
+.q4-applet-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.q4-applet-close-btn {
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.65); color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%; font-size: 22px;
+  cursor: pointer; z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+}
+.q4-applet-close-btn:hover { background: rgba(0,0,0,0.9); }
+.q4-applet-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: none; display: block;
+}
+/* /QUES4A ============================================================ */
+
+/* ============================================================
+   QUES4B — Multi-select radio, screen-q4b
+   Figma: 9:1352 (main), 9:1666 (help), 9:1701 (tryagain),
+          9:1743 (correct), 9:1785 (incorrect)
+   Correct answers: options 2 (3/2 = 3·8/2·8) and 3 (3/2 = X/16)
+   Part 2 of Question 4 — shares background, character, illustration
+   with QUES4A. Same progress indicator (stays on 4).
+   ============================================================ */
+
+/* — Background / Overlay / Card (same assets as q4) — */
+.q4b-bg {
+  position: absolute;
+  left: -25px; top: -84px;
+  width: 2038px; height: 1164px;
+  object-fit: cover; pointer-events: none;
+}
+.q4b-overlay {
+  position: absolute;
+  left: -26px; top: -15px;
+  width: 1946px; height: 1110px;
+  background: rgba(0,0,0,0.40);
+  pointer-events: none;
+}
+.q4b-card {
+  position: absolute;
+  left: 51px; top: 163px;
+  width: 1618px; height: 802px;
+  pointer-events: none;
+}
+
+/* — Progress — stays on "4" (same asset as q4) */
+.q4b-progress {
+  position: absolute;
+  left: 1513px; top: 39px;
+  width: 371px; height: 48px;
+  pointer-events: none; z-index: 5;
+}
+
+/* — Help button — */
+.q4b-help-btn {
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 10;
+}
+.q4b-help-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* — Help popup tooltip —
+   Figma 9:1697: popup bg left:20px top:24px w:847px h:172px
+   Text: 3 lines — "שימו לב לצבע הצהוב..." */
+.q4b-help-popup {
+  position: absolute;
+  left: -64px; top: 2px; transform: none;
+  width: 962px; height: 246px;
+  z-index: 9; display: none;
+  box-sizing: border-box;
+}
+.q4b-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -22px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem; line-height: 41px;
+  color: #3b2600; margin: 0;
+  text-align: right; direction: rtl;
+}
+#screen-q4b[data-q4b-help="true"] .q4b-help-popup { display: block; }
+
+/* — Applet button (ישומון) — */
+.q4b-app-btn {
+  position: absolute;
+  left: 136px; top: 8px;
+  width: 141px; height: 141px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 8;
+}
+.q4b-app-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* — Narration bubble shape (same as q4) — */
+.q4b-bubble {
+  display: none;
+}
+
+/* — Story text — right side inside card */
+.q4b-story {
+  position: absolute;
+  top: 192px; right: 330px;
+  width: 750px;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  white-space: normal;
+  z-index: 6;
+}
+.q4b-story p { margin: 0; white-space: normal; }
+
+/* — Question text —
+   Figma 9:1359: left:148px top:192px width:799px
+   Bold: "4. ב. כמה ליטרים..." 2 lines
+   Regular: "סמנו..." 2 lines */
+.q4b-question {
+  position: absolute;
+  left: 132px; top: 192px;
+  width: 860px;
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.42;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right; direction: rtl;
+  z-index: 6;
+}
+.q4b-question p { margin: 0 0 2px; }
+.q4b-question .q4b-q-sub {
+  font-weight: var(--font-weight-regular);
+  font-size: 2rem;
+}
+
+/* — Illustration & teacher character (same assets as q4) — */
+.q4b-illu {
+  position: absolute;
+  left: 994px; top: 570px;
+  width: 413px; height: 338px;
+  pointer-events: none; z-index: 5;
+}
+.q4b-stav {
+  position: absolute;
+  left: 1340px; top: 600px;
+  width: 545px; height: 452px;
+  pointer-events: none; z-index: 5;
+}
+
+/* ── Answer options — 3 options horizontal row ───────────────
+   Figma positions: left:387, left:586, left:786 each 161px wide
+   Gap: 586-387-161 = 38px */
+.q4b-options {
+  position: absolute;
+  left: 317px; top: 406px;
+  display: flex;
+  flex-direction: row;
+  gap: 38px;
+  direction: ltr;
+  z-index: 6;
+}
+
+/* option card — no border, circle-only indicators */
+.q4b-option {
+  width: 161px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: 2.5px solid transparent;
+  border-radius: 10px;
+  padding: 8px 6px 10px;
+  box-sizing: border-box;
+  transition: none;
+}
+.q4b-option.q4b-opt-selected { /* no card change — circle only */ }
+.q4b-option.q4b-opt-correct   { /* no card change — circle only */ }
+.q4b-option.q4b-opt-wrong     { /* no card change — circle only */ }
+
+/* equation card area */
+.q4b-eq-area {
+  width: 100%; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* fraction equation — live HTML */
+.q4b-eq-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  color: #232020;
+  line-height: 1;
+  direction: ltr;
+}
+.q4b-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.q4b-frac-num {
+  border-bottom: 2px solid #232020;
+  padding: 0 3px 2px;
+  text-align: center;
+  min-width: 16px;
+}
+.q4b-frac-den {
+  padding: 2px 3px 0;
+  text-align: center;
+  min-width: 16px;
+}
+.q4b-eq-sym {
+  line-height: 1;
+}
+
+/* circle + label row */
+.q4b-circle-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+}
+.q4b-opt-label {
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  color: #232020;
+  line-height: 1;
+  direction: rtl;
+}
+
+/* circle indicator — identical system to q4 */
+.q4b-circle {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid #4A7CC7;
+  background: transparent;
+  position: relative;
+  overflow: visible;
+  flex-shrink: 0;
+  transition: none;
+}
+
+/* SELECTED — outer blue ring + inner blue dot */
+.q4b-option.q4b-opt-selected .q4b-circle {
+  background: transparent;
+  border-color: #4A7CC7;
+}
+.q4b-option.q4b-opt-selected .q4b-circle::before {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #4A7CC7;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* CORRECT — plain ring + V icon; hide radio dot */
+.q4b-option.q4b-opt-correct .q4b-circle {
+  background: transparent;
+  border-color: #4A7CC7;
+}
+.q4b-option.q4b-opt-correct .q4b-circle::before { display: none; }
+.q4b-option.q4b-opt-correct .q4b-circle::after {
+  content: '';
+  position: absolute;
+  width: 26px; height: 22px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: url('../img/q4-v.png') center / contain no-repeat;
+}
+
+/* WRONG — red ring + X icon; hide radio dot */
+.q4b-option.q4b-opt-wrong .q4b-circle {
+  background: transparent;
+  border-color: #c0392b;
+}
+.q4b-option.q4b-opt-wrong .q4b-circle::before { display: none; }
+.q4b-option.q4b-opt-wrong .q4b-circle::after {
+  content: '';
+  position: absolute;
+  width: 22px; height: 20px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: url('../img/q4-x.png') center / contain no-repeat;
+}
+
+/* lock options in final states */
+#screen-q4b[data-q4b-state="correct"] .q4b-option,
+#screen-q4b[data-q4b-state="incorrect"] .q4b-option {
+  cursor: default; pointer-events: none;
+}
+
+/* — Submit button (same position as q4) — */
+.q4b-submit-btn {
+  position: absolute;
+  left: 207px; top: 743px;
+  width: 209px; height: 137px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 8;
+  display: none;
+}
+.q4b-submit-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+.q4b-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* — Try again message —
+   Figma 9:1729: left ~178px top:581px — placed above submit btn */
+.q4b-tryagain-msg {
+  position: absolute;
+  left: 178px; top: 581px;
+  width: 740px;
+  z-index: 7; display: none;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right; direction: rtl;
+}
+.q4b-tryagain-msg p { margin: 0; }
+.q4b-retry-btn {
+  background: none; border: none;
+  color: inherit;
+  font-family: var(--font-main);
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+
+/* — Feedback panel —
+   Figma 9:1782: left:188px top:581px width:759px height:282px */
+.q4b-feedback-panel {
+  position: absolute;
+  left: 100px; top: 575px;
+  width: 880px; height: 270px;
+  z-index: 9; display: none;
+}
+.q4b-feedback-bg-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: fill; pointer-events: none;
+}
+.q4b-fb-correct,
+.q4b-fb-incorrect {
+  position: absolute; inset: 0;
+  display: none;
+  padding: 12px 30px 10px 48px;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 38px;
+  text-align: right; direction: rtl;
+  box-sizing: border-box;
+}
+.q4b-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: 2rem;
+  margin: 0;
+}
+.q4b-fb-correct p,
+.q4b-fb-incorrect p { margin: 0; }
+
+/* — State visibility rules — */
+#screen-q4b[data-q4b-state="main"] .q4b-tryagain-msg   { display: none; }
+#screen-q4b[data-q4b-state="main"] .q4b-feedback-panel { display: none; }
+
+#screen-q4b[data-q4b-state="tryagain"] .q4b-tryagain-msg   { display: block; }
+#screen-q4b[data-q4b-state="tryagain"] .q4b-feedback-panel { display: none; }
+#screen-q4b[data-q4b-state="tryagain"] .q4b-submit-btn     { display: none; }
+
+#screen-q4b[data-q4b-state="correct"] .q4b-feedback-panel { display: block; }
+#screen-q4b[data-q4b-state="correct"] .q4b-fb-correct     { display: block; }
+#screen-q4b[data-q4b-state="correct"] .q4b-submit-btn     { display: none; }
+#screen-q4b[data-q4b-state="correct"] .q4b-tryagain-msg   { display: none; }
+
+#screen-q4b[data-q4b-state="incorrect"] .q4b-feedback-panel { display: block; }
+#screen-q4b[data-q4b-state="incorrect"] .q4b-fb-incorrect   { display: block; }
+#screen-q4b[data-q4b-state="incorrect"] .q4b-submit-btn     { display: none; }
+#screen-q4b[data-q-submit-ready="true"][data-q4b-state="main"] .q4b-submit-btn { display: block; }
+#screen-q4b[data-q4b-state="incorrect"] .q4b-tryagain-msg   { display: none; }
+
+/* — Applet overlay — */
+.q4b-applet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 9999; display: none;
+  align-items: center; justify-content: center;
+}
+.q4b-applet-overlay.open { display: flex; }
+.q4b-applet-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.q4b-applet-close-btn {
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.65); color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%; font-size: 22px;
+  cursor: pointer; z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+}
+.q4b-applet-close-btn:hover { background: rgba(0,0,0,0.9); }
+.q4b-applet-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: none; display: block;
+}
+/* /QUES4B ============================================================ */
+
+/* ============================================================
+   QUES4C — Numeric Input question, screen-q4c
+   Figma: 9:1824 (main), 9:1854 (help), 9:1920 (tryagain),
+          9:1939 (correct), 9:1964 (incorrect)
+   Correct answer: 24 (ratio 3:2 × factor 8 → blue = 3×8)
+   Part 3 of Question 4 — shares background, character, illustration
+   with QUES4A and QUES4B. Same progress indicator (stays on 4).
+   ============================================================ */
+
+/* — Background / Overlay / Card (same assets as q4/q4b) — */
+.q4c-bg {
+  position: absolute;
+  left: -25px; top: -84px;
+  width: 2038px; height: 1164px;
+  object-fit: cover; pointer-events: none;
+}
+.q4c-overlay {
+  position: absolute;
+  left: -26px; top: -15px;
+  width: 1946px; height: 1110px;
+  background: rgba(0,0,0,0.40);
+  pointer-events: none;
+}
+.q4c-card {
+  position: absolute;
+  left: 51px; top: 163px;
+  width: 1618px; height: 802px;
+  pointer-events: none;
+}
+
+/* — Progress — stays on "4" (same asset as q4/q4b) */
+.q4c-progress {
+  position: absolute;
+  left: 1513px; top: 39px;
+  width: 371px; height: 48px;
+  pointer-events: none; z-index: 5;
+}
+
+/* — Help button — */
+.q4c-help-btn {
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 10;
+}
+.q4c-help-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* — Help popup tooltip —
+   Figma 9:1885: left:17 top:24 w:847 h:172 — same text as q4b help */
+.q4c-help-popup {
+  position: absolute;
+  left: -64px; top: 2px; transform: none;
+  width: 962px; height: 246px;
+  z-index: 9; display: none;
+  box-sizing: border-box;
+}
+.q4c-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -22px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem; line-height: 41px;
+  color: #3b2600; margin: 0;
+  text-align: right; direction: rtl;
+}
+#screen-q4c[data-q4c-help="true"] .q4c-help-popup { display: block; }
+
+/* — Applet button (ישומון) — */
+.q4c-app-btn {
+  position: absolute;
+  left: 136px; top: 8px;
+  width: 141px; height: 141px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 8;
+}
+.q4c-app-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* — Narration bubble shape (same as q4/q4b) — */
+.q4c-bubble {
+  display: none;
+}
+
+/* — Story text — right side inside card */
+.q4c-story {
+  position: absolute;
+  top: 192px; right: 330px;
+  width: 750px;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  white-space: normal;
+  z-index: 6;
+}
+.q4c-story p { margin: 0; white-space: normal; }
+
+/* — Question text —
+   Figma 9:1831: left ~131px (after -translate-x-full) top:229 w:815
+   Bold: "4. ג. מהו מספר..." 2 lines
+   Regular: "היעזרו ביישומון..." 1 line */
+.q4c-question {
+  position: absolute;
+  left: 145px; top: 192px;
+  width: 815px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem;          /* 33.333px */
+  font-weight: var(--font-weight-bold);
+  line-height: 1.23;
+  letter-spacing: 0.1302px;
+  color: #232020;
+  text-align: right; direction: rtl;
+  z-index: 6;
+}
+.q4c-question p { margin: 0 0 2px; }
+.q4c-question .q4c-q-sub {
+  font-weight: var(--font-weight-regular);
+  font-size: 2.0833rem;
+}
+
+/* — Illustration & character (same assets as q4/q4b) — */
+.q4c-illu {
+  position: absolute;
+  left: 994px; top: 570px;
+  width: 413px; height: 338px;
+  pointer-events: none; z-index: 5;
+}
+.q4c-stav {
+  position: absolute;
+  left: 1340px; top: 600px;
+  width: 545px; height: 452px;
+  pointer-events: none; z-index: 5;
+}
+
+/* — Numeric input field —
+   Figma DROP3 (9:1852): left:457 top:423 w:163 h:49
+   Styled as plain white box matching the Figma white rectangle */
+.q4c-input {
+  position: absolute;
+  left: 457px; top: 423px;
+  width: 163px; height: 49px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem;          /* 33.333px — large, readable */
+  font-weight: var(--font-weight-semibold);
+  color: #232020;
+  text-align: center;
+  direction: ltr;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  outline: none;
+  z-index: 8;
+  /* Remove browser number spinners */
+  -moz-appearance: textfield;
+}
+.q4c-input::-webkit-outer-spin-button,
+.q4c-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.q4c-input:focus { border-color: #4A7CC7; box-shadow: 0 0 0 3px rgba(74,124,199,0.18); }
+.q4c-input:disabled { background: #f0f0f0; color: #888; cursor: default; }
+
+/* — Submit button —
+   Figma CHECK 1 (9:1832): left:428 top:516 w:204 h:137 */
+.q4c-submit-btn {
+  position: absolute;
+  left: 428px; top: 516px;
+  width: 204px; height: 137px;
+  background: transparent; border: none; padding: 0;
+  cursor: pointer; z-index: 8;
+  display: none;
+}
+.q4c-submit-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+.q4c-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* — Try again message —
+   Figma 9:1937: text at top:581, color #a93d2c */
+.q4c-tryagain-msg {
+  position: absolute;
+  left: 178px; top: 581px;
+  width: 740px;
+  z-index: 7; display: none;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right; direction: rtl;
+}
+.q4c-tryagain-msg p { margin: 0; }
+.q4c-retry-btn {
+  background: none; border: none;
+  color: inherit;
+  font-family: var(--font-main);
+  font-size: inherit;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+.q4c-retry-btn:hover { opacity: 0.8; }
+
+/* — Feedback panel —
+   Figma 9:1961: left:188 top:581 w:759 h:214 */
+.q4c-feedback-panel {
+  position: absolute;
+  left: 131px; top: 581px;
+  width: 855px; height: 195px;
+  z-index: 9; display: none;
+}
+.q4c-feedback-bg-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: fill; pointer-events: none;
+}
+.q4c-fb-correct,
+.q4c-fb-incorrect {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 30px 10px 48px;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 41px;
+  text-align: right; direction: rtl;
+  box-sizing: border-box;
+}
+.q4c-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  margin: 0;
+}
+.q4c-fb-correct p,
+.q4c-fb-incorrect p { margin: 0; }
+
+/* — State visibility rules — */
+#screen-q4c[data-q4c-state="main"] .q4c-tryagain-msg   { display: none; }
+#screen-q4c[data-q4c-state="main"] .q4c-feedback-panel { display: none; }
+
+#screen-q4c[data-q4c-state="tryagain"] .q4c-tryagain-msg   { display: block; }
+#screen-q4c[data-q4c-state="tryagain"] .q4c-feedback-panel { display: none; }
+#screen-q4c[data-q4c-state="tryagain"] .q4c-submit-btn     { display: none; }
+
+#screen-q4c[data-q4c-state="correct"] .q4c-feedback-panel { display: block; }
+#screen-q4c[data-q4c-state="correct"] .q4c-fb-correct     { display: flex; }
+#screen-q4c[data-q4c-state="correct"] .q4c-submit-btn     { display: none; }
+#screen-q4c[data-q4c-state="correct"] .q4c-tryagain-msg   { display: none; }
+
+#screen-q4c[data-q4c-state="incorrect"] .q4c-feedback-panel { display: block; }
+#screen-q4c[data-q4c-state="incorrect"] .q4c-fb-incorrect   { display: flex; }
+#screen-q4c[data-q4c-state="incorrect"] .q4c-submit-btn     { display: none; }
+#screen-q4c[data-q-submit-ready="true"][data-q4c-state="main"] .q4c-submit-btn { display: block; }
+#screen-q4c[data-q4c-state="incorrect"] .q4c-tryagain-msg   { display: none; }
+
+/* — Applet overlay — */
+.q4c-applet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 9999; display: none;
+  align-items: center; justify-content: center;
+}
+.q4c-applet-overlay.open { display: flex; }
+.q4c-applet-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.q4c-applet-close-btn {
+  position: absolute;
+  top: 12px; left: 16px;
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.65); color: #fff;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 50%; font-size: 22px;
+  cursor: pointer; z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+}
+.q4c-applet-close-btn:hover { background: rgba(0,0,0,0.9); }
+.q4c-applet-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: none; display: block;
+}
+/* /QUES4C ============================================================ */
+
+/* ─── SLIDE8 ─────────────────────────────────────────────────
+   Figma frame 8:114
+   סוג: content — ► תמיד פעיל, ◄ תמיד פעיל
+   ──────────────────────────────────────────────────────────── */
+
+/* רקע מלא — node 8:121, 1920×1080 */
+.slide8-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1920px; height: 1080px;
+  display: block;
+}
+
+/* פאנל כותרת — BG_HEADER2 1 מ-Figma (RGBA עם שקיפות אמיתית בפינות).
+   left:1273 top:0 w:1512 h:233 — בדיוק כמו הפיגמה.
+   התמונה מתחילה ב-x=1273 ויוצאת מחוץ למסך ימינה (אין גבול ימני). */
+.slide8-header-wrap {
+  position: absolute;
+  top: 0; left: 1273px;
+  width: 1512px; height: 233px;
+  z-index: 2;
+}
+.slide8-header-wrap img {
+  width: 1512px; height: 233px;
+  display: block;
+}
+
+/* טקסט קריינות — node 8:117 — Live HTML
+   מיקום: right=37px (1920-1883), top=42px
+   טיפוגרפיה מפיגמה: Assistant SemiBold 600, 33.333px, lh=41px, ls=0.1302px */
+.slide8-text {
+  position: absolute;
+  top: 42px; right: 37px;
+  width: 610px;   /* 3 שורות בצד ימין של הבועה */
+  z-index: 3;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.slide8-text p { margin: 0; }
+/* /SLIDE8 ============================================================ */
+
+/* ─── SLIDE10 ────────────────────────────────────────────────────
+   Figma frame 8:438
+   סוג: content — ► תמיד פעיל, ◄ תמיד פעיל
+   ──────────────────────────────────────────────────────────────── */
+
+/* רקע מלא — 1920×1080 */
+.slide10-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1920px; height: 1080px;
+  display: block;
+}
+
+/* פאנל כותרת — BG_HEADER2 1
+   left:735 top:-55 w:1524.979 h:235 */
+.slide10-header-wrap {
+  position: absolute;
+  top: -55px; left: 735px;
+  width: 1525px; height: 235px;
+  z-index: 2;
+}
+.slide10-header-wrap img {
+  width: 1525px; height: 235px;
+  display: block;
+}
+
+/* טקסט קריינות — node 8:441, שורה אחת
+   right=37px (1920-1883), top=42px */
+.slide10-text {
+  position: absolute;
+  top: 42px; right: 37px;
+  width: 1100px;
+  margin: 0;
+  z-index: 3;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px;
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  white-space: nowrap;
+}
+/* סרטון fullscreen — נסתר עד לחיצה על Play */
+.slide10-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+}
+.slide10-video--hidden {
+  display: none;
+}
+
+/* header + טקסט תמיד מעל הסרטון */
+#screen-slide10 .slide10-header-wrap,
+#screen-slide10 .slide10-text {
+  z-index: 4;
+}
+
+/* כפתור Play */
+.slide10-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 168px;
+  height: 168px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 5;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.slide10-play-btn svg { width: 100%; height: 100%; display: block; }
+.slide10-play-btn--hidden { display: none; }
+.slide10-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  opacity: 0.9;
+}
+
+/* בועות דיבור */
+.slide10-bubbles--hidden { display: none; }
+
+.slide10-bubble-l {
+  position: absolute;
+  left: 248px; top: 204px;
+  width: 366px; height: 266px;
+  z-index: 3; pointer-events: none;
+}
+.slide10-bubble-l-text {
+  position: absolute;
+  left: 275px; top: 240px;
+  width: 300px;
+  z-index: 4;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 29.333px;
+  line-height: 35.2px;
+  color: #232020;
+  text-align: right; direction: rtl;
+}
+.slide10-bubble-l-text p { margin: 0; }
+
+.slide10-bubble-r {
+  position: absolute;
+  left: 960px; top: 180px;
+  width: 284px; height: 212px;
+  z-index: 3; pointer-events: none;
+  transform: scaleX(-1);
+}
+.slide10-bubble-r-text {
+  position: absolute;
+  left: 980px; top: 223px;
+  width: 240px;
+  z-index: 4;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 29.333px;
+  line-height: 35.2px;
+  color: #232020;
+  text-align: right; direction: rtl;
+}
+.slide10-bubble-r-text p { margin: 0; }
+
+
+/* /SLIDE10 =========================================================== */
+
+/* ══════════════════════════════════════════════════════════════════
+   QUES5 — single-choice radio, screen-q5 (data-screen="10")
+   Figma: 8:122 (main) | 8:225 (help) | 8:255 (tryagain)
+          8:280 (correct) | 8:408 (incorrect)
+   Correct: option 2 ("בתערובת א'...")
+   Progress: 5
+
+   ══ REUSABLE FEEDBACK RULE (applies to all radio questions) ══════
+   Selected state (before submit):
+     • circle: blue ring, filled center dot — standard radio
+     • row: NO background, NO border change
+   Feedback states (correct / incorrect / tryagain):
+     • correct answer → green ✓ icon (q2-v.png) over the circle
+     • wrong selected → red ✕ icon (q2-x.png) over the circle
+     • NO filled colored circles in feedback states
+     • NO row background changes
+     • icons are PNG files overlaid on the circle position
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── רקע + overlay ────────────────────────────────────────── */
+.q5-bg {
+  position: absolute;
+  top: -84px; left: -25px;
+  width: 2038px; height: 1164px;
+  display: block;
+}
+.q5-overlay {
+  position: absolute; top: 0; left: 0;
+  width: 1920px; height: 1080px;
+  background: rgba(0,0,0,0.30);
+  z-index: 1;
+}
+/* כרטיס (BG_QUES 1) — Figma: left:151 top:139 w:1618 h:802 */
+.q5-card {
+  position: absolute;
+  left: 151px; top: 139px;
+  width: 1618px; height: 802px;
+  z-index: 2;
+}
+/* מחוון (5_SELECTED 1) — Figma: left:1512 top:39 w:371 h:48 */
+.q5-progress {
+  position: absolute;
+  left: 1512px; top: 39px;
+  width: 371px; height: 48px;
+  z-index: 3;
+}
+
+/* ── כפתורי עזרה + ישומון ─────────────────────────────────── */
+.q5-help-btn {
+  position: absolute; left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 4;
+}
+.q5-help-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+.q5-app-btn {
+  position: absolute; left: 136px; top: 8px;
+  width: 141px; height: 141px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 2;
+}
+.q5-app-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+/* ── Tooltip עזרה ───────────────────────────────────────────
+   מיקום: מתחת לכפתור (button bottom = 8+140=148, +4px gap → top:152)
+   עיצוב: תמונת Figma המקורית (q5-help-popup.png), טקסט ממורכז */
+.q5-help-popup {
+  display: none;
+  position: absolute;
+  left: 15px; top: 18px; transform: none;
+  width: 498px; height: 207px;
+  z-index: 3;
+}
+.q5-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -14px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #3b2600;
+  direction: rtl; text-align: right; margin: 0;
+}
+#screen-q5[data-q5-help="true"] .q5-help-popup { display: block; }
+
+/* ── גרפיקת תערובות ─────────────────────────────────────────
+   TAAROVET_B — Figma: left:624 top:269 w:646 h:264
+   TAAROVET_A — Figma: left:1270 top:268 w:416 h:210 */
+/* mixa (416px) — ימין; mixB (514px) — שמאל; gap 60px; total 990px; center 960 → left 465 */
+.q5-taarovet-a {
+  position: absolute;
+  left: 1039px; top: 278px;
+  height: 210px; width: auto;
+  display: block; z-index: 3;
+}
+.q5-taarovet-b {
+  position: absolute;
+  left: 465px; top: 278px;
+  height: 210px; width: auto;
+  display: block; z-index: 3;
+}
+
+/* ── טקסט שאלה — Figma 8:287
+   right:234 top:174 w:1371 */
+.q5-question {
+  position: absolute;
+  right: 234px; top: 174px;
+  width: 1371px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);   /* 33.333px */
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  direction: rtl; text-align: right;
+  z-index: 3;
+}
+.q5-question p { margin: 0; }
+
+/* ── אפשרויות תשובה ──────────────────────────────────────────
+   Figma: options at right:234 top:540/591/642 h:41px each (gap:10px)
+   Text in Figma spans nearly full screen width (overflow: visible).
+   In HTML we replicate by setting width from card-left (151) to options-right-edge (1686):
+   width = 1686 - 151 = 1535px → text fits in 1 line at 33px Hebrew.
+   ─────────────────────────────────────────────────────────── */
+.q5-options {
+  position: absolute;
+  right: 234px; top: 510px;
+  width: 1535px;         /* = 1920 - 234 - 151 (card left margin) */
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Option row: NO background, NO border — clean like Figma */
+.q5-option {
+  display: flex;
+  flex-direction: row;
+  direction: rtl;
+  align-items: flex-start;  /* top-align for multi-line text */
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  /* no padding, no background, no border */
+}
+
+/* Circle — 19×19px matching Figma aspect-[19/19].
+   margin-top:11px centers it in the first 41px line: (41-19)/2 = 11px */
+.q5-circle {
+  flex-shrink: 0;
+  width: 19px; height: 19px;
+  border-radius: 50%;
+  border: 2px solid #4A7CC7;
+  background: transparent;
+  position: relative;
+  overflow: visible;
+  margin-top: 11px;
+}
+
+/* V/X icons — hidden by default, overlay the circle */
+.q5-icon-v,
+.q5-icon-x {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+}
+/* V: 21×18 — Figma: left:126 top:12 within 143px component (circle at 124px) */
+.q5-icon-v { width: 32px; height: 28px; top: -10px; left: -3px; }
+/* X: 16×15 — Figma: left:127 top:15 within 143px (circle at 124px) */
+.q5-icon-x { width: 26px; height: 24px; top: -3px; left: -4px; }
+
+/* Option label text */
+.q5-label {
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);   /* 33.333px — matches Figma */
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  flex: 1;
+  text-align: right;
+}
+
+/* ── SELECTED state (before submit): filled center dot only ──
+   No row background, no border — only the circle dot changes */
+.q5-option.q5-opt-selected .q5-circle::after {
+  content: '';
+  position: absolute;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #4A7CC7;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ── TRYAGAIN: show X on the wrong selected option (CSS-only, no JS logic change) ── */
+#screen-q5[data-q5-state="tryagain"] .q5-option.q5-opt-selected .q5-icon-x { display: block; }
+/* In tryagain, hide the selection dot (it was submitted — show X instead) */
+#screen-q5[data-q5-state="tryagain"] .q5-option.q5-opt-selected .q5-circle::after { display: none; }
+
+/* ── FEEDBACK states: V/X icons only, clean circle, no row coloring ── */
+.q5-option.q5-opt-correct .q5-icon-v { display: block; }
+/* ensure no dot shows in feedback correct state */
+.q5-option.q5-opt-correct .q5-circle::after { display: none; }
+
+.q5-option.q5-opt-wrong .q5-icon-x { display: block; }
+/* ensure no dot shows in feedback wrong state */
+.q5-option.q5-opt-wrong .q5-circle::after { display: none; }
+
+/* Lock options in final states */
+#screen-q5[data-q5-state="correct"] .q5-option,
+#screen-q5[data-q5-state="incorrect"] .q5-option {
+  cursor: default; pointer-events: none;
+}
+
+/* ── כפתור צדקתי? — Figma CHECK 1: left:206 top:767 w:209 h:137 */
+.q5-submit-btn {
+  position: absolute;
+  left: 206px; top: 767px;
+  width: 209px; height: 137px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 7;
+  display: none;
+}
+.q5-submit-btn img { width: 100%; height: 100%; object-fit: fill; display: block; }
+.q5-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* ── הודעת TryAgain — Figma TRYAGAIN (8:255):
+   text at left:1682 top:785 → right:238 top:785 (whitespace-nowrap 2 lines) */
+.q5-tryagain-msg {
+  position: absolute;
+  right: 234px; top: 701px;
+  width: 1400px;
+  z-index: 8;
+  display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right;
+  direction: rtl;
+}
+.q5-tryagain-msg p { margin: 0; }
+.q5-retry-btn {
+  background: none; border: none;
+  color: inherit;
+  font-family: inherit; font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: pointer; padding: 0;
+}
+
+/* ── פאנל משוב ───────────────────────────────────────────────
+   Figma CORRECT/INCORRECT (8:280/8:408):
+   left:229 top:699 w:1462 h:190 bg:#434242 border-radius:29px
+   Text node: left:249 top:712 → padding = 13px top, 20px sides */
+.q5-feedback-panel {
+  position: absolute;
+  left: 229px; top: 670px;
+  width: 1462px; height: 235px;
+  background: #434242;
+  border-radius: 29px;
+  z-index: 9;
+  display: none;
+  box-sizing: border-box;
+  padding: 13px 20px 14px 20px;
+  overflow: hidden;
+}
+.q5-fb-correct,
+.q5-fb-incorrect {
+  display: none;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1172px;
+  color: #ffffff;
+  text-align: right;
+  direction: rtl;
+}
+/* Title — bold */
+.q5-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: 1.875rem;
+  line-height: 41px;
+  display: block;
+  margin: 0;
+}
+/* Body — regular */
+.q5-fb-correct p,
+.q5-fb-incorrect p {
+  font-weight: 400;
+  margin: 0;
+  line-height: 41px;
+}
+.q5-fb-correct p.q5-fb-title,
+.q5-fb-incorrect p.q5-fb-title {
+  font-weight: var(--font-weight-bold);
+}
+
+/* ── State visibility rules ──────────────────────────────── */
+#screen-q5[data-q5-state="main"] .q5-tryagain-msg   { display: none; }
+#screen-q5[data-q5-state="main"] .q5-feedback-panel { display: none; }
+
+#screen-q5[data-q5-state="tryagain"] .q5-tryagain-msg   { display: block; }
+#screen-q5[data-q5-state="tryagain"] .q5-feedback-panel { display: none; }
+#screen-q5[data-q5-state="tryagain"] .q5-submit-btn     { display: none; }
+
+#screen-q5[data-q5-state="correct"] .q5-feedback-panel { display: block; }
+#screen-q5[data-q5-state="correct"] .q5-fb-correct     { display: block; }
+#screen-q5[data-q5-state="correct"] .q5-submit-btn     { display: none; }
+#screen-q5[data-q5-state="correct"] .q5-tryagain-msg   { display: none; }
+
+#screen-q5[data-q5-state="incorrect"] .q5-feedback-panel { display: block; }
+#screen-q5[data-q5-state="incorrect"] .q5-fb-incorrect   { display: block; }
+#screen-q5[data-q5-state="incorrect"] .q5-submit-btn     { display: none; }
+#screen-q5[data-q-submit-ready="true"][data-q5-state="main"] .q5-submit-btn { display: block; }
+#screen-q5[data-q5-state="incorrect"] .q5-tryagain-msg   { display: none; }
+
+/* ── Applet modal (ישומון) — same pattern as all other questions */
+.q5-applet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.q5-applet-overlay.open { display: flex; }
+.q5-applet-modal {
+  position: relative;
+  width: min(92vw, 1400px);
+  height: min(96vh, 1000px);
+  background: #fff; border-radius: 18px;
+  overflow: hidden;
+}
+.q5-applet-close-btn {
+  position: absolute; top: 12px; left: 12px;
+  width: 44px; height: 44px;
+  background: rgba(0,0,0,0.7); color: #fff;
+  border: none; border-radius: 50%;
+  font-size: 22px; cursor: pointer; z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+}
+.q5-applet-close-btn:hover { background: rgba(0,0,0,0.9); }
+.q5-applet-iframe {
+  width: 100%; height: 100%;
+  border: none; display: block;
+}
+
+/* /QUES5 ============================================================ */
+
+/* ══════════════════════════════════════════════════════════════════
+   QUES6 — single-choice radio, screen-q6 (data-screen="12")
+   Figma: 8:446 (main) | 8:475 (help) | 8:514 (tryagain)
+          8:544 (correct) | 8:579 (incorrect)
+
+   REUSABLE FEEDBACK RULE (same as QUES5):
+   Selected: blue ring + filled center dot only
+   Correct feedback → V PNG icon, clean circle, no row coloring
+   Wrong feedback → X PNG icon, clean circle, no row coloring
+   Tryagain → X on submitted-wrong option (CSS state rule, no JS)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* רקע, overlay, כרטיס — same positions as Q5 */
+.q6-bg {
+  position: absolute;
+  top: -84px; left: -25px;
+  width: 2038px; height: 1164px;
+  display: block;
+  z-index: 0;
+}
+.q6-overlay {
+  position: absolute;
+  top: -15px; left: -26px;
+  width: 1946px; height: 1110px;
+  background: rgba(0,0,0,0.55);
+  z-index: 1;
+}
+.q6-card {
+  position: absolute;
+  left: 151px; top: 139px;
+  width: 1618px; height: 802px;
+  display: block;
+  z-index: 2;
+}
+
+/* מחוון — 6_SELECTED 1: left:1512 top:39 w:371 h:48 */
+.q6-progress {
+  position: absolute;
+  left: 1512px; top: 39px;
+  width: 371px; height: 48px;
+  z-index: 3;
+  display: block;
+}
+
+/* כפתור עזרה — HELP 1: left:2 top:8 size:140 */
+.q6-help-btn {
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 140px; height: 140px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 4;
+}
+.q6-help-btn > img { width: 140px; height: 140px; object-fit: fill; display: block; }
+
+/* Help popup — below help button (top:152px), same image as Q5 */
+.q6-help-popup {
+  display: none;
+  position: absolute;
+  left: 12px; top: 22px; transform: none;
+  width: 537px; height: 208px;
+  z-index: 3;
+}
+.q6-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -12px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #3b2600;
+  direction: rtl; text-align: right; margin: 0;
+}
+#screen-q6[data-q6-help="true"] .q6-help-popup { display: block; }
+
+/* נרטיב (node 8:453): right edge at x=1699 → right=221px, top=192px, w=720px */
+.q6-narration {
+  position: absolute;
+  top: 192px; right: 221px;
+  width: 720px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q6-narration p { margin: 0; }
+
+/* שאלה (node 8:454): right edge at x=947 → right=973px, top=192px, w=740px */
+.q6-question {
+  position: absolute;
+  top: 192px; right: 973px;
+  width: 740px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q6-question p { margin: 0; }
+.q6-q-num  { font-weight: var(--font-weight-semibold); }
+.q6-q-semibold { font-weight: var(--font-weight-semibold); }
+.q6-q-bold { font-weight: var(--font-weight-bold); }
+
+/* תמונת דיאגרמה — Q6_IMG 1: left:979 top:353 w:715 h:506 */
+.q6-img {
+  position: absolute;
+  left: 979px; top: 353px;
+  width: 715px; height: 506px;
+  display: block;
+  z-index: 5;
+}
+
+/* אפשרויות — right edge of circle at x=947 → right:973px, top:399px
+   Gap between options: 58px row height - 41px = 17px gap
+   Width: widest label "300 מטרים"=142px + gap 12px + circle 19px = 173px + margin */
+.q6-options {
+  position: absolute;
+  right: 973px; top: 399px;
+  width: 200px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+/* שורת אפשרות — RTL: circle on right, label extends left */
+.q6-option {
+  display: flex;
+  flex-direction: row;
+  direction: rtl;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  height: 41px;
+}
+
+/* עיגול — 19×19px, margin-top:11px to center in 41px row */
+.q6-circle {
+  flex-shrink: 0;
+  width: 19px; height: 19px;
+  border-radius: 50%;
+  border: 2px solid #4A7CC7;
+  background: transparent;
+  position: relative;
+  overflow: visible;
+  margin-top: 11px;
+}
+
+/* V/X icons — hidden by default */
+.q6-icon-v, .q6-icon-x {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+}
+.q6-icon-v { width: 21px; height: 18px; top: 0px; left: -1px; }
+.q6-icon-x { width: 16px; height: 15px; top: 2px; left: 1px; }
+
+/* תווית אפשרות */
+.q6-label {
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  flex: 1;
+}
+
+/* SELECTED: blue filled dot */
+.q6-option.q6-opt-selected .q6-circle::after {
+  content: '';
+  position: absolute;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #4A7CC7;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* TRYAGAIN: X on selected wrong option (CSS-only) */
+#screen-q6[data-q6-state="tryagain"] .q6-option.q6-opt-selected .q6-icon-x { display: block; }
+#screen-q6[data-q6-state="tryagain"] .q6-option.q6-opt-selected .q6-circle::after { display: none; }
+
+/* FEEDBACK: V/X icons */
+.q6-option.q6-opt-correct .q6-icon-v { display: block; }
+.q6-option.q6-opt-correct .q6-circle::after { display: none; }
+.q6-option.q6-opt-wrong .q6-icon-x { display: block; }
+.q6-option.q6-opt-wrong .q6-circle::after { display: none; }
+
+/* Lock options in final states */
+#screen-q6[data-q6-state="correct"] .q6-option,
+#screen-q6[data-q6-state="incorrect"] .q6-option {
+  cursor: default; pointer-events: none;
+}
+
+/* כפתור שליחה — Figma: left:207 top:743 w:209 h:137 */
+.q6-submit-btn {
+  position: absolute;
+  left: 207px; top: 743px;
+  width: 209px; height: 137px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 7;
+  display: none;
+}
+.q6-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+
+/* הודעת נסו שוב — right edge at x=938 → right=982px, top=669px */
+.q6-tryagain-msg {
+  position: absolute;
+  right: 982px; top: 669px;
+  width: 700px;
+  z-index: 8;
+  display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right;
+  direction: rtl;
+}
+.q6-tryagain-msg p { margin: 0; }
+.q6-retry-btn {
+  background: none; border: none;
+  color: inherit;
+  font-family: inherit; font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: pointer; padding: 0;
+}
+
+/* פאנל משוב — Figma: left:258 top:631 w:692 h:228 */
+.q6-feedback-panel {
+  position: absolute;
+  left: 258px; top: 631px;
+  width: 692px; height: 228px;
+  background: #434242;
+  border-radius: 29px;
+  z-index: 9;
+  display: none;
+  box-sizing: border-box;
+  padding: 12px 26px 11px 26px;
+  overflow: hidden;
+}
+.q6-fb-correct, .q6-fb-incorrect {
+  display: none;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1172px;
+  color: #ffffff;
+  text-align: right;
+  direction: rtl;
+}
+.q6-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: 1.875rem;
+  line-height: 41px;
+  display: block; margin: 0;
+}
+.q6-fb-correct p, .q6-fb-incorrect p {
+  font-weight: var(--font-weight-semibold);
+  margin: 0; line-height: 41px;
+}
+
+/* State visibility rules */
+#screen-q6[data-q6-state="main"] .q6-tryagain-msg   { display: none; }
+#screen-q6[data-q6-state="main"] .q6-feedback-panel { display: none; }
+#screen-q6[data-q6-state="tryagain"] .q6-tryagain-msg   { display: block; }
+#screen-q6[data-q6-state="tryagain"] .q6-feedback-panel { display: none; }
+#screen-q6[data-q6-state="tryagain"] .q6-submit-btn     { display: none; }
+#screen-q6[data-q6-state="correct"] .q6-feedback-panel { display: block; }
+#screen-q6[data-q6-state="correct"] .q6-fb-correct     { display: block; }
+#screen-q6[data-q6-state="correct"] .q6-submit-btn     { display: none; }
+#screen-q6[data-q6-state="correct"] .q6-tryagain-msg   { display: none; }
+#screen-q6[data-q6-state="incorrect"] .q6-feedback-panel { display: block; }
+#screen-q6[data-q6-state="incorrect"] .q6-fb-incorrect   { display: block; }
+#screen-q6[data-q6-state="incorrect"] .q6-submit-btn     { display: none; }
+#screen-q6[data-q-submit-ready="true"][data-q6-state="main"] .q6-submit-btn { display: block; }
+#screen-q6[data-q6-state="incorrect"] .q6-tryagain-msg   { display: none; }
+/* /QUES6 ============================================================ */
+
+/* ══════════════════════════════════════════════════════════════════
+   QUES7 — Drag & Drop question, screen-q7 (data-screen="13")
+   Figma: 8:610 (main) | 8:651 (help) | 8:689 (tryagain)
+          8:719 (correct) | 8:814 (incorrect)
+   2 drop zones, 4 chips: "6","30","28","5"
+   Correct: drop1="5", drop2="6"
+   ══════════════════════════════════════════════════════════════════ */
+
+/* רקע, overlay, כרטיס — same positions as other questions */
+.q7-bg {
+  position: absolute;
+  top: -84px; left: -25px;
+  width: 2038px; height: 1164px;
+  display: block;
+  z-index: 0;
+}
+.q7-overlay {
+  position: absolute;
+  top: -15px; left: -26px;
+  width: 1946px; height: 1110px;
+  background: rgba(0,0,0,0.55);
+  z-index: 1;
+}
+.q7-card {
+  position: absolute;
+  left: 151px; top: 139px;
+  width: 1618px; height: 802px;
+  display: block;
+  z-index: 2;
+}
+
+/* מחוון — 7_SELECTED 1: left:1512 top:39 w:371 h:48 */
+.q7-progress {
+  position: absolute;
+  left: 1512px; top: 39px;
+  width: 371px; height: 48px;
+  z-index: 3;
+  display: block;
+}
+
+/* כפתור עזרה — HELP 1: left:8 top:17 size:140 */
+.q7-help-btn {
+  position: absolute;
+  left: 8px; top: 17px;
+  width: 140px; height: 140px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 8;
+}
+.q7-help-btn > img { width: 140px; height: 140px; object-fit: fill; display: block; }
+
+/* Help popup — next to button */
+.q7-help-popup {
+  display: none;
+  position: absolute;
+  left: 0px; top: -23px;
+  width: 830px; height: 225px;
+  z-index: 6;
+  overflow: visible !important;
+}
+.q7-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% - 12px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: #3b2600;
+  direction: rtl; text-align: right; margin: 0;
+}
+#screen-q7[data-q7-help="open"] .q7-help-popup { display: block; }
+
+/* טקסט helpers */
+.q7-semibold { font-weight: var(--font-weight-semibold); }
+.q7-bold     { font-weight: var(--font-weight-bold); }
+
+/* נרטיב ימין — right=230px top=196px */
+.q7-narration {
+  position: absolute;
+  top: 196px; right: 230px;
+  width: 720px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q7-narration p { margin: 0; }
+
+/* שאלה — right=920px top=196px */
+.q7-question {
+  position: absolute;
+  top: 196px; right: 920px;
+  width: 740px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q7-question p { margin: 0; }
+
+/* תיאור מנה — right=920px top=339px */
+.q7-batch-desc {
+  position: absolute;
+  top: 339px; right: 920px;
+  width: 740px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q7-batch-desc p { margin: 0; }
+.q7-batch-desc p:first-child { margin-bottom: 12px; }
+
+/* DROP1 — left:712 top:388 w:163 h:49 */
+#q7-drop-1 {
+  position: absolute;
+  left: 712px; top: 388px;
+  width: 163px; height: 49px;
+  z-index: 6;
+  cursor: pointer;
+}
+
+/* DROP2 — left:657 top:503 w:163 h:49 */
+#q7-drop-2 {
+  position: absolute;
+  left: 657px; top: 503px;
+  width: 163px; height: 49px;
+  z-index: 6;
+  cursor: pointer;
+}
+
+/* Drop zone shared styles */
+.q7-drop {
+  border-radius: 9px;
+}
+.q7-drop-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 163px; height: 49px;
+  display: block;
+  pointer-events: none;
+}
+.q7-drop-label {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 41px; /* center in 49px */
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 1.75rem; /* 28px, same as chips */
+  line-height: 35px;
+  color: #ffffff;
+  text-align: center;
+  pointer-events: none;
+}
+/* Filled state: hide the empty drop bg, show chip bg behind label */
+.q7-drop.q7-drop-filled .q7-drop-bg { display: none; }
+.q7-drop.q7-drop-filled {
+  background-image: url('../img/q7-chip.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  height: 41px; /* chip height */
+}
+/* Correct style: green border */
+.q7-drop.q7-drop-correct-style {
+  outline: 4px solid #19963c;
+  border-radius: 9px;
+}
+/* Wrong style: red border */
+.q7-drop.q7-drop-wrong-style {
+  outline: 4px solid #a93d2c;
+  border-radius: 9px;
+}
+
+/* "ליטרים" — right=1219px top=392px */
+.q7-litrim {
+  position: absolute;
+  top: 392px; right: 1219px;
+  margin: 0;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  direction: rtl;
+  white-space: nowrap;
+}
+
+/* "5 מנות לא יספיקו..." — right=920px top=450px */
+.q7-five-text {
+  position: absolute;
+  top: 450px; right: 920px;
+  width: 740px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+}
+.q7-five-text p { margin: 0; }
+.q7-five-text p:first-child { margin-bottom: 12px; }
+
+/* "מנות צבע שלמות ששוות 30" — right=1278px top=503px */
+.q7-manot-text {
+  position: absolute;
+  top: 503px; right: 1278px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  white-space: nowrap;
+}
+.q7-manot-text p { margin: 0; }
+
+/* "30 ליטרים ומתוכם..." — right=920px top=551px */
+.q7-thirty-text {
+  position: absolute;
+  top: 551px; right: 920px;
+  width: 740px;
+  z-index: 5;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* איור גלונים — ILLU_QUES7: left:1209 top:523 w:489 h:244 */
+.q7-illu {
+  position: absolute;
+  left: 1209px; top: 523px;
+  width: 489px; height: 244px;
+  display: block;
+  z-index: 5;
+}
+
+/* Word bank — flex row of chips at top≈585, centered between left=270..837+163 */
+.q7-chips {
+  position: absolute;
+  right: 920px; top: 617px;
+  display: flex;
+  flex-direction: row;
+  gap: 26px;
+  z-index: 6;
+  direction: ltr; /* chips in visual left-to-right order */
+}
+
+/* Individual chip */
+.q7-chip {
+  position: relative;
+  width: 163px; height: 41px;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+.q7-chip-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 163px; height: 41px;
+  display: block;
+  border-radius: 9px;
+  pointer-events: none;
+}
+.q7-chip-label {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 1.75rem; /* 28px */
+  line-height: 35px;
+  color: #ffffff;
+  text-align: center;
+  pointer-events: none;
+}
+.q7-chip.q7-chip-dragging { opacity: 0.5; }
+.q7-chip.q7-chip-placed   { display: none; }
+
+/* כפתור שליחה — left:217 top:718 w:209 h:137 */
+.q7-submit-btn {
+  position: absolute;
+  left: 217px; top: 718px;
+  width: 209px; height: 137px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 7;
+}
+.q7-submit-btn img { width: 100%; height: 100%; display: block; }
+
+/* Submit visible only when all drops filled AND state=main */
+#screen-q7:not([data-q-submit-ready="true"]) .q7-submit-btn,
+#screen-q7[data-q7-state="tryagain"] .q7-submit-btn,
+#screen-q7[data-q7-state="correct"] .q7-submit-btn,
+#screen-q7[data-q7-state="incorrect"] .q7-submit-btn {
+  display: none;
+}
+#screen-q7[data-q-submit-ready="true"][data-q7-state="main"] .q7-submit-btn {
+  display: block;
+}
+
+/* הודעת tryagain */
+.q7-tryagain-text {
+  position: absolute;
+  right: 920px; top: 695px;
+  width: 700px;
+  z-index: 8;
+  display: none;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right;
+  direction: rtl;
+}
+.q7-tryagain-text p { margin: 0; }
+.q7-tryagain-action {
+  background: none; border: none; padding: 0;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  color: var(--color-tryagain);
+  text-decoration: underline;
+  cursor: pointer;
+}
+#screen-q7[data-q7-state="tryagain"] .q7-tryagain-text { display: block; }
+
+/* פאנל משוב — left:196 top:659 w:866 h:231 */
+.q7-feedback-panel {
+  position: absolute;
+  left: 196px; top: 615px;
+  width: 950px; height: 273px;
+  background: #434242;
+  border-radius: 29px;
+  z-index: 9;
+  display: none;
+  box-sizing: border-box;
+  padding: 13px 26px 12px 26px;
+  overflow: hidden;
+}
+.q7-fb-correct, .q7-fb-incorrect {
+  display: none;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1172px;
+  color: #ffffff;
+  text-align: right;
+  direction: rtl;
+}
+.q7-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  display: block; margin: 0;
+}
+.q7-fb-correct p, .q7-fb-incorrect p {
+  font-weight: var(--font-weight-semibold);
+  margin: 0; line-height: 41px;
+}
+
+/* State visibility */
+#screen-q7[data-q7-state="correct"]   .q7-feedback-panel { display: block; }
+#screen-q7[data-q7-state="correct"]   .q7-fb-correct      { display: block; }
+#screen-q7[data-q7-state="incorrect"] .q7-feedback-panel  { display: block; }
+#screen-q7[data-q7-state="incorrect"] .q7-fb-incorrect     { display: block; }
+
+/* Lock drag/drop in final states */
+#screen-q7[data-q7-state="correct"] .q7-chip,
+#screen-q7[data-q7-state="incorrect"] .q7-chip {
+  cursor: default; pointer-events: none;
+}
+/* Hide remaining chips when feedback is shown */
+#screen-q7[data-q7-state="correct"] .q7-chips,
+#screen-q7[data-q7-state="incorrect"] .q7-chips { display: none; }
+/* /QUES7 ============================================================ */
+
+/* ================================================================
+   QUES7B — שאלה 7ב, Drag & Drop, מסך 14
+   Figma: 8:846 main | 8:967 help | 8:1034 tryagain
+          8:1063 correct | 8:1099 incorrect
+   ================================================================ */
+
+/* רקע + overlay + כרטיס (mirrors QUES7) */
+.q7b-bg     { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; z-index: 0; }
+.q7b-overlay { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
+               background: rgba(13,12,36,0.55); z-index: 1; }
+.q7b-card   { position: absolute; left: 151px; top: 139px; width: 1618px; height: 802px; z-index: 2; }
+
+/* מחוון התקדמות — right=37px top=17px */
+.q7b-progress { position: absolute; right: 37px; top: 17px; width: 371px; height: 48px; z-index: 5; }
+
+/* כפתור עזרה — left:8 top:17 size:140 */
+.q7b-help-btn { position: absolute; left: 8px; top: 17px; width: 140px; height: 140px;
+                background: none; border: none; padding: 0; cursor: pointer; z-index: 10; }
+.q7b-help-btn img { width: 100%; height: 100%; display: block; }
+
+/* Tooltip עזרה — left:8 top:161 */
+.q7b-help-popup {
+  position: absolute; left: -1px; top: 28px; transform: none;
+  width: 592px; height: 212px;
+  display: none; z-index: 9;
+}
+.q7b-help-popup p {
+  position: relative; z-index: 1;
+  top: calc(50% + -12px); transform: translateY(-50%);
+  right: 44px; left: 12px;
+  margin: 0; padding: 0;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem;
+  line-height: 41px;
+  color: #3b2600;
+  text-align: right; direction: rtl;
+}
+#screen-q7b[data-q7b-help="open"] .q7b-help-popup { display: block; }
+
+/* Typography */
+.q7b-semibold { font-weight: var(--font-weight-semibold); }
+.q7b-bold     { font-weight: var(--font-weight-bold); }
+
+/* נרטיב ימין — right=217px top=196px */
+.q7b-narration {
+  position: absolute;
+  top: 196px; right: 217px;
+  width: 720px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem;
+  line-height: 41px;
+  color: #232020;
+  text-align: right; direction: rtl;
+  z-index: 4;
+}
+.q7b-narration p { margin: 0; }
+
+/* שאלה — right=930px top=176px */
+.q7b-question {
+  position: absolute;
+  top: 176px; right: 930px;
+  width: 740px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem;
+  line-height: 41px;
+  color: #232020;
+  text-align: right; direction: rtl;
+  z-index: 4;
+}
+.q7b-question p { margin: 0; }
+.q7b-question p:nth-child(4) { margin-top: 18px; }
+.q7b-question p:last-child   { margin-top: 18px; }
+
+/* שורת כחול — right=930px top=393px (aligned with .q7b-question right edge) */
+.q7b-blue-text {
+  position: absolute;
+  top: 443px; right: 930px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem; line-height: 41px;
+  color: #232020; white-space: nowrap;
+  text-align: right; direction: rtl;
+  z-index: 4; margin: 0; padding: 0;
+}
+
+/* "ליטרים" כחול — right=1471px top=393px */
+.q7b-blue-litrim {
+  position: absolute;
+  top: 443px; right: 1471px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem; line-height: 41px;
+  color: #232020; white-space: nowrap;
+  text-align: right; direction: rtl;
+  z-index: 4; margin: 0; padding: 0;
+}
+
+/* שורת צהוב — right=930px top=450px (aligned with .q7b-question right edge) */
+.q7b-yellow-text {
+  position: absolute;
+  top: 500px; right: 930px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem; line-height: 41px;
+  color: #232020; white-space: nowrap;
+  text-align: right; direction: rtl;
+  z-index: 4; margin: 0; padding: 0;
+}
+
+/* "ליטרים" צהוב — right=1471px top=450px */
+.q7b-yellow-litrim {
+  position: absolute;
+  top: 500px; right: 1471px;
+  font-family: var(--font-main);
+  font-size: 2.0833rem; line-height: 41px;
+  color: #232020; white-space: nowrap;
+  text-align: right; direction: rtl;
+  z-index: 4; margin: 0; padding: 0;
+}
+
+/* Drop zones — moved closer to the shortened question text */
+#q7b-drop-1 { position: absolute; left: 457px; top: 443px; width: 163px; height: 41px; z-index: 5; cursor: pointer; }
+#q7b-drop-2 { position: absolute; left: 457px; top: 500px; width: 163px; height: 41px; z-index: 5; cursor: pointer; }
+
+.q7b-drop-bg {
+  position: absolute; top: 0; left: 0; width: 163px; height: 49px;
+}
+.q7b-drop.q7b-drop-filled .q7b-drop-bg { display: none; }
+.q7b-drop.q7b-drop-filled {
+  background-image: url('../img/q7-chip.png');
+  background-size: 100% 100%;
+  height: 41px;
+  border-radius: 9px;
+}
+.q7b-drop-label {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 1.75rem; /* 28px */
+  color: #fff;
+  line-height: 35px;
+  z-index: 1;
+}
+.q7b-drop.q7b-drop-correct-style { outline: 4px solid #19963c; border-radius: 9px; }
+.q7b-drop.q7b-drop-wrong-style   { outline: 4px solid #a93d2c; border-radius: 9px; }
+
+/* איור — left:1209 top:523 w:489 h:244 */
+.q7b-illu {
+  position: absolute; left: 1209px; top: 523px;
+  width: 489px; height: 244px;
+  z-index: 4; pointer-events: none;
+}
+
+/* Chips container — left:260 top:529 */
+.q7b-chips {
+  position: absolute; left: 260px; top: 579px;
+  display: flex; flex-direction: row; gap: 26px;
+  z-index: 6;
+}
+.q7b-chip {
+  position: relative; width: 163px; height: 41px;
+  cursor: grab; z-index: 6;
+  user-select: none; -webkit-user-select: none;
+}
+.q7b-chip-bg { position: absolute; top: 0; left: 0; width: 163px; height: 41px; pointer-events: none; }
+.q7b-chip-label {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 1.75rem;
+  color: #fff; line-height: 35px;
+  pointer-events: none; z-index: 1;
+}
+.q7b-chip.q7b-chip-placed  { display: none; }
+.q7b-chip.q7b-chip-dragging { opacity: 0.5; }
+
+/* כפתור שליחה — left:217 top:718 w:209 h:137 */
+.q7b-submit-btn {
+  position: absolute;
+  left: 217px; top: 718px;
+  width: 209px; height: 137px;
+  background: none; border: none; padding: 0; cursor: pointer; z-index: 7;
+}
+.q7b-submit-btn img { width: 100%; height: 100%; display: block; }
+
+/* Submit visible only when all drops filled AND state=main */
+#screen-q7b:not([data-q-submit-ready="true"]) .q7b-submit-btn,
+#screen-q7b[data-q7b-state="tryagain"] .q7b-submit-btn,
+#screen-q7b[data-q7b-state="correct"]  .q7b-submit-btn,
+#screen-q7b[data-q7b-state="incorrect"] .q7b-submit-btn {
+  display: none;
+}
+#screen-q7b[data-q-submit-ready="true"][data-q7b-state="main"] .q7b-submit-btn {
+  display: block;
+}
+
+/* הודעת tryagain — right=930px top=669px */
+.q7b-tryagain-text {
+  position: absolute;
+  right: 930px; top: 669px;
+  width: 700px;
+  display: none;
+  z-index: 8;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-tryagain);
+  text-align: right;
+  direction: rtl;
+}
+.q7b-tryagain-text p { margin: 0; }
+.q7b-tryagain-action {
+  background: none; border: none; padding: 0;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  color: var(--color-tryagain);
+  text-decoration: underline;
+  cursor: pointer;
+}
+#screen-q7b[data-q7b-state="tryagain"] .q7b-tryagain-text { display: block; }
+
+/* פאנל משוב — left:260 top:595 w:734 h:228 */
+.q7b-feedback-panel {
+  position: absolute;
+  left: 260px; top: 595px;
+  width: 734px; height: 228px;
+  background: #434242;
+  border-radius: 29px;
+  padding: 13px 26px 12px 26px;
+  overflow: hidden;
+  display: none;
+  z-index: 7;
+}
+.q7b-fb-correct, .q7b-fb-incorrect {
+  display: none;
+  font-family: var(--font-main);
+  font-size: var(--font-size-2xl);
+  line-height: 41px;
+  color: #fff;
+  text-align: right;
+  direction: rtl;
+}
+.q7b-fb-title {
+  font-weight: var(--font-weight-bold);
+  font-size: 1.875rem;
+  line-height: 41px;
+  display: block; margin-bottom: 0;
+}
+.q7b-fb-correct p, .q7b-fb-incorrect p { margin: 0; }
+
+/* State visibility */
+#screen-q7b[data-q7b-state="correct"]   .q7b-feedback-panel { display: block; }
+#screen-q7b[data-q7b-state="correct"]   .q7b-fb-correct      { display: block; }
+#screen-q7b[data-q7b-state="incorrect"] .q7b-feedback-panel  { display: block; }
+#screen-q7b[data-q7b-state="incorrect"] .q7b-fb-incorrect     { display: block; }
+
+/* Lock chips when done; hide unplaced ones in feedback */
+#screen-q7b[data-q7b-state="correct"] .q7b-chip,
+#screen-q7b[data-q7b-state="incorrect"] .q7b-chip {
+  cursor: default; pointer-events: none;
+}
+#screen-q7b[data-q7b-state="correct"] .q7b-chip:not(.q7b-chip-placed),
+#screen-q7b[data-q7b-state="incorrect"] .q7b-chip:not(.q7b-chip-placed) {
+  display: none;
+}
+/* /QUES7B ============================================================ */
+
+/* ================================================================
+   SLIDE18 — מסך סיום (end screen)
+   Figma: 2:2
+   ================================================================ */
+
+/* רקע חוף — oversized to fill 1920×1080 */
+.slide18-bg {
+  position: absolute;
+  left: -295px; top: -100px;
+  width: 2453px; height: 1402px;
+  z-index: 0; pointer-events: none;
+}
+
+/* קישוט לבן top-right: left:1117 top:-816 w:1788 h:1067 */
+.slide18-deco {
+  position: absolute;
+  left: 1117px; top: -816px;
+  width: 1788px; height: 1067px;
+  z-index: 1; pointer-events: none;
+}
+
+/* טקסט נרטיב top-right: left:1208 top:45 */
+.slide18-narration {
+  position: absolute;
+  left: 1208px; top: 45px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 2.0833rem; /* 33.333px */
+  line-height: 33.333px;
+  color: #232020;
+  white-space: nowrap;
+  text-align: right; direction: rtl;
+  z-index: 2; margin: 0; padding: 0;
+}
+
+/* Speech bubble images */
+.slide18-bubble-l {
+  position: absolute; left: 72px; top: 407px;
+  width: 339px; height: 257px;
+  z-index: 2; pointer-events: none;
+}
+.slide18-bubble-c {
+  position: absolute; left: 642px; top: 438px;
+  width: 318px; height: 218px;
+  z-index: 2; pointer-events: none;
+}
+.slide18-bubble-r {
+  position: absolute; left: 1208px; top: 462px;
+  width: 286px; height: 218px;
+  z-index: 2; pointer-events: none;
+}
+
+/* Speech bubble texts — shared style */
+.slide18-text-l,
+.slide18-text-c,
+.slide18-text-r {
+  position: absolute;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 1.8333rem; /* 29.333px */
+  line-height: 35.2px;
+  color: #232020;
+  text-align: right; direction: rtl;
+  z-index: 3;
+}
+.slide18-text-l p,
+.slide18-text-c p,
+.slide18-text-r p { margin: 0; white-space: pre; }
+
+/* Left bubble text: left:122 top:442 w:265 */
+.slide18-text-l {
+  left: 122px; top: 442px;
+  width: 270px;
+}
+/* Center bubble text: left:699 top:500 w:230 */
+.slide18-text-c {
+  left: 699px; top: 500px;
+  width: 235px;
+}
+/* Right bubble text: left:1228 top:494 w:240 */
+.slide18-text-r {
+  left: 1228px; top: 494px;
+  width: 245px;
+}
+/* /SLIDE18 ============================================================ */
+
+
+/* ============================================================
+   SLIDE18 — VIDEO + SCORE POPUP
+   ============================================================ */
+
+/* סרטון fullscreen בתוך המסך */
+.slide18-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  background: #000;
+}
+
+/* כפתור סיימתי */
+.slide18-done-btn {
+  position: absolute;
+  left: 33px;
+  top: 923px;
+  width: 209px;
+  height: 137px;
+  z-index: 10;
+  display: none;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.slide18-done-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.slide18-done-btn--visible {
+  display: block;
+}
+.slide18-done-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.04);
+}
+
+/* ניווט ◄ מעל הסרטון */
+#screen-slide18 .nav-prev {
+  z-index: 20;
+}
+
+/* ── Pre-video overlay ─────────────────────────────────────── */
+.slide18-pre-header {
+  position: absolute;
+  top: 0; left: 1102px;
+  width: 818px; height: 140px;
+  display: block; z-index: 10;
+}
+.slide18-header-text {
+  position: absolute;
+  top: 29px; right: 37px;
+  width: 1440px;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 33.333px; line-height: 41px;
+  letter-spacing: 0.1302px;
+  color: var(--color-text);
+  text-align: right; direction: rtl;
+  z-index: 11;
+}
+.slide18-header-text p { margin: 0; }
+
+.slide18-pre-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+}
+.slide18-pre-overlay.slide18-pre-overlay--hidden {
+  display: none;
+}
+.slide18-pre-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* כפתור Play */
+.slide18-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 168px;
+  height: 168px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.slide18-play-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.slide18-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  opacity: 0.9;
+}
+
+/* Overlay פופאפ ציון */
+.score-popup-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* כרטיס פופאפ */
+.score-popup-card {
+  position: relative;
+  background: #fff;
+  border-radius: 24px;
+  padding: 60px 80px 50px;
+  text-align: center;
+  direction: rtl;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+  min-width: 480px;
+}
+
+/* כפתור סגירה ✕ */
+.score-popup-close {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: #888;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.score-popup-close:hover {
+  color: #333;
+  background: rgba(0,0,0,0.07);
+}
+
+.score-popup-title {
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  color: #232020;
+  margin: 0 0 24px;
+}
+
+.score-popup-score-label {
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  color: #555;
+  margin: 0 0 12px;
+}
+
+.score-popup-score-value {
+  font-family: var(--font-main);
+  font-size: 5rem;
+  font-weight: var(--font-weight-bold);
+  color: #2a7c3f;
+  margin: 0;
+  line-height: 1;
+}
+/* /SLIDE18 VIDEO + SCORE POPUP ======================================== */
