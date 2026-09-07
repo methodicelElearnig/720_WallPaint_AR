@@ -45,16 +45,25 @@
 <!-- רקע — תמיד נראה -->
 <img alt="" class="slide1-bg" draggable="false" src="img/bg-slide1.png"/>
 <!-- סרטון -->
-<video class="slide1-video slide1-video--hidden" id="slide1-video" onended="onSlide1VideoEnded()" playsinline="" preload="auto" src="video/FirstVidfinal1.mp4">
+<video class="slide1-video slide1-video--hidden" id="slide1-video" onclick="pauseSlide1Video()" onended="onSlide1VideoEnded()" playsinline="" preload="auto" src="video/Video1_AR.mp4">
 </video>
 <!-- header + טקסט — תמיד מעל -->
-<img alt="" class="slide1-header" draggable="false" src="img/bg-slide2-header.png"/>
+<div class="slide1-header ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
 <div class="slide1-text" dir="rtl">
 <p>هذه سمر، معلّمة الفنون.</p>
 <p>دخلَتْ إلى درس الصفّ الثامن "ب"، ومعها بُشرى للطلّاب.</p>
 </div>
+</div>
 <!-- כפתור Play -->
 <button aria-label="تشغيل الفيديو" class="slide1-play-btn" id="slide1-play-btn" onclick="startSlide1Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
+<!-- כפתור חידוש נגינה — מופיע כשעוצרים את הסרטון באמצע -->
+<button aria-label="استئناف الفيديو" class="slide1-play-btn slide1-play-btn--hidden" id="slide1-resume-btn" onclick="resumeSlide1Video()">
 <svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
 <circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
 <polygon fill="white" points="31,22 62,40 31,58"></polygon>
@@ -77,12 +86,14 @@
 <!-- רקע מלא 1920×1080 -->
 <img alt="" class="slide2-bg" draggable="false" src="img/bg-slide2.png"/>
 <!-- פאנל כותרת -->
-<img alt="" class="slide2-header" draggable="false" src="img/bg-slide2-header.png"/>
+<div class="slide2-header ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
 <!-- טקסט קריינות -->
 <div class="slide2-text" dir="rtl">
 <p>بعد حيرةٍ كبيرة، اختارَ طلّاب وطالبات الصفّ، بأغلبيّة الأصوات، أنْ يرسُموا شاطئًا استوائيًّا مع أشجار نخيل وقوارب.</p>
 <p>والآن عليْهِم أنْ يخطِّطوا لدرجات الألوان وكمّيّات الألوان التي سيحتاجون إليها للرسمة.</p>
 <p>قسّمَتْ سمر الصفّ إلى عدّة مجموعات، وكانَتْ كلّ مجموعة مسؤولة عن تحضير بعض درجات الألوان المطلوبة للرسمة.</p>
+</div>
 </div>
 <!-- ניווט -->
 <button aria-label="التالي" class="nav-btn nav-next" id="slide2-next" onclick="goTo(currentScreen + 1)">
@@ -103,7 +114,15 @@
 <img alt="" class="slide3-bg" draggable="false" src="img/bg-slide3.png"/>
 <!-- פאנל כותרת — node 2:21, 1512×233, left=1102
              גלוי מ-x=1102 עד x=1920 (818px); .screen overflow:hidden מקצץ -->
-<img alt="" class="slide3-header" draggable="false" src="img/bg-slide3-header.png"/>
+<div class="slide3-header ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
+<!-- טקסט כותרת — Live HTML, node 2:23
+             Assistant SemiBold 600, 33.333px, right=62px, top=42px -->
+<div class="slide3-header-text" dir="rtl">
+<p>قبل أنْ يبدؤوا بالتخطيط،</p>
+<p>شرحَتْ سمر لأعضاء مجموعة درجات اللون الأخضر بعض الأمور:</p>
+</div>
+</div>
 <!-- לוח לבן — node 2:32, 947×977, left=0, top=2 -->
 <img alt="" class="slide3-board" draggable="false" src="img/board-slide3.png"/>
 <!-- מבחנות וסמלים — ימין: full-yellow + little-blue = light-green -->
@@ -123,12 +142,6 @@
 </div>
 <img alt="=" class="slide3-icon-equal-l" draggable="false" src="img/icon-equal.png"/>
 <img alt="" class="slide3-tube-dark-green" draggable="false" src="img/tube-dark-green.png"/>
-<!-- טקסט כותרת — Live HTML, node 2:23
-             Assistant SemiBold 600, 33.333px, right=62px, top=42px -->
-<div class="slide3-header-text" dir="rtl">
-<p>قبل أنْ يبدؤوا بالتخطيط،</p>
-<p>شرحَتْ سمر لأعضاء مجموعة درجات اللون الأخضر بعض الأمور:</p>
-</div>
 <!-- טקסט ראשי על לוח — Live HTML, node 2:33
              Assistant Regular 400 + Bold 700 spans, right=1042px, top=159px
              ⚠ "וריחוקץ" — כך בפיגמה (Source of Truth), ייתכן שגיאת הקלדה -->
@@ -158,7 +171,7 @@
              src: video/slide3-teacher.mp4 (placeholder — קובץ עדיין לא קיים)
              onended: משחרר נעילת ►
              onerror: graceful fallback — משחרר נעילה בסביבת פיתוח (קובץ חסר) -->
-<video aria-label="الألوان الدافئة والباردة — فيديو" class="slide3-video" id="slide3-video" playsinline="" preload="auto" src="video/hot_cold_colors2.mp4">
+<video aria-label="الألوان الدافئة والباردة — فيديو" class="slide3-video" id="slide3-video" playsinline="" preload="auto" src="video/Video2_AR.mp4">
 </video>
 <!-- כפתור "נגן שוב" — מוצג רק כשחוזרים למסך אחרי שהסרטון כבר נצפה -->
 <button aria-label="تشغيل الفيديو مرّة أخرى" class="slide3-replay-btn s3-hidden-btn" id="slide3-replay-btn" onclick="replaySlide3Video()">
@@ -206,15 +219,14 @@
 <div class="q1-context-text" dir="rtl">
 <p>بدأ الطلّاب بتخطيط الألوان التي يحتاجون إليها للرسمة.</p>
 <p>وبَعد عِدّة مُحاوَلات، توصّلوا إلى درجة "أخضر الغابة"،</p>
-<p>التي تنتُج من 3 أكواب مِن اللون الأزرق وكوبَيْن مِن اللون الأصفر.</p>
-<p>أيْ أنّ النسبة الملائمة هي 2 : 3.</p>
+<p>التي تنتُج من 3 أكواب مِن اللون الأزرق وكوبَيْن مِن اللون الأصفر. أيْ أنّ النسبة الملائمة هي 2 : 3.</p>
 </div>
 <!-- הנחיית שאלה — Live HTML — node 2:63, right edge x=914, top=229
              Assistant Bold 700, 33.333px
              right: 1920-914=1006px
              ⚠ "צהובץ" — כך בפיגמה (Source of Truth) -->
 <div class="q1-instruction" dir="rtl">
-<p class="q1-instruction-num-line">1. أكمِلوا الجُمل التالية.</p>
+<p class="q1-instruction-num-line"><strong>1.</strong> أكمِلوا الجُمل التالية.</p>
 <p>جُرّوا الكلمات الملائمة من مخزن الكلمات.</p>
 </div>
 <!-- איור — node 2:62 (QUES1_ILLU 1), 501×408, left=1155, top=445 -->
@@ -364,13 +376,15 @@
 <img alt="" class="s5-bg" draggable="false" src="img/slide5-bg.jpg"/>
 <!-- פאנל כותרת — node 5:9, left:960, top:0, 1512×233
              גלוי גם ב-closed וגם ב-open -->
-<img alt="" class="s5-header-bg" draggable="false" src="img/slide5-header-bg.png"/>
+<div class="s5-header-bg ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
 <!-- טקסט כותרת — Live HTML (לא מיוצא כתמונה)
              node 5:10 — Assistant SemiBold 600, 33.333px, right:37px, top:42px -->
 <div class="s5-header-text" dir="rtl">
 <p>بَيْنَما كان بقيّة الطلّاب مُنشَغِلين بتخطيط الألوان،</p>
 <p>كانَتْ عبير تعمل مع أداة ذكاء اصطناعي (AI)، وطوّرَتْ بواسطتها تطبيقًا يساعد في إجراء الحِسابات.</p>
 <p><strong>اُنقُروا على هاتف عبير لفتح التطبيق.</strong></p>
+</div>
 </div>
 <!-- Hotspot לחיץ — תמונת ידיים+טלפון PNG מונחת בדיוק על מיקום דניאלה
              נראה רק ב-closed; hover = brightness עדין -->
@@ -392,8 +406,8 @@
 <!-- טקסט הוראות א — Live HTML
                node 5:26 — right edge at 883px → CSS right:1037px, top:417px -->
 <div class="s5-instructions-a" dir="rtl">
-<p>أ. كوِّنوا اللون الأخضر، بحيث تكون النسبة بين عدد أكواب</p>
-<p>اللون الأزرق وعدد أكواب اللون الأصفر 3 : 4.</p>
+<p>أ. كوِّنوا اللون الأخضر، بحيث تكون النسبة بين عدد</p>
+<p>أكواب اللون الأزرق وعدد أكواب اللون الأصفر 3 : 4.</p>
 <p>اكتُبوا إمكانيّتَيْن مختلفتَيْن لعدد الأكواب</p>
 <p>من كل لون، بحيث تحقِّقان النسبة المطلوبة.</p>
 </div>
@@ -467,7 +481,7 @@
 </div>
 <!-- שאלה — עמודת שמאל (node 5:41) -->
 <div class="q2-question" dir="rtl">
-<p>2. الآن يَجِب إضافة اللون الأصفر. يدّعي وسام أنّهُ يَجِب إضافة 12 كوبًا مِن اللون الأصفر للحِفاظ على نسبة الخليط. استعينوا بالتطبيق أعلاه، وافحَصوا ما إذا تمّ الحِفاظ على درجة اللون وفقًا لاقتراح وسام.</p>
+<p><strong>2.</strong> الآن يَجِب إضافة اللون الأصفر. يدّعي وسام أنّهُ يَجِب إضافة 12 كوبًا مِن اللون الأصفر للحِفاظ على نسبة الخليط. استعينوا بالتطبيق أعلاه، وافحَصوا ما إذا تمّ الحِفاظ على درجة اللون وفقًا لاقتراح وسام.</p>
 <p><strong>هل هو على صواب؟</strong>   اختاروا الإجابة الصحيحة.</p>
 </div>
 <!-- איור — כוסות כחול + צהוב (animated, 2 phases) -->
@@ -506,7 +520,7 @@
 </div>
 <div aria-checked="false" class="q2-option" data-value="2" onclick="selectQ2Option(2)" role="radio" tabindex="0">
 <span class="q2-opt-marker"></span>
-<span class="q2-opt-text" style="white-space: nowrap;">وسام مُخطئ، يَجِب إضافة 10 أكواب فقط مِن اللون الأصفر للحِفاظ على نسبة الخليط</span>
+<span class="q2-opt-text">وسام مُخطئ، يَجِب إضافة 10 أكواب فقط مِن اللون الأصفر للحِفاظ على نسبة الخليط</span>
 </div>
 <div aria-checked="false" class="q2-option" data-value="3" onclick="selectQ2Option(3)" role="radio" tabindex="0">
 <span class="q2-opt-marker"></span>
@@ -590,7 +604,7 @@
 <p>اختاروا الإجابة الصحيحة.</p>
 <p>استعينوا بالتطبيق أعلاه وافحَصوا إجابتَكُم قبل أنْ تجيبوا.</p>
 </div>
-<!-- איור — דלי שפיכה (⚠️ q3-pic.png contains Hebrew "2 ליטר" — clean Figma export needed) -->
+<!-- איור — דלי שפיכה (q3-pic.png — clean Arabic export "2 لترَيْن") -->
 <img alt="" class="q3-pic" draggable="false" src="img/q3-pic.png"/>
 <!-- ילדות מבועתות -->
 <img alt="" class="q3-girls" draggable="false" src="img/q3-girls.png"/>
@@ -655,11 +669,11 @@
            SCREEN 6 — QUES4A
            Figma: 7:526 main | 9:1183 help | 9:1222 tryagain | 9:1264 correct | 9:1309 incorrect
            Multi-select radio — correct: {2,4} (2/3=16/X and 3/2=X/16)
-           ⚠️  q4-stav.png contains "16 ליטר" — needs clean Figma export
+           q4-stav.png — clean Arabic export ("16 لترًا"), reused by Q4b/Q4c
            ============================================================ -->
 <section class="screen" data-q-state="" data-q4-help="false" data-q4-state="main" data-screen="7" id="screen-q4">
 <!-- אודיו קריינות שאלה 4 -->
-<audio id="q4-audio" preload="auto" src="audio/Q4_audio.mp3"></audio>
+<audio id="q4-audio" preload="auto" src="audio/Slide_8_Narration.mp3"></audio>
 <!-- רקע — reuse QUES2/QUES3 bg/overlay/card -->
 <img alt="" class="q4-bg" draggable="false" src="img/bg-slide2.png"/>
 <div class="q4-overlay"></div>
@@ -697,7 +711,6 @@
 </div>
 <!-- איור — צינוריות ודלי (node 7:554 + 7:555) -->
 <img alt="" class="q4-illu" draggable="false" src="img/q4-illu.png"/>
-<!-- ⚠️ q4-stav.png contains "16 ליטר" baked in — needs clean Figma export -->
 <img alt="" class="q4-stav" draggable="false" src="img/q4-stav.png"/>
 <!-- אפשרויות תשובה — 4 options, horizontal, LTR order matching Figma pixel order -->
 <!-- Correct: option 2 (2/3=16/X) and option 4 (3/2=X/16) -->
@@ -1041,15 +1054,15 @@
 <img alt="" class="slide8-bg" draggable="false" src="img/bg-slide8.png"/>
 <!-- פאנל כותרת — BG_HEADER2 1 מ-Figma (RGBA, שקיפות אמיתית בפינות)
              left:1273 w:1512 — יוצא מחוץ למסך ימינה -->
-<div class="slide8-header-wrap">
-<img alt="" draggable="false" src="img/bg-slide8-header-fresh.png"/>
-</div>
+<div class="slide8-header-wrap ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
 <!-- טקסט קריינות — Live HTML, node 8:117
              Assistant SemiBold 600, 33.333px, right=37px, top=42px -->
 <div class="slide8-text" dir="rtl">
 <p>ذكَّرِتْ نسرين أصدقاءَها بأنّ هناك درجات أخرى مِن اللون الأخضر</p>
 <p>في الرسم، بالإضافة إلى درجة أخضر الغابة،</p>
 <p>وأنّهُ يَجِب تحضير خلطات ملائمة لها أيضًا.</p>
+</div>
 </div>
 <!-- ניווט -->
 <button aria-label="التالي" class="nav-btn nav-next" onclick="goTo(currentScreen + 1)">
@@ -1086,8 +1099,12 @@
 <button aria-label="تطبيق" class="q5-app-btn" onclick="openQ5Applet()">
 <img alt="" draggable="false" src="img/q2-app-btn.png"/>
 </button>
-<!-- גרפיקת תערובות — Figma TAAROVET_B + TAAROVET_A -->
+<!-- גרפיקת תערובות — Figma TAAROVET_B + TAAROVET_A
+             images re-exported clean (no baked text) — captions
+             are now live HTML, positioned above each graphic -->
+<p class="q5-taarovet-b-caption" dir="rtl">الخليط "ب" - النسبة 13:5</p>
 <img alt='الخليط "ب" - النسبة 13:5' class="q5-taarovet-b" draggable="false" src="img/mixB.png"/>
+<p class="q5-taarovet-a-caption" dir="rtl">الخليط "أ" - النسبة 3:2</p>
 <img alt='الخليط "أ" - النسبة 3:2' class="q5-taarovet-a" draggable="false" src="img/mixa.png"/>
 <!-- טקסט שאלה — Figma 8:392, right:234 top:174 -->
 <div class="q5-question" dir="rtl">
@@ -1163,21 +1180,18 @@
 <!-- רקע — תמיד נראה (גם לפני וגם אחרי הסרטון) -->
 <img alt="" class="slide10-bg" draggable="false" src="img/bg-slide10.png"/>
 <!-- סרטון — מוצג בזמן הנגינה בלבד -->
-<video class="slide10-video slide10-video--hidden" id="slide10-video" onended="onSlide10VideoEnded()" playsinline="" preload="auto" src="video/slide10.mp4">
+<video class="slide10-video slide10-video--hidden" id="slide10-video" onclick="pauseSlide10Video()" onended="onSlide10VideoEnded()" playsinline="" preload="auto" src="video/Video3_AR.mp4">
 </video>
 <!-- header + טקסט — תמיד מעל (גם בזמן הסרטון) -->
-<div class="slide10-header-wrap">
-<img alt="" draggable="false" src="img/bg-slide10-header.png"/>
-</div>
+<div class="slide10-header-wrap ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
 <p class="slide10-text" dir="rtl">بعد أنِ انتَهَوْا مِن تخطيط جميع خلطات الألوان، خرجَ الطلّاب إلى الخارج لمُعايَنة الجدار.</p>
+</div>
 <!-- בועות דיבור — מופיעות אחרי הסרטון -->
 <div class="slide10-bubbles--hidden" id="slide10-bubbles">
 <img alt="" class="slide10-bubble-l" draggable="false" src="img/slide10-bubble.png"/>
 <div class="slide10-bubble-l-text" dir="rtl">
-<p>إنّهُ أكبر بكثير مِمّا</p>
-<p>ظنَنَتُ! كيف سنعرِف أنْ نُخطِّط</p>
-<p>كُبر الرسمة على</p>
-<p>الجدار الحقيقيّ؟</p>
+<p>إنّهُ أكبر بكثير مِمّا ظنَنَتُ! كيف سنعرِف أنْ نُخطِّط كُبر الرسمة على الجدار الحقيقيّ؟</p>
 </div>
 <img alt="" class="slide10-bubble-r" draggable="false" src="img/slide10-bubble.png"/>
 <div class="slide10-bubble-r-text" dir="rtl">
@@ -1187,6 +1201,13 @@
 </div>
 <!-- כפתור Play — נסתר לאחר לחיצה -->
 <button aria-label="تشغيل الفيديو" class="slide10-play-btn" id="slide10-play-btn" onclick="startSlide10Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
+<!-- כפתור חידוש נגינה — מופיע כשעוצרים את הסרטון באמצע -->
+<button aria-label="استئناف الفيديو" class="slide10-play-btn slide10-play-btn--hidden" id="slide10-resume-btn" onclick="resumeSlide10Video()">
 <svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
 <circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
 <polygon fill="white" points="31,22 62,40 31,58"></polygon>
@@ -1366,8 +1387,11 @@
 </div>
 <!-- "30 ליטרים ומתוכם..." (node 8:926): right=920px top=524px -->
 <p class="q7-thirty-text q7-semibold" dir="rtl">30 لترًا، واستخدام 28 لترًا المطلوبة منها.</p>
-<!-- איור גלונים — ILLU_QUES7 1: left:1209 top:523 w:489 h:244 -->
+<!-- איור גלונים — ILLU_QUES7 1: left:1209 top:523 w:489 h:244
+             re-exported clean (no baked text) — captions are live HTML -->
 <img alt="" class="q7-illu" draggable="false" src="img/q7-illu.png"/>
+<p class="q7-illu-caption q7-illu-caption-yellow" dir="rtl">2 لترَيْن</p>
+<p class="q7-illu-caption q7-illu-caption-blue" dir="rtl">5 لترات</p>
 <!-- word bank — 4 chips at top≈585 -->
 <div class="q7-chips">
 <div class="q7-chip" data-word="6" draggable="true" onclick="q7ChipClick(event,'6')" ondragend="q7DragEnd(event)" ondragstart="q7DragStart(event,'6')">
@@ -1475,8 +1499,11 @@
 <img alt="" class="q7b-drop-bg" draggable="false" src="img/q7-drop.png"/>
 <span class="q7b-drop-label"></span>
 </div>
-<!-- איור גלונים — same as QUES7: left:1209 top:523 w:489 h:244 -->
+<!-- איור גלונים — same as QUES7: left:1209 top:523 w:489 h:244
+             re-exported clean (no baked text) — captions are live HTML -->
 <img alt="" class="q7b-illu" draggable="false" src="img/q7-illu.png"/>
+<p class="q7-illu-caption q7-illu-caption-yellow" dir="rtl">2 لترَيْن</p>
+<p class="q7-illu-caption q7-illu-caption-blue" dir="rtl">5 لترات</p>
 <!-- word bank — 4 chips: "30","28","18","12" at left:260/449/638/827 top:529 -->
 <div class="q7b-chips">
 <div class="q7b-chip" data-word="30" draggable="true" onclick="q7bChipClick(event,'30')" ondragend="q7bDragEnd(event)" ondragstart="q7bDragStart(event,'30')">
@@ -1531,9 +1558,11 @@
            ============================================================ -->
 <section class="screen" data-screen="16" id="screen-slide18">
 <!-- פאנל כותרת — תמיד גלוי -->
-<img alt="" class="slide18-pre-header" draggable="false" src="img/bg-slide2-header.png"/>
+<div class="slide18-pre-header ar-bubble-wrap">
+<div class="ar-bubble-bg"></div>
 <div class="slide18-header-text" dir="rtl">
 <p>بَعد عدّة أيّام مِن العمل المكثَّف، أنهى الطلّاب الرسمة.</p>
+</div>
 </div>
 <!-- overlay סטטי לפני הסרטון -->
 <div class="slide18-pre-overlay" id="slide18-pre-overlay">
@@ -1547,8 +1576,15 @@
 </button>
 </div>
 <!-- סרטון סיום — fullscreen -->
-<video class="slide18-video" id="slide18-video" onended="onSlide18VideoEnded()" playsinline="" preload="auto" src="video/lastslidevid.mp4">
+<video class="slide18-video" id="slide18-video" onclick="pauseSlide18Video()" onended="onSlide18VideoEnded()" playsinline="" preload="auto" src="video/Video4_AR.mp4">
 </video>
+<!-- כפתור חידוש נגינה — מופיע כשעוצרים את הסרטון באמצע (לא נוגע ב-pre-overlay/תמונה סטטית) -->
+<button aria-label="استئناف الفيديو" class="slide18-play-btn slide18-play-btn--hidden" id="slide18-resume-btn" onclick="resumeSlide18Video()">
+<svg viewbox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+<circle cx="40" cy="40" fill="rgba(60,60,60,0.75)" r="38" stroke="white" stroke-width="3"></circle>
+<polygon fill="white" points="31,22 62,40 31,58"></polygon>
+</svg>
+</button>
 <!-- כפתור סיימתי — מופיע לאחר סיום הסרטון -->
 <button aria-label="اِنْتَهَيْتُ" class="slide18-done-btn" id="slide18-done-btn" onclick="openScorePopup()">
 <img alt="اِنْتَهَيْتُ" draggable="false" src="img/btn-done.png"/>

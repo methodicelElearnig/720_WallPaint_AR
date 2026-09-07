@@ -87,6 +87,11 @@ function startQ4AudioSequence() {
 
   /* Start narration after illustration animation finishes (0.3s delay + 0.4s duration) */
   _q4AudioTimer = setTimeout(function() {
+    _q4AudioTimer = null;
+    /* Belt-and-suspenders: resetScreenState() cancels this timer on
+       navigating away, but if Q4 somehow isn't the active screen
+       anymore when it fires, don't start the narration regardless. */
+    if (!screen.classList.contains('active')) return;
     audio.playbackRate = 1.1;
     audio.play().catch(function() {});
 

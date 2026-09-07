@@ -10,7 +10,7 @@
     ],
     "idScheme": "MURALS-{SCREEN}-{TYPE}-{SEQ}",
     "totalScreens": 17,
-    "totalEntries": 381,
+    "totalEntries": 384,
     "totalOrphaned": 0,
     "regenerate": "python3 translation/tools/extract_translations.py",
     "notes": "IDs are stable across regeneration when (screen, type, Hebrew source) is unchanged. Entries removed or edited in the source move to 'orphaned' instead of being deleted, so in-progress Arabic translations are never silently lost — review 'orphaned' after each regeneration and re-merge manually if the text just moved. Rows of type 'video-narration' were added by hand from the SRT subtitle file of SLIDE1 / FirstVidfinal1.mp4, whose spoken narration has no on-screen equivalent. They carry \"manual\": true and are NOT re-derived from index.html — extract_translations.py preserves them across regeneration instead of orphaning them. SLIDE3 / hot_cold_colors2.mp4 is deliberately not included: its narration is already covered by the on-screen rows MURALS-SLIDE3-NARR-*."
@@ -3613,7 +3613,9 @@
       "note": "",
       "id": "MURALS-SLIDE10-DLG-01",
       "translation": "",
-      "status": "active"
+      "status": "active",
+      "character": "Wisam (وسام)",
+      "direction": "said in despair/frustration (production note: בייאוש)"
     },
     {
       "screen": "slide10",
@@ -3627,7 +3629,9 @@
       "note": "",
       "id": "MURALS-SLIDE10-DLG-02",
       "translation": "",
-      "status": "active"
+      "status": "active",
+      "character": "Unnamed classmate (girl, blue hoodie)",
+      "direction": "reassuring"
     },
     {
       "screen": "slide10",
@@ -3641,7 +3645,9 @@
       "note": "",
       "id": "MURALS-SLIDE10-DLG-03",
       "translation": "كُبر الرسمة على",
-      "status": "active"
+      "status": "active",
+      "character": "Wisam (وسام)",
+      "direction": "said in despair/frustration"
     },
     {
       "screen": "slide10",
@@ -3655,7 +3661,9 @@
       "note": "",
       "id": "MURALS-SLIDE10-DLG-04",
       "translation": "",
-      "status": "active"
+      "status": "active",
+      "character": "Wisam (وسام)",
+      "direction": "said in despair/frustration"
     },
     {
       "screen": "slide10",
@@ -3669,7 +3677,9 @@
       "note": "",
       "id": "MURALS-SLIDE10-DLG-05",
       "translation": "",
-      "status": "active"
+      "status": "active",
+      "character": "Unnamed classmate (girl, blue hoodie)",
+      "direction": "reassuring"
     },
     {
       "screen": "slide10",
@@ -3683,7 +3693,9 @@
       "note": "",
       "id": "MURALS-SLIDE10-DLG-06",
       "translation": "",
-      "status": "active"
+      "status": "active",
+      "character": "Unnamed classmate (girl, blue hoodie)",
+      "direction": "reassuring"
     },
     {
       "screen": "slide10",
@@ -5000,6 +5012,57 @@
       "id": "MURALS-SLIDE18-NARR-01",
       "translation": "بَعد عدّة أيّام مِن العمل المكثَّف، أنهى الطلّاب الرسمة.",
       "status": "active"
+    },
+    {
+      "screen": "slide18",
+      "screenIndex": 15,
+      "component": "video",
+      "screenLabel": "סרטון סיום — הקבוצה בחוף (וידאו)",
+      "type": "dialogue",
+      "source": "תראו איך יצא לנו יפה! עם כל התקלות בדרך, מי היה מאמין...",
+      "sourceFile": "lastslidevid.mp4",
+      "sourceLocator": "baked-in speech bubble 1 of 3, ~0:04-0:08",
+      "note": "Baked into the video pixels — not audio/lip-synced, a static comic-style caption bubble. No on-screen HTML equivalent existed before this entry. Translated to match the document's established fusha register and diacritic density.",
+      "id": "MURALS-SLIDE18-DLG-01",
+      "translation": "انظروا كيف خرجَتِ الرسمةُ جميلةً! رغمَ كُلِّ العقباتِ في الطريق، مَن كانَ يُصَدِّق...",
+      "status": "active",
+      "manual": true,
+      "character": "Wisam (وسام)",
+      "direction": "reflective, amazed"
+    },
+    {
+      "screen": "slide18",
+      "screenIndex": 15,
+      "component": "video",
+      "screenLabel": "סרטון סיום — הקבוצה בחוף (וידאו)",
+      "type": "dialogue",
+      "source": "המתמטיקה עזרה לנו לפתור הכל",
+      "sourceFile": "lastslidevid.mp4",
+      "sourceLocator": "baked-in speech bubble 2 of 3, ~0:04-0:08",
+      "note": "Baked into the video pixels — not audio/lip-synced, a static comic-style caption bubble. No on-screen HTML equivalent existed before this entry.",
+      "id": "MURALS-SLIDE18-DLG-02",
+      "translation": "الرياضيّاتُ ساعَدَتْنا على حَلِّ كُلِّ شيء.",
+      "status": "active",
+      "manual": true,
+      "character": "Unnamed classmate (girl, purple hoodie) — possibly same character as SLIDE10 classmate, unconfirmed",
+      "direction": "said with pride (production note: בגאווה)"
+    },
+    {
+      "screen": "slide18",
+      "screenIndex": 15,
+      "component": "video",
+      "screenLabel": "סרטון סיום — הקבוצה בחוף (וידאו)",
+      "type": "dialogue",
+      "source": "השאלה היא איך המתמטיקה יכולה לעזור לנו ממש להגיע אל החוף הזה, ולא רק לצייר אותו...",
+      "sourceFile": "lastslidevid.mp4",
+      "sourceLocator": "baked-in speech bubble 3 of 3, ~0:13-0:17",
+      "note": "Baked into the video pixels — not audio/lip-synced, a static comic-style caption bubble. No on-screen HTML equivalent existed before this entry. Closing punchline of the unit.",
+      "id": "MURALS-SLIDE18-DLG-03",
+      "translation": "السؤالُ هو كيف يُمكن لِلرياضيّاتِ أنْ تُساعِدَنا فعلًا على الوصول إلى هذا الشاطئ، لا أنْ نَرسُمَهُ فقط...",
+      "status": "active",
+      "manual": true,
+      "character": "Wisam (وسام)",
+      "direction": "reflective, closing punchline"
     },
     {
       "screen": "slide18",

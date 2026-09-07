@@ -1,12 +1,12 @@
 'use strict';
 
 /*
- * SLIDE 3 — Video-driven sequence (video/hot_cold_colors2.mp4)
+ * SLIDE 3 — Video-driven sequence (video/Video2_AR.mp4)
  *
  * Phase 1: screen active → header slides in (CSS animation)
  * Phase 2: +2s → video starts playing
- * Phase 3: video t≥20.9s → left tubes appear (dark-green side)   — narration: "בתערובת יש יותר כחול"
- * Phase 4: video t≥26.2s → right tubes appear (light-green side) — narration: "בתערובת יש יותר צהוב"
+ * Phase 3: video t≥22.5s → left tubes appear (dark-green side)   — narration: "أكبر من اللون الأزرق... أخضر بارد وغامق"
+ * Phase 4: video t≥30.4s → right tubes appear (light-green side) — narration: "أكبر من اللون الأصفر... أخضر دافئ وفاتح"
  * Phase 5: video ended → unlock ► + freeze on last frame
  *
  * חזרה למסך אחרי שהסרטון כבר נצפה: קופאים על הפריים האחרון (לא שחור) +
@@ -142,6 +142,10 @@ function _playSlide3Sequence(scr, video) {
 
   /* Phase 2: start video after 2s */
   at(2000, function() {
+    /* Belt-and-suspenders: resetScreenState() cancels this timer on
+       navigating away, but if slide3 somehow isn't the active screen
+       anymore when it fires, don't start the narration regardless. */
+    if (!scr.classList.contains('active')) return;
     video.play().catch(function() {});
   });
 
@@ -149,7 +153,7 @@ function _playSlide3Sequence(scr, video) {
   video.ontimeupdate = function() {
     var t = video.currentTime;
 
-    if (!leftShown && t >= 20.9) {
+    if (!leftShown && t >= 22.5) {
       leftShown = true;
       show('.slide3-tube-little-yellow', 's3-rev-pour');
       show('.slide3-icon-plus-l',        's3-rev-fadein');
@@ -160,7 +164,7 @@ function _playSlide3Sequence(scr, video) {
       });
     }
 
-    if (!rightShown && t >= 26.2) {
+    if (!rightShown && t >= 30.4) {
       rightShown = true;
       show('.slide3-tube-full-yellow','s3-rev-pour');
       show('.slide3-icon-plus-r',     's3-rev-fadein');

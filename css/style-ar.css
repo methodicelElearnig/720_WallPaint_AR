@@ -6,7 +6,10 @@
 
    Contents
      1. Typeface
-     2. Translation-expansion fixes, screen by screen
+     2. Row spacing — general increase (unit-wide SME comment)
+     3. Un-clip panels that would now silently truncate text
+     4. Translation-expansion fixes, screen by screen
+     5. Top narration panel — SVG "bubble" (unit-wide SME comment)
    ============================================================ */
 
 /* ── 1. Typeface ─────────────────────────────────────────────
@@ -16,34 +19,224 @@
   --font-main: 'Cairo', 'Segoe UI', Arial, sans-serif;
 }
 
-/* ── 2. Translation-expansion fixes ──────────────────────────
+/* ── 2. Row spacing — general increase ───────────────────────
+   SME: rows read too tight, especially with Arabic diacritics.
+   Bumps line-height only (never font-size, so none of the
+   pixel-tuned positions below have to move) by roughly the same
+   proportion everywhere: ~41px → ~46px at the project's common
+   33.333px body size, and scaled the same way at every other
+   size in use. Applies to every narration/question/feedback/
+   help-text block that reads as a sentence; small fixed-size UI
+   tokens (drag-drop chips, blanks, drop labels) are left alone —
+   a taller line-height on a single-line label sitting in a small
+   fixed box has no reading benefit and risks misaligning it.   */
+
+/* Q1 */
+.q1-context-text,
+.q1-instruction,
+.q1-stem,
+.q1-tryagain-text,
+.q1-help-text {
+  line-height: 46px;
+}
+.q1-feedback-correct-text p,
+.q1-feedback-incorrect-text p {
+  line-height: 46px;
+}
+
+/* Q2 */
+.q2-question {
+  line-height: 45px;
+}
+.q2-tryagain-msg {
+  line-height: 46px;
+}
+.q2-fb-correct,
+.q2-fb-incorrect {
+  line-height: 40px;
+}
+.q2-help-popup p {
+  line-height: 46px;
+}
+
+/* Q3 */
+.q3-question {
+  line-height: 45px;
+}
+.q3-tryagain-msg {
+  line-height: 46px;
+}
+.q3-fb-correct,
+.q3-fb-incorrect {
+  line-height: 37px;
+}
+
+/* Q4 / Q4b / Q4c */
+.q4-story,
+.q4b-story,
+.q4c-story {
+  line-height: 46px;
+}
+.q4c-question {
+  line-height: 1.38;
+}
+.q4-tryagain-msg,
+.q4b-tryagain-msg,
+.q4c-tryagain-msg {
+  line-height: 46px;
+}
+.q4-fb-correct,
+.q4-fb-incorrect,
+.q4c-fb-correct,
+.q4c-fb-incorrect {
+  line-height: 46px;
+}
+.q4b-fb-correct,
+.q4b-fb-incorrect {
+  line-height: 43px;
+}
+.q4-help-popup p,
+.q4b-help-popup p,
+.q4c-help-popup p {
+  line-height: 46px;
+}
+
+/* Q5 */
+.q5-question,
+.q5-label,
+.q5-tryagain-msg {
+  line-height: 46px;
+}
+.q5-fb-correct,
+.q5-fb-incorrect,
+.q5-fb-correct p,
+.q5-fb-incorrect p {
+  line-height: 46px;
+}
+.q5-help-popup p {
+  line-height: 46px;
+}
+
+/* Q6 */
+.q6-narration,
+.q6-question,
+.q6-label,
+.q6-tryagain-msg {
+  line-height: 46px;
+}
+.q6-fb-correct,
+.q6-fb-incorrect,
+.q6-fb-correct p,
+.q6-fb-incorrect p {
+  line-height: 46px;
+}
+.q6-help-popup p {
+  line-height: 46px;
+}
+
+/* Q7 */
+.q7-narration,
+.q7-question,
+.q7-tryagain-text {
+  line-height: 46px;
+}
+.q7-fb-correct,
+.q7-fb-incorrect,
+.q7-fb-correct p,
+.q7-fb-incorrect p {
+  line-height: 46px;
+}
+.q7-help-popup p {
+  line-height: 46px;
+}
+
+/* Q7b */
+.q7b-narration,
+.q7b-question,
+.q7b-tryagain-text {
+  line-height: 46px;
+}
+.q7b-fb-correct,
+.q7b-fb-incorrect {
+  line-height: 46px;
+}
+.q7b-help-popup p {
+  line-height: 46px;
+}
+
+/* Top narration panels (all "slide" screens) — see also §5, the
+   panel itself becomes an auto-sizing SVG so this larger line
+   spacing never gets clipped by a fixed-height image. */
+.slide1-text,
+.slide2-text,
+.slide3-header-text,
+.slide8-text,
+.slide10-text,
+.slide18-header-text {
+  line-height: 46px;
+}
+.s5-header-text p {
+  line-height: 46px;
+}
+/* slide10's narration was forced onto one un-wrapped line to fit
+   the old fixed-size header image — the new auto-sizing panel
+   wraps normally instead. */
+.slide10-text {
+  white-space: normal;
+}
+
+/* ── 3. Un-clip panels that would now silently truncate ──────
+   These feedback panels/text blocks were `overflow:hidden` at a
+   fixed height, tuned to the OLD (tighter) line-height. With the
+   larger spacing from §2 they'd cut text off invisibly instead
+   of wrapping — switched to visible so nothing is silently lost.
+   The resulting visual spillover onto neighbouring elements is
+   expected and will be corrected screen-by-screen afterward. */
+.q2-story {
+  overflow: visible;
+}
+.q3-fb-correct,
+.q3-fb-incorrect {
+  overflow: visible;
+}
+.q5-feedback-panel,
+.q6-feedback-panel,
+.q7-feedback-panel,
+.q7b-feedback-panel {
+  overflow: visible;
+}
+/* Q6 — feedback panel sat 11px into the last option's line
+   ("300 متر"). Moving it down clears the options (15px gap) and
+   still leaves 65px before the card's bottom edge. */
+.q6-feedback-panel {
+  top: 657px;
+}
+
+/* ── 4. Translation-expansion fixes ──────────────────────────
    Arabic runs longer than Hebrew here, and these Figma boxes
    are fixed-size. Every fix below keeps the screen's layout and
    reading order; only the type scale or a blank's position
    moves, and only where the Arabic would otherwise be clipped
-   or land on top of something else.                           */
+   or land on top of something else. Line-heights below already
+   include the §2 increase — they replace, not add to, the base
+   values from css/style.css.                                  */
 
-/* SLIDE2 — header paragraph ran a 5th line, spilling out from
-   under the white header shape (which ends at y=233). */
-.slide2-text {
-  font-size: 32px;
-  line-height: 39px;
-}
-
-/* Q2 — story column: 7 Arabic lines in a 205px box with
-   `overflow: hidden`; the tail was cut off and would have run
-   into the illustration at y=420. */
+/* Q2 — story column: 7 Arabic lines in a 205px box (now
+   `overflow: visible` per §3, so a taller line-height no longer
+   risks clipping — kept smaller than the new 46px baseline so
+   the block doesn't grow enormously past its illustration). */
 .q2-story {
   font-size: 1.6875rem;   /* 27px  (was 32px)  */
-  line-height: 29px;      /*       (was 40px)  */
+  line-height: 33px;      /* was 29px, +§2 bump */
 }
 
-/* Q3 — story column: the text fits, but Cairo's line box is a
-   little taller than the 40px line-height it is set in, so
-   `overflow: hidden` shaved the descenders off the last line.
-   Only artwork sits below, so it simply stops clipping. */
+/* Q3 — story column: Cairo's line box is a little taller than
+   the line-height it's set in, so `overflow: hidden` shaved the
+   descenders off the last line. Only artwork sits below, so it
+   simply stops clipping. */
 .q3-story {
   overflow: visible;
+  line-height: 45px;
 }
 .q3-story p:last-child {
   margin-bottom: 0;
@@ -53,15 +246,14 @@
    Hebrew reads:  <text> [blank] <text>  /  <text>
    Arabic is long enough that the sentence needs one more line,
    so the second blank and the text after it move down to a line
-   of their own and everything below shifts with them. The type
-   drops from 33.3px to 30px to keep the block compact. */
+   of their own and everything below shifts with them. */
 .q7-batch-desc,
 .q7-five-text,
 .q7-manot-text,
 .q7-litrim,
 .q7-thirty-text {
   font-size: 30px;
-  line-height: 37px;
+  line-height: 41px;      /* was 37px, +§2 bump */
 }
 #q7-drop-2 {
   top: 545px;
@@ -87,7 +279,6 @@
 .q7b-blue-litrim,
 .q7b-yellow-litrim {
   font-size: 29px;
-  line-height: 41px;
 }
 #q7b-drop-1,
 #q7b-drop-2 {
@@ -96,4 +287,1026 @@
 .q7b-blue-litrim,
 .q7b-yellow-litrim {
   right: 1614px;          /* right edge x=306, left of the blank */
+}
+
+/* ── 5. Top narration panel — auto-sizing "bubble" ───────────
+   SME: the top narration panel is a fixed-size raster image, and
+   Arabic runs long enough that some screens are already at risk
+   of overflowing it (slide2 had to shrink its type to fit; others
+   never got that fix). SME follow-up: a hand-measured fixed-size
+   replacement was still "too big and wide" on short screens — it
+   needs to genuinely hug its own text, not just be a bigger fixed
+   box. Replaced on every "slide"-type screen with a CSS-drawn
+   shape (white fill, black border on the left/bottom edges only,
+   rounded bottom-left corner — the top/right edges never showed a
+   border even in the original art, since they always sit flush
+   with or past the screen's own edge) on a `width:fit-content`
+   wrapper. The wrapper's `max-width` is the OLD fixed text width
+   (the wrap-point, i.e. the widest the panel is ever allowed to
+   get); its actual width/height then shrink to whatever the text
+   really needs, per screen, automatically — no more per-screen
+   guessing. Border-radius (not an SVG path) means no distortion
+   at any resulting aspect ratio.
+   Each wrapper keeps the original element's class name so it
+   still picks up `position:absolute; top:0` (and any JS class
+   toggling / entrance animation) from css/style.css — only the
+   box model (fit-content + padding replacing a fixed width/height)
+   changes here. */
+.ar-bubble-wrap {
+  box-sizing: border-box;
+  width: fit-content;
+  height: auto;
+  display: block;
+}
+.ar-bubble-bg {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border-left: 7px solid #000;
+  border-bottom: 7px solid #000;
+  border-bottom-left-radius: 40px;
+  pointer-events: none;
+}
+/* Text sits in normal flow inside the padded wrapper (so its
+   natural content size drives the wrapper's fit-content size)
+   instead of being independently absolutely-positioned. */
+.slide1-text,
+.slide2-text,
+.slide3-header-text,
+.s5-header-text,
+.slide8-text,
+.slide10-text,
+.slide18-header-text {
+  position: relative;
+  z-index: 1;
+  top: auto; right: auto; left: auto;
+  width: auto;
+}
+
+.slide1-header {
+  left: auto; right: 0; top: 0;
+  max-width: 1517px;
+  padding: 29px 37px 24px 40px;
+}
+.slide2-header {
+  left: auto; right: 0; top: 0;
+  /* Narrower than the other slide headers on purpose: at the old
+     1517px the 1st paragraph's last word ("وقوارب.") wrapped alone
+     onto its own line. Narrowing the wrap point pushes 3 more words
+     down to join it, and also improves the 3rd paragraph's own
+     short trailing line — both without breaking the 2nd paragraph,
+     which still fits on one line at this width. */
+  max-width: 1250px;
+  padding: 42px 37px 24px 40px;
+}
+/* SLIDE3 — widened from the original 750px text column so the
+   2nd paragraph stops wrapping to an orphaned 3rd line; both
+   paragraphs now fit one line each. */
+.slide3-header {
+  left: auto; right: 0; top: 0;
+  max-width: 1060px;
+  padding: 42px 62px 24px 40px;
+}
+.s5-header-bg {
+  left: auto; right: 0; top: 0;
+  max-width: 1517px;
+  padding: 42px 37px 24px 40px;
+}
+.slide8-header-wrap {
+  left: auto; right: 0; top: 0;
+  max-width: 687px;
+  padding: 42px 37px 24px 40px;
+}
+.slide10-header-wrap {
+  top: 0; left: auto; right: 0;
+  max-width: 1177px;
+  padding: 42px 37px 24px 40px;
+}
+.slide18-pre-header {
+  left: auto; right: 0; top: 0;
+  max-width: 1517px;
+  padding: 29px 37px 24px 40px;
+}
+
+/* ── 6. Q1 — screen-by-screen pass ───────────────────────────
+   SME: not enough room for how much text this screen has; the
+   right-side context text was spilling into the question column
+   on the left; the two longest word-bank options ("الدافئ والفاتح",
+   "البارد والغامق") overflow their pill shape; the feedback panel
+   overlaps the scene below the card. */
+
+/* Card frame — enlarged (was left:151 top:139 1618x802). Growth is
+   mostly to the left/down; everything else on the screen keeps its
+   original position, it just gets more surrounding margin, except
+   where called out below. */
+.q1-card,
+.q1-card-border {
+  left: 15px;
+  top: 100px;
+  width: 1825px;
+  height: 850px;
+}
+
+/* Context text (right column) had no width at all and could run
+   into the instruction column; instruction gets the same safety
+   net. Both now wrap instead of running past their column. */
+.q1-context-text {
+  width: 680px;
+  white-space: normal;
+}
+.q1-instruction {
+  width: 700px;
+  white-space: normal;
+}
+
+/* SME follow-up (round 2): 24px read as too small next to the rest
+   of the unit. Sized back up to 30px — close to this unit's normal
+   body size — for everything: sentence stems, word-bank/drop-zone
+   labels (including the "5"/"6" number chips) and the feedback
+   text. At 30px the two longest word-bank phrases ("الدافئ والفاتح",
+   "البارد والغامق") no longer fit a 163px pill at all, so the pills
+   themselves (word-bank AND drop-zone, since either can end up
+   holding either word) grow to 230×48 to match — see the grid
+   below, which re-derives every chip/drop position for the wider
+   pill instead of nudging the old ones. */
+.q1-context-text,
+.q1-instruction,
+.q1-stem {
+  font-size: 30px;
+  line-height: 44px;
+}
+/* Story column gets extra line-height so its 4 short paragraphs
+   spread down to just above the illustration (top:445) instead of
+   stopping well short of it. */
+.q1-context-text {
+  line-height: 64px;
+}
+.q1-chip-label,
+.q1-chip-label-num,
+.q1-drop-label {
+  font-size: 30px;
+}
+
+/* Push the whole block down from the card's top edge a bit, and
+   give the story column enough line-height that it spreads down to
+   just above the illustration (top:445) instead of stopping short
+   of it. */
+.q1-context-text, .q1-instruction { top: 170px; }
+.q1-stem-1, #q1-drop-1, .q1-stem-suffix { top: 270px; }
+.q1-circle-1           { top: 285px; }
+.q1-stem-2             { top: 333px; }
+#q1-drop-2             { top: 329px; }
+.q1-circle-2           { top: 348px; }
+.q1-stem-3             { top: 396px; }
+#q1-drop-3             { top: 392px; }
+.q1-circle-3           { top: 411px; }
+
+/* Blanks re-anchored to each stem's own (now 30px) rendered end,
+   not the old Hebrew-tuned spot. Row 1's suffix ("أكواب") now
+   trails its own blank directly instead of sitting at a fixed
+   position independent of it. */
+.q1-drop {
+  width: 230px;
+}
+.q1-drop .q1-drop-chip {
+  width: 230px;
+  height: 48px;
+  top: 3px;
+}
+#q1-drop-1 { left: 261px; }
+.q1-stem-suffix { right: 1671px; }
+#q1-drop-2 { left: 306px; }
+#q1-drop-3 { left: 37px; }
+
+/* Word bank — pills widened to 230px for the 30px type (see above),
+   which needs the 3-column grid re-spaced, and the whole bank
+   raised to sit just below the fill-in-blank sentences instead of
+   leaving a large gap. */
+.q1-chip {
+  width: 230px;
+  height: 48px;
+}
+#q1-chip-hamim, #q1-chip-karir { left: 100px; }
+#q1-chip-kahol, #q1-chip-tsahov { left: 345px; }
+#q1-chip-5, #q1-chip-6 { left: 590px; }
+#q1-chip-hamim, #q1-chip-kahol, #q1-chip-5 { top: 470px; }
+#q1-chip-karir, #q1-chip-tsahov, #q1-chip-6 { top: 530px; }
+
+/* Feedback panel (CORRECT / INCORRECT) — spread rightward (into the
+   gap before the illustration at x=1155) and nudged up so it stays
+   inside the card; text sized/spaced to actually fill the panel
+   instead of leaving its lower half empty. Overrides the
+   state-specific rules in css/style.css that hard-code
+   left/top/width/height per state. */
+#screen-q1[data-q-state="correct"] .q1-feedback-bg-img {
+  left: 150px; top: 678px; width: 950px; height: 230px;
+}
+#screen-q1[data-q-state="incorrect"] .q1-feedback-bg-img {
+  left: 150px; top: 682px; width: 950px; height: 230px;
+}
+.q1-feedback-correct-text {
+  right: 840px; top: 692px; width: 900px;
+  font-size: 30px;
+}
+.q1-feedback-incorrect-text {
+  right: 840px; top: 697px; width: 900px;
+  font-size: 30px;
+}
+.q1-feedback-correct-text p,
+.q1-feedback-incorrect-text p {
+  line-height: 52px;
+}
+
+/* ── 7. Q2 — screen-by-screen pass ───────────────────────────
+   Same treatment as Q1: bigger card, everything on the screen at
+   one consistent 30px size, layout nudged to fit. */
+.q2-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q2-story,
+.q2-question {
+  font-size: 30px;
+  line-height: 44px;
+  top: 150px;
+}
+/* Story sat close enough to the card's rounded top-right corner
+   that its first line rendered past the white fill, into the dark
+   overlay behind it (looked like clipped/missing text). Narrowed
+   and pushed down to clear the corner. */
+.q2-story {
+  top: 180px;
+  width: 650px;
+}
+/* Card's left edge moved from 151 to 15 — shift the question/
+   options column left by the same ~147px so it actually uses the
+   reclaimed margin, instead of leaving it empty while an unwrapped
+   option line (below) ran out the other side. */
+.q2-question {
+  left: 45px;
+}
+.q2-options {
+  top: 353px;
+  left: 45px;
+  width: 1000px;
+}
+/* The question/feedback text and the option rows all share
+   left:45px, but their different widths (and the option row's own
+   marker+gap before the text) leave their right-aligned text
+   starting at noticeably different x positions — question/feedback
+   look shifted left of the options. Nudge question/feedback right
+   and narrow options (still comfortably fits its longest line on
+   one line) so the three roughly line up. */
+.q2-question {
+  left: 85px;
+}
+.q2-options {
+  width: 950px;
+}
+.q2-feedback-panel {
+  left: 85px;
+}
+.q2-opt-text {
+  font-size: 26px;
+  line-height: 36px;
+}
+.q2-tryagain-msg {
+  font-size: 30px;
+  line-height: 44px;
+}
+/* Options are now much shorter (1 line each instead of 2, see
+   .q2-opt-text above), which frees up enough room to move the
+   panel down clear of them instead of overlapping. */
+.q2-feedback-panel {
+  left: 45px;
+  width: 880px;
+  top: 563px;
+  height: 340px;
+}
+.q2-fb-correct,
+.q2-fb-incorrect {
+  font-size: 26px;
+  line-height: 34px;
+  overflow: visible;
+}
+.q2-fb-title {
+  font-size: 26px;
+}
+/* The correct/wrong marker (checkmark/X over the option's radio
+   circle) was working correctly but easy to miss — same 22px
+   circle as the Hebrew build, next to noticeably bigger option
+   text now. Sized up so it reads clearly at a glance. */
+.q2-opt-marker {
+  width: 26px; height: 26px;
+}
+.q2-option.q2-opt-selected .q2-opt-marker::after {
+  width: 13px; height: 13px;
+}
+.q2-option.q2-opt-correct .q2-opt-marker::after {
+  width: 35px; height: 30px;
+}
+.q2-option.q2-opt-wrong .q2-opt-marker::after {
+  width: 33px; height: 30px;
+}
+.q2-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+/* Base left:-34px (style.css) is relative to the help button's own
+   left:2px, landing the popup at screen-x -32px — off the left edge
+   of the 1920px canvas, which .screen clips (overflow:hidden). Pull
+   it fully on-screen; nothing else about the box changes. */
+.q2-help-popup {
+  left: 12px;
+}
+
+/* ── 8. Q3 — screen-by-screen pass ───────────────────────────
+   Same treatment as Q1/Q2. */
+.q3-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q3-story,
+.q3-question {
+  font-size: 30px;
+  line-height: 44px;
+  top: 150px;
+}
+/* Question grew to 4 lines at 30px/44px (was shorter), pushing
+   into the options list below it. */
+.q3-options {
+  top: 360px;
+}
+.q3-tryagain-msg {
+  font-size: 30px;
+  line-height: 44px;
+}
+/* Panel had a lot of empty space at the bottom relative to its
+   content — pulled its top edge down (keeping the same bottom, so
+   it still clears the now-lower options) instead of just leaving
+   that space unused. */
+.q3-feedback-panel {
+  width: 880px;
+  top: 617px;
+  height: 313px;
+}
+.q3-fb-correct,
+.q3-fb-incorrect {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q3-fb-title {
+  font-size: 30px;
+}
+.q3-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+
+/* ── 9. Q4 / Q4b / Q4c — screen-by-screen pass ───────────────
+   Same treatment as Q1-3. All three share the same card position
+   (unlike Q2/Q3/Q5-7b), now aligned to the same enlarged frame. */
+.q4-card, .q4b-card, .q4c-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q4-story, .q4b-story, .q4c-story,
+.q4-question, .q4b-question, .q4c-question {
+  font-size: 30px;
+  line-height: 44px;
+  top: 150px;
+}
+.q4-q-sub, .q4b-q-sub, .q4c-q-sub {
+  font-size: 30px;
+}
+/* Q4b/Q4c help popup: base style.css sizes this for the ORIGINAL
+   Hebrew (left:-64 top:2 width:962 height:246, screen-space left
+   ends up at -62 — off the left edge of the canvas, same offscreen
+   bug as Q2), then an earlier pass grew height to 296px for the
+   longer Arabic hint text (3 lines at 30px/44px, ~604px natural
+   line width) without narrowing the 962px width — so the box
+   stayed almost twice as wide as its text needs and, at that
+   height, its bottom edge reached down into .q4b-q-sub/.q4c-q-sub
+   (the "اختاروا التمارين..." line under the equations), visibly
+   slicing through it. Narrowing the box to fit the text (with
+   margin) lets the height come back down clear of that line, and
+   a positive left brings it fully on-screen. */
+.q4b-help-popup, .q4c-help-popup {
+  left: 12px;
+  width: 700px;
+  height: 190px;
+}
+/* Q4b/Q4c's question columns (860px/815px, further right than
+   Q4's 820px) ran into the story column at this font size —
+   narrowed to clear it. */
+.q4b-question {
+  width: 680px;
+}
+.q4c-question {
+  width: 670px;
+}
+/* Q4's own question column (820px, unchanged) was never narrowed
+   in the pass above and still ran under the story column's left
+   edge (840px) — shift the story column right instead, since it's
+   the one covering the question text. Clears both the question
+   (30px gap) and the illustration below it. */
+.q4-story {
+  right: 240px;
+}
+.q4c-feedback-panel {
+  height: 260px;
+}
+.q4b-feedback-panel {
+  height: 345px;
+}
+/* Same off-screen-popup bug as Q2 (§7), worse here: base left:-64px
+   (style.css) relative to the help button's own left:2px lands the
+   popup at screen-x -62px — off the left edge of the 1920px canvas,
+   which .screen clips (overflow:hidden). Same fix, same value. */
+.q4b-help-popup,
+.q4c-help-popup {
+  left: 12px;
+}
+
+/* ── 10. Q5 — screen-by-screen pass ──────────────────────────
+   Same treatment as Q1-4c. */
+.q5-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q5-question {
+  font-size: 30px;
+  line-height: 44px;
+  top: 160px;
+}
+.q5-options {
+  top: 496px;
+}
+.q5-label {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q5-tryagain-msg {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q5-fb-correct,
+.q5-fb-incorrect,
+.q5-fb-correct p,
+.q5-fb-incorrect p {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q5-fb-title {
+  font-size: 30px;
+}
+.q5-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+
+/* ── 11. Q6 — screen-by-screen pass ──────────────────────────
+   Same treatment as Q1-5. Options column (200px, the narrowest of
+   any screen) widened for the 30px labels. */
+.q6-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q6-narration,
+.q6-question {
+  font-size: 30px;
+  line-height: 44px;
+  top: 220px;
+}
+.q6-options {
+  top: 427px;
+  width: 260px;
+}
+.q6-label {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q6-tryagain-msg {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q6-fb-correct, .q6-fb-incorrect,
+.q6-fb-correct p, .q6-fb-incorrect p {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q6-fb-title {
+  font-size: 30px;
+}
+.q6-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+/* An earlier pass grew this box to 233px tall for the Arabic hint
+   text, but that text only wraps to 2 lines (~124px incl. padding)
+   — the leftover height pushed the box's bottom edge down into
+   .q6-question (top:220px, set above), slicing through "6. ارتفاع
+   الشجرة..." Narrowing the box lets the same 2-line text wrap a
+   little tighter and shrinks height to match, clearing that gap. */
+.q6-help-popup {
+  width: 460px;
+  height: 150px;
+}
+
+/* ── 12. Q7 — screen-by-screen pass ──────────────────────────
+   Same treatment as Q1-6, applied on top of the existing
+   translation-expansion fix in §4 (which already moved this screen
+   to 30px for the batch-desc/five-text/manot-text/litrim/thirty-text
+   group — only their line-height changes here, to stay consistent
+   with the rest of the screen). */
+.q7-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q7-narration,
+.q7-question {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q7-batch-desc,
+.q7-five-text,
+.q7-manot-text,
+.q7-litrim,
+.q7-thirty-text {
+  line-height: 44px;
+}
+/* Question grew to 5 lines at 30px/44px (was shorter), pushing into
+   batch-desc below it — the whole left-column cascade shifts down
+   ~100px to clear it, keeping each row's relative gaps. */
+.q7-batch-desc { top: 439px; }
+#q7-drop-1 { top: 488px; }
+.q7-litrim { top: 492px; }
+.q7-five-text { top: 550px; }
+.q7-manot-text { top: 670px; }
+#q7-drop-2 { top: 670px; }
+.q7-thirty-text { top: 718px; }
+.q7-chips { top: 782px; }
+.q7-chip-label {
+  font-size: 30px;
+}
+.q7-tryagain-text {
+  font-size: 30px;
+  line-height: 44px;
+}
+/* This screen's question cascade (question + 4 fill-in-blank rows)
+   is unusually tall; there isn't 30px worth of room left below it
+   for the feedback panel before the card ends. It overlaps the
+   (by then decorative) chip row instead, at a smaller size, to fit
+   without covering any of the readable question text above it. */
+.q7-feedback-panel {
+  top: 772px;
+  height: 178px;
+  width: 1000px;
+}
+.q7-fb-correct, .q7-fb-incorrect,
+.q7-fb-correct p, .q7-fb-incorrect p {
+  font-size: 24px;
+  line-height: 29px;
+}
+.q7-fb-title {
+  font-size: 24px;
+}
+.q7-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+
+/* ── 13. Q7b — screen-by-screen pass ─────────────────────────
+   Same treatment as Q7. */
+.q7b-card {
+  left: 15px; top: 100px;
+  width: 1825px; height: 850px;
+}
+.q7b-narration,
+.q7b-question {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q7b-blue-text,
+.q7b-yellow-text,
+.q7b-blue-litrim,
+.q7b-yellow-litrim {
+  line-height: 44px;
+}
+/* Question grew to 6 lines at 30px/44px, pushing into the blue-text
+   row below it — cascade shifts down ~57px to clear it. */
+.q7b-blue-text, .q7b-blue-litrim, #q7b-drop-1 { top: 500px; }
+.q7b-yellow-text, .q7b-yellow-litrim, #q7b-drop-2 { top: 557px; }
+.q7b-chips { top: 636px; }
+.q7b-tryagain-text { top: 726px; }
+.q7b-feedback-panel { top: 652px; }
+.q7b-chip-label {
+  font-size: 30px;
+}
+.q7b-tryagain-text {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q7b-fb-correct, .q7b-fb-incorrect,
+.q7b-fb-correct p, .q7b-fb-incorrect p {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q7b-fb-title {
+  font-size: 30px;
+}
+.q7b-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q4-options, .q4b-options {
+  top: 388px;
+}
+.q4-eq-wrap {
+  font-size: 30px;
+}
+/* Q4b's widest option ("3+14 / 2+14") never got the same font-size
+   reduction as Q4's own equations, and at 161px was only ~3px from
+   fitting even before that — just tight enough that flexbox's
+   default min-width:auto let it shrink the option below its content
+   width, which (since the fraction text has spaces) wrapped "2 + 14"
+   into "2 +" / "14" instead of overflowing, jumbling the radio
+   circle/letter underneath it. white-space:nowrap stops that
+   shrink-to-wrap; the wider option column and reduced font-size
+   give it comfortable room instead of a few px of margin; the block
+   shifts left (under the question text's own left edge) to make
+   room for the wider columns without reaching the illustration. */
+.q4b-eq-wrap {
+  font-size: 30px;
+}
+.q4b-frac-num, .q4b-frac-den {
+  white-space: nowrap;
+}
+.q4b-options {
+  left: 140px;
+}
+.q4b-option {
+  width: 180px;
+}
+.q4-tryagain-msg, .q4b-tryagain-msg, .q4c-tryagain-msg {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q4-fb-correct, .q4-fb-incorrect,
+.q4b-fb-correct, .q4b-fb-incorrect,
+.q4c-fb-correct, .q4c-fb-incorrect {
+  font-size: 30px;
+  line-height: 44px;
+}
+.q4-fb-title, .q4b-fb-title, .q4c-fb-title {
+  font-size: 30px;
+}
+.q4-help-popup p, .q4b-help-popup p, .q4c-help-popup p {
+  font-size: 30px;
+  line-height: 44px;
+}
+
+/* ── 14. Click-to-pause on the video screens ──────────────────
+   SME: clicking the playing video should pause it and show a
+   resume button. slide1/slide10 reuse their existing play button
+   for this (just re-shown). slide18's resume button is a new,
+   separate element — it must NOT reuse slide18-pre-overlay, since
+   that overlay also carries the static pre-video poster image
+   (bg-slide18.png), which would blank out the paused video frame
+   instead of just floating a button over it. Neither style.css
+   nor the Hebrew build has this class, since the button is new. */
+.slide18-play-btn--hidden {
+  display: none;
+}
+/* .slide18-video has z-index:1 (style.css) — without an explicit
+   z-index of its own the new resume button (z-index:auto) rendered
+   underneath it despite coming later in the DOM. */
+#slide18-resume-btn {
+  z-index: 2;
+}
+
+/* ── 15. Slide3 — align the yellow-mixture tube group under its
+   Arabic paragraph (baked into Video2_AR.mp4). The Hebrew build's
+   positions (style.css) were tuned for the old video's text layout;
+   the new Arabic narration places that paragraph further left. */
+.slide3-tube-full-yellow { left: 168px; }
+.slide3-icon-plus-r      { left: 266px; }
+.slide3-tube-little-blue { left: 311px; }
+.slide3-icon-equal-r     { left: 371px; }
+.slide3-tube-light-green { left: 417px; }
+
+/* ── 16. Slide3 — NEXT stays fully hidden (not just faded) while
+   the video is still playing/locked; only the disabled look is
+   shared with other screens via style.css's .nav-btn:disabled. */
+#screen-slide3 .nav-next:disabled {
+  display: none;
+}
+
+/* ── 17. Q3 — feedback panel. Two separate problems here:
+   1) Position — at the Hebrew top:618px the panel sat only 20px
+      below the options list and 20px above the card's bottom edge.
+   2) Size — the real bug behind "still spilling out of the frame":
+      at 30px/44px (§8) the correct/incorrect text needs 7 lines,
+      ~329px including its own top padding, but the panel box
+      (height:313px from §8) was 16px too short for that — with
+      `overflow: visible` (§3) the last line rendered outside the
+      panel's own dark background, past the card's edge, no matter
+      where the box itself was positioned.
+   Fixed both together: grown to 335px (fits the 7 lines with a
+   little breathing room) and moved up close to the options (10px
+   gap, matching "close to the last answer option") which still
+   leaves 8px clear above the card edge — the 353px total slack
+   between options and card is fixed, so height + both gaps must
+   add up to exactly that. */
+.q3-feedback-panel {
+  top: 607px;
+  height: 335px;
+}
+
+/* ── 18. Slide10 — left speech bubble (worried boy). At the
+   Hebrew-tuned 300px width the Arabic sentence needed manual line
+   breaks to avoid an orphaned word; widening it to fit the bubble
+   image's own 366px better lets it auto-wrap into 3 even lines
+   instead, so the HTML reverts to a single <p> again. */
+.slide10-bubble-l-text {
+  width: 330px;
+  left: 260px;
+}
+
+/* ── 19. Q5 — mixture graphics re-exported without the baked
+   Hebrew ratio caption ("תערובת א׳/ב׳ - יחס X:Y"). First pass put
+   the caption on its own line above a shrunk image; SME asked for
+   the images enlarged back to their original size instead, with
+   the caption overlaid on the image's own top area like the
+   Hebrew version (a translucent strip over the glasses, rather
+   than a separate line — the re-exported art has almost no blank
+   margin up there, unlike the old baked banner, so the strip needs
+   its own background to stay readable). Height restored to the
+   original 210px (width follows via the existing width:auto); top
+   sits a little higher than the old 283px/165px block so the
+   bigger image still clears the options list (496px) below it. */
+.q5-taarovet-a {
+  top: 256px;
+  height: 210px;
+}
+.q5-taarovet-b {
+  top: 256px;
+  height: 210px;
+}
+.q5-taarovet-a-caption,
+.q5-taarovet-b-caption {
+  position: absolute;
+  top: 262px;
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-semibold);
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--color-text);
+  text-align: center;
+  box-sizing: border-box;
+  /* No background chip — sits directly on the image, so a soft
+     white halo keeps it legible over the glasses without one. */
+  text-shadow:
+    0 0 6px #fff, 0 0 6px #fff, 0 0 6px #fff,
+    0 0 3px #fff, 0 0 3px #fff;
+  /* .q5-card has z-index:2 (style.css) — without an explicit
+     z-index of its own the caption (z-index:auto) rendered
+     underneath the card despite coming later in the DOM. */
+  z-index: 4;
+  /* Float in together with the images they sit on (same class,
+     same delay, style.css) instead of just appearing instantly. */
+  animation: qFadeUp 0.4s ease 3s both;
+}
+.q5-taarovet-a-caption {
+  left: 1039px;
+  width: 416px;
+}
+.q5-taarovet-b-caption {
+  left: 465px;
+  width: 514px;
+}
+
+/* ── 20. Help-popup sizing, all question screens. Heights grown
+   enough for each screen's actual (Arabic, longer-than-Hebrew)
+   hint text — content details in §23 below, which also replaces
+   how that text is positioned inside the box. */
+.q3-help-popup {
+  height: 243px;
+}
+/* Q4b/Q4c height now set in §9 above, alongside their width/left
+   fix — leaving both here would have this later rule's height:296
+   win the cascade and silently undo that fix. */
+.q5-help-popup {
+  height: 237px;
+}
+/* Q6 height now set in §11 above, next to its other per-screen
+   fixes — see the note there for why. */
+.q7-help-popup {
+  height: 325px;
+}
+.q7b-help-popup {
+  height: 227px;
+}
+
+/* ── 21. Q7 — first blank ("تحتوي معًا على ___ لترات."). The
+   Arabic for "تحتوي معًا على" runs to x=807-1000, overlapping
+   #q7-drop-1 (712-875) by ~68px. Shifting the blank and the
+   "لترات." after it left by 83px clears the text with a 15px
+   margin; #q7-drop-2 (the second blank) already got the same
+   treatment in an earlier pass and is untouched here. */
+#q7-drop-1 {
+  left: 629px;
+}
+.q7-litrim {
+  right: 1302px;
+}
+
+/* ── 22. Q7/Q7b — container illustration re-exported without the
+   baked Hebrew size labels ("2/5 ליטר"), added back as live HTML.
+   Both screens position img.q7-illu/q7b-illu identically (left:
+   1209 top:523 w:489 h:244, style.css) so one pair of caption
+   rules, positioned relative to that same box, covers both. */
+.q7-illu-caption {
+  position: absolute;
+  margin: 0;
+  font-family: var(--font-main);
+  font-weight: var(--font-weight-bold);
+  font-size: 32px;
+  color: #232020;
+  text-align: center;
+  z-index: 6;
+}
+.q7-illu-caption-yellow {
+  left: 1230px; top: 650px;
+  width: 190px;
+}
+.q7-illu-caption-blue {
+  left: 1465px; top: 650px;
+  width: 220px;
+}
+/* These captions had no entrance animation of their own, so they
+   sat visible from t=0 while the bucket image they label faded in
+   later — .q7-illu fades in at 3s (style.css qFadeUp rule below),
+   .q7b-illu appears instantly (also style.css) — making the label
+   and the picture arrive at visibly different times. Give each
+   screen's captions the same timing as its own image. */
+#screen-q7.active .q7-illu-caption {
+  animation: qFadeUp 0.4s ease 3s both;
+}
+#screen-q7b.active .q7-illu-caption {
+  animation: none;
+  opacity: 1;
+}
+
+/* ── 23. Help-popup background, Q2–Q7b. The bubble background is
+   a raster image (help-popup-bg-img) stretched via object-fit:fill
+   to match whatever size the popup box is given. At each screen's
+   ORIGINAL (Hebrew-tuned) height this looked fine, but growing any
+   of these boxes (§20's height fixes for Q4b/Q4c/Q5/Q6/Q7/Q7b) hit
+   a rendering bug in this environment: the stretched image visibly
+   stops partway down the box — confirmed with explicit pixel
+   width/height (not just percentages) on the <img>, so it isn't a
+   percentage-resolution issue, and confirmed the identical image
+   stretches correctly in an isolated element outside the app's
+   scaled canvas — something about stretching this raster image
+   this large, this far down-scaled, doesn't render right here.
+   Fix: stop stretching a raster image at all. All these popups use
+   the exact same flat fill (#FFF4C1) and black rounded-rect border
+   (confirmed by sampling the source PNGs), so drawing that
+   directly on the popup box itself in CSS reproduces the look
+   exactly, at any height, with no image involved. */
+.q2-help-popup .help-popup-bg-img,
+.q3-help-popup .help-popup-bg-img,
+.q4-help-popup .help-popup-bg-img,
+.q4b-help-popup .help-popup-bg-img,
+.q4c-help-popup .help-popup-bg-img,
+.q5-help-popup .help-popup-bg-img,
+.q6-help-popup .help-popup-bg-img,
+.q7-help-popup .help-popup-bg-img,
+.q7b-help-popup .help-popup-bg-img {
+  display: none;
+}
+.q2-help-popup,
+.q3-help-popup,
+.q4-help-popup,
+.q4b-help-popup,
+.q4c-help-popup,
+.q5-help-popup,
+.q6-help-popup,
+.q7-help-popup,
+.q7b-help-popup {
+  background: #FFF4C1;
+  border: 5px solid #000;
+  border-radius: 28px;
+  box-sizing: border-box;
+}
+
+/* ── 24. Help-popup text: centered, not "start below the button".
+   Now that the button's own icon hides itself while its popup is
+   open (below), there's nothing left to dodge — center the text
+   in the panel with flexbox instead, which also drops the old
+   calc(50%)+translateY(-50%)/fixed-top hacks entirely. The close
+   "X" stays put — it's already position:absolute so flexbox on the
+   popup doesn't move it. */
+.q2-help-popup,
+.q3-help-popup,
+.q4-help-popup,
+.q4b-help-popup,
+.q4c-help-popup,
+.q5-help-popup,
+.q6-help-popup,
+.q7-help-popup,
+.q7b-help-popup {
+  align-items: center;
+  justify-content: center;
+  padding: 18px 24px;
+}
+/* display must stay scoped to the open state — style.css's own
+   base rule is "display:none" with a separate "display:block when
+   open" override, so setting display:flex unconditionally here
+   (on the un-scoped selector above) defeated that toggle entirely
+   and left every popup permanently visible regardless of state. */
+#screen-q2[data-q2-help="true"]    .q2-help-popup,
+#screen-q3[data-q3-help="true"]    .q3-help-popup,
+#screen-q4[data-q4-help="true"]    .q4-help-popup,
+#screen-q4b[data-q4b-help="true"]  .q4b-help-popup,
+#screen-q4c[data-q4c-help="true"]  .q4c-help-popup,
+#screen-q5[data-q5-help="true"]    .q5-help-popup,
+#screen-q6[data-q6-help="true"]    .q6-help-popup,
+#screen-q7[data-q7-help="open"]    .q7-help-popup,
+#screen-q7b[data-q7b-help="open"]  .q7b-help-popup {
+  display: flex;
+}
+.q2-help-popup p,
+.q3-help-popup p,
+.q4-help-popup p,
+.q4b-help-popup p,
+.q4c-help-popup p,
+.q5-help-popup p,
+.q6-help-popup p,
+.q7-help-popup p,
+.q7b-help-popup p {
+  position: static;
+  top: auto; left: auto; right: auto;
+  transform: none;
+  width: auto;
+  text-align: center;
+}
+
+/* Only the "X" + panel should show once help is open — push the
+   button's own icon out of the way (the popup is its sibling/child
+   and stays visible; only the circular icon disappears). */
+#screen-q2[data-q2-help="true"]   .q2-help-btn   > img,
+#screen-q3[data-q3-help="true"]   .q3-help-btn   > img,
+#screen-q4[data-q4-help="true"]   .q4-help-btn   > img,
+#screen-q4b[data-q4b-help="true"] .q4b-help-btn  > img,
+#screen-q4c[data-q4c-help="true"] .q4c-help-btn  > img,
+#screen-q5[data-q5-help="true"]   .q5-help-btn   > img,
+#screen-q6[data-q6-help="true"]   .q6-help-btn   > img,
+#screen-q7[data-q7-help="open"]   .q7-help-btn   > img,
+#screen-q7b[data-q7b-help="open"] .q7b-help-btn  > img {
+  display: none;
+}
+
+/* ── 25. Slide5 — phone-applet panel. The live color_lab.html app
+   has a hard content-driven minimum width (~690px: nowrap action
+   buttons + ratio inputs) that the original 650px iframe box was
+   narrower than. In its RTL flex layout the overflow spilled out
+   the LEFT side of the iframe (negative x), past the iframe's own
+   overflow:hidden — the app's counters/buttons/result panel got
+   clipped exactly like the phone frame was cutting them off.
+   Widened the phone frame image and the iframe inside it enough
+   to clear that minimum with margin, keeping both roughly
+   centred over the same screen area (frame top/left anchor kept
+   so the close button's original offsets still line up, only its
+   left shifts to track the frame's new right edge). */
+.s5-iphone-frame {
+  left: 140px; top: 236px;
+  width: 1670px; height: 802px;
+}
+.s5-iframe {
+  left: 950px; top: 310px;
+  width: 760px; height: 650px;
+}
+.s5-close-btn {
+  left: 1730px; top: 252px;
+}
+
+/* The frame image's landscape camera pill sits on its right edge
+   (~x:1696-1762, y:527-747 in absolute canvas coords — vertically
+   centred on the frame). At the iframe box above, its right edge
+   (950+760=1710) runs 14px into the pill's left edge, so the
+   iframe's white background visibly covers part of it. Shift the
+   iframe (and the CTA link below it, kept in lockstep) left to
+   clear the pill with margin, and up a bit for breathing room from
+   the frame's screen-area top edge. Size unchanged — position only. */
+.s5-iframe {
+  left: 910px; top: 280px;
+}
+/* CTA link — kept centred under the iframe (same left/width, gap
+   below its new bottom edge: 280+650=930, +16px gap = 946). */
+.s5-zoom-cta {
+  left: 910px; top: 946px;
+  width: 760px;
 }

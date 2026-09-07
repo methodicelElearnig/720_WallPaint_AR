@@ -109,10 +109,29 @@ function resetScreenState() {
     var a = document.getElementById(id);
     if (a) { a.pause(); a.currentTime = 0; a.onended = null; }
   });
+  // ...and cancel slide3's own pending timers (video-start delay + phase
+  // reveals) — otherwise a quick visit to slide3 (leaving before the 2s
+  // video-start timer, or a later phase timer, fires) leaves them armed,
+  // and video.play() later starts the video's narration audio audibly
+  // on whatever screen the learner has since moved to (slide5 immediately
+  // follows slide3→q1, so that's where it was heard). Same class of bug
+  // as the Q4 audio timer above.
+  if (typeof _s3Timers !== 'undefined' && _s3Timers.length) {
+    _s3Timers.forEach(clearTimeout);
+    _s3Timers = [];
+  }
 
   // Stop Q4 audio when leaving
   var q4audio = document.getElementById('q4-audio');
   if (q4audio) { q4audio.pause(); q4audio.currentTime = 0; q4audio.onended = null; }
+  // ...and cancel its pending start-delay timer too — otherwise a quick
+  // visit to Q4 (entering, then leaving before the 800ms delay in
+  // startQ4AudioSequence elapses) leaves the timer armed, and it fires
+  // audio.play() later on whatever screen the learner has since moved to.
+  if (typeof _q4AudioTimer !== 'undefined' && _q4AudioTimer) {
+    clearTimeout(_q4AudioTimer);
+    _q4AudioTimer = null;
+  }
 
   // Called before navigating AWAY from currentScreen.
   // Answered questions (qDone=true) → preserve state (lומד רואה מצב אחרון).

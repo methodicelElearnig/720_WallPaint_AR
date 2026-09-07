@@ -25,9 +25,10 @@ var SLIDE18_STOP_BEFORE_END = 0.3;
 var _slide18Stopped = false;
 
 function initSlide18() {
-  var video   = document.getElementById('slide18-video');
-  var doneBtn = document.getElementById('slide18-done-btn');
-  var overlay = document.getElementById('slide18-pre-overlay');
+  var video     = document.getElementById('slide18-video');
+  var doneBtn   = document.getElementById('slide18-done-btn');
+  var overlay   = document.getElementById('slide18-pre-overlay');
+  var resumeBtn = document.getElementById('slide18-resume-btn');
 
   _slide18Stopped = false;
   if (video) {
@@ -35,8 +36,29 @@ function initSlide18() {
     video.currentTime = 0;
     video.ontimeupdate = _slide18CheckStopPoint;
   }
-  if (doneBtn) doneBtn.classList.remove('slide18-done-btn--visible');
-  if (overlay) overlay.classList.remove('slide18-pre-overlay--hidden');
+  if (doneBtn)   doneBtn.classList.remove('slide18-done-btn--visible');
+  if (overlay)   overlay.classList.remove('slide18-pre-overlay--hidden');
+  if (resumeBtn) resumeBtn.classList.add('slide18-play-btn--hidden');
+}
+
+/* Click on the playing video itself — pause + show a resume button
+   over it (separate from slide18-pre-overlay, which also carries
+   the static poster image and would hide the paused frame). Only
+   while actually mid-playback — once _slide18CheckStopPoint has
+   frozen the video near the end, clicking it does nothing here. */
+function pauseSlide18Video() {
+  var video     = document.getElementById('slide18-video');
+  var resumeBtn = document.getElementById('slide18-resume-btn');
+  if (!video || video.paused || _slide18Stopped) return;
+  video.pause();
+  if (resumeBtn) resumeBtn.classList.remove('slide18-play-btn--hidden');
+}
+
+function resumeSlide18Video() {
+  var video     = document.getElementById('slide18-video');
+  var resumeBtn = document.getElementById('slide18-resume-btn');
+  if (video) video.play().catch(function() {});
+  if (resumeBtn) resumeBtn.classList.add('slide18-play-btn--hidden');
 }
 
 function startSlide18Video() {
@@ -69,6 +91,8 @@ function _freezeSlide18AtStopPoint(stopAt) {
 
   var doneBtn = document.getElementById('slide18-done-btn');
   if (doneBtn) doneBtn.classList.add('slide18-done-btn--visible');
+  var resumeBtn = document.getElementById('slide18-resume-btn');
+  if (resumeBtn) resumeBtn.classList.add('slide18-play-btn--hidden');
 }
 
 /* רשת ביטחון: אם הסרטון בכל זאת הגיע לסוף האמיתי בלי שה-timeupdate
