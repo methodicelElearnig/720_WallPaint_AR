@@ -1017,10 +1017,35 @@
    gap, matching "close to the last answer option") which still
    leaves 8px clear above the card edge — the 353px total slack
    between options and card is fixed, so height + both gaps must
-   add up to exactly that. */
+   add up to exactly that.
+   Follow-up: "8px clear above the card edge" was measured against
+   q3-card's own CSS box (top:100 + height:850 = 950), but q2-card.png
+   (the shared card art) draws its own ~18-20px black border inset
+   from that box — the card's actual white interior ends around
+   y=921, not 950. So the panel's real clearance was negative: its
+   bottom (607+335=942) sat ~21px INTO the border/past it, still
+   visibly on the frame no matter how "clear of the box" the numbers
+   looked. Tightened the correct/incorrect text's own padding and
+   paragraph spacing (below) so 7 lines fit in 326px instead of 335,
+   then spent every freed pixel moving the box up (not just shrinking
+   it): top 607→589 (18px higher, still 8px clear of the options
+   list) with height 326 now ends at 915 — a real 6px inside the
+   card's actual white area, not just its bounding box. Nudged left
+   a bit too, mirroring the question/options column instead of the
+   Hebrew-tuned inset that was never revisited when the card moved. */
 .q3-feedback-panel {
-  top: 607px;
-  height: 335px;
+  left: 140px; top: 589px;
+  height: 326px;
+}
+.q3-fb-correct,
+.q3-fb-incorrect {
+  padding: 3px 27px 5px 20px;
+}
+.q3-fb-title {
+  margin-bottom: 3px;
+}
+.q3-fb-correct p, .q3-fb-incorrect p {
+  margin-bottom: 2px;
 }
 
 /* ── 18. Slide10 — left speech bubble (worried boy). At the
