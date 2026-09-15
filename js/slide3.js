@@ -3,11 +3,11 @@
 /*
  * SLIDE 3 — Video-driven sequence (video/Video2_AR.mp4)
  *
- * Phase 1: screen active → header slides in (CSS animation)
- * Phase 2: +2s → video starts playing
+ * Phase 1: screen active → header slides in (CSS animation) + כפתור Play מוצג
+ * Phase 2: הלומד לוחץ Play → הכפתור נעלם והסרטון מתחיל (אין הפעלה אוטומטית)
  * Phase 3: video t≥22.5s → left tubes appear (dark-green side)   — narration: "أكبر من اللون الأزرق... أخضر بارد وغامق"
  * Phase 4: video t≥30.4s → right tubes appear (light-green side) — narration: "أكبر من اللون الأصفر... أخضر دافئ وفاتح"
- * Phase 5: video ended → unlock ► + freeze on last frame
+ * Phase 5: video ended → unlock ► + freeze on last frame + כפתור "נגן שוב"
  *
  * חזרה למסך אחרי שהסרטון כבר נצפה: קופאים על הפריים האחרון (לא שחור) +
  * מציגים כפתור "נגן שוב" שמריץ את כל הרצף מחדש.
@@ -25,6 +25,9 @@ var S3_END_FRAME_OFFSET = 0.2;
 
 function _s3FreezeOnLastFrame(video) {
   if (!video || !isFinite(video.duration)) return;
+  /* pause() לפני ה-seek — חובה: וידאו שהסתיים נשאר paused=false, ודילוג
+     אחורה בלי pause מחזיר אותו לנגינה (ואז הוא מתנגן שוב במקום לקפוא) */
+  video.pause();
   video.currentTime = Math.max(0, video.duration - S3_END_FRAME_OFFSET);
 }
 
@@ -49,6 +52,7 @@ function initSlide3() {
 
   var scr       = document.getElementById('screen-slide3');
   var video     = document.getElementById('slide3-video');
+  var playBtn   = document.getElementById('slide3-play-btn');
   var replayBtn = document.getElementById('slide3-replay-btn');
 
   /* Header — animate only on the very first entry into this screen */
@@ -76,6 +80,7 @@ function initSlide3() {
     video.onended     = null;
     video.ontimeupdate = null;
   }
+  if (playBtn)   playBtn.classList.add('s3-hidden-btn');
   if (replayBtn) replayBtn.classList.add('s3-hidden-btn');
 
   /* Already watched — freeze on last frame + show all elements, offer replay */
@@ -91,7 +96,21 @@ function initSlide3() {
     return;
   }
 
+  /* Not watched yet — wait for the learner to press Play (no autoplay) */
   if (!video) return;
+  video.currentTime = 0;
+  if (playBtn) playBtn.classList.remove('s3-hidden-btn');
+}
+
+/* startSlide3Video — כפתור ה-Play: מסתיר את הכפתור ומריץ את הרצף מההתחלה */
+function startSlide3Video() {
+  var scr     = document.getElementById('screen-slide3');
+  var video   = document.getElementById('slide3-video');
+  var playBtn = document.getElementById('slide3-play-btn');
+
+  if (playBtn) playBtn.classList.add('s3-hidden-btn');
+  if (!video) return;
+
   video.currentTime = 0;
   _playSlide3Sequence(scr, video);
 }
@@ -99,11 +118,13 @@ function initSlide3() {
 function replaySlide3Video() {
   var scr       = document.getElementById('screen-slide3');
   var video     = document.getElementById('slide3-video');
+  var playBtn   = document.getElementById('slide3-play-btn');
   var replayBtn = document.getElementById('slide3-replay-btn');
 
   _s3Timers.forEach(clearTimeout);
   _s3Timers = [];
 
+  if (playBtn)   playBtn.classList.add('s3-hidden-btn');
   if (replayBtn) replayBtn.classList.add('s3-hidden-btn');
 
   S3_ANIM_ELS.forEach(function(sel) {
@@ -140,14 +161,9 @@ function _playSlide3Sequence(scr, video) {
 
   function at(ms, fn) { _s3Timers.push(setTimeout(fn, ms)); }
 
-  /* Phase 2: start video after 2s */
-  at(2000, function() {
-    /* Belt-and-suspenders: resetScreenState() cancels this timer on
-       navigating away, but if slide3 somehow isn't the active screen
-       anymore when it fires, don't start the narration regardless. */
-    if (!scr.classList.contains('active')) return;
-    video.play().catch(function() {});
-  });
+  /* Phase 2: הסרטון מופעל מיד — הלחיצה על Play / "נגן שוב" היא הטריגר,
+     ולכן אין יותר השהיה של 2 שניות מרגע הכניסה למסך */
+  video.play().catch(function() {});
 
   /* Phases 3 & 4: driven by video time */
   video.ontimeupdate = function() {
@@ -180,7 +196,9 @@ function _playSlide3Sequence(scr, video) {
   video.onended = function() {
     _s3FreezeOnLastFrame(video);
     markVideoWatched('slide3-video');
+    var playBtn   = document.getElementById('slide3-play-btn');
     var replayBtn = document.getElementById('slide3-replay-btn');
+    if (playBtn)   playBtn.classList.add('s3-hidden-btn');
     if (replayBtn) replayBtn.classList.remove('s3-hidden-btn');
   };
 }

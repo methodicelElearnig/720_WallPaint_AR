@@ -470,7 +470,9 @@ body {
   z-index: 0;
 }
 
-/* כפתור "נגן שוב" — מופיע בשובנו למסך אחרי שהסרטון כבר נצפה */
+/* כפתורי הפעלה — Play (כניסה למסך) ו"נגן שוב" (בסיום / בשובנו למסך).
+   שניהם באותו מקום ובאותו גודל, כך שהמעבר ביניהם לא "קופץ" */
+.slide3-play-btn,
 .slide3-replay-btn {
   position: absolute;
   left: 50%;
@@ -485,7 +487,9 @@ body {
   z-index: 5;
   transition: transform 0.15s, opacity 0.15s;
 }
+.slide3-play-btn svg,
 .slide3-replay-btn svg { width: 100%; height: 100%; display: block; }
+.slide3-play-btn:hover,
 .slide3-replay-btn:hover { transform: translate(-50%, 0) scale(1.1); opacity: 0.9; }
 .s3-hidden-btn { display: none; }
 
